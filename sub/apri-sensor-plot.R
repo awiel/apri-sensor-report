@@ -59,7 +59,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
       strip.background = element_rect(colour="black", fill="grey", size=0.3)
     )
   print('annotation')
-  browser()
+
   if(is.null(ylim)!=TRUE) {
     print("test1")
     gTotal<-gTotal +
@@ -100,6 +100,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
 }
 
 apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL,width=3.8,height=2.28,dpi="print",units='in',subFolder='') {
+  sprintf("%s is best", "1")
   filePath<-plotPath
   if (!is.null(fileSuffix)) fileSuffix<-paste0('-',fileSuffix)
   if (!is.null(fileDate)) fileDate<-paste0('-',fileDate)
@@ -116,6 +117,8 @@ apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL
   if (subFolder != '') {
     subFolder<-paste0(subFolder,'/')
   }
-  image_write(final_plot, paste(filePath,subFolder,fileName,sep=''))
+  print(plotPath)
+  print(fileName)
+  image_write(final_plot, paste0(plotPath,fileName))
 }
 

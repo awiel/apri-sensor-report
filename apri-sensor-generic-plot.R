@@ -12,7 +12,7 @@ if (length(args)==0) {
 } else reportId<-args[1]
 
 
-scriptPath='/data/Alfresco/opt/R/apri-sensor/'
+scriptPath='/data/Alfresco/opt/R/apri-sensor-report/'
 subPath=paste0(scriptPath,'sub/')
 reportPath=paste0(scriptPath,'report/')
 configPath=paste0(scriptPath,'config/')
@@ -31,7 +31,6 @@ plotPath<-paste0(scriptPath,'plot/')
 #install.packages("tidyverse") # voor o.a. ggplot2
 #install.packages("ggplot2")
 library(ggplot2)
-ggplot()
 library(magick)
 #library(RColorBrewer)
 library(jsonlite)
@@ -98,9 +97,17 @@ for (i in 1:nrow(sensorIds)) {
       aggregateInd<-NULL
     }
     if (periodType == "actual") {
-      dfTmpOne<-getFiwareData(NULL,sensorIds$fiwareService[i],sensorIds$fiwareServicePath[i],sensorIds$key[i],sensorIds$sensorId[i],observableProperties)
+      dfTmpOne<-getFiwareData(dfIn=NULL
+              ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
+              ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
+              ,cachePath=cachePath)
     } else { # hist
-      dfTmpOne<-getFiwareData(NULL,sensorIds$fiwareService[i],sensorIds$fiwareServicePath[i],sensorIds$key[i],sensorIds$sensorId[i],observableProperties,dateFrom=reportConfig$dateFrom,dateTo=reportConfig$dateTo,aggregateInd=aggregateInd)
+      dfTmpOne<-getFiwareData(dfIn=NULL
+              ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
+              ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
+              ,dateFrom=reportConfig$dateFrom,dateTo=reportConfig$dateTo
+              ,aggregateInd=aggregateInd
+              ,cachePath=cachePath)
     }
     
     #    calib<-FALSE
@@ -228,13 +235,11 @@ if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='dag') {
 }
 gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle,ylim,treshold=reportTreshold,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels,aggregateTxt=aggregateTxt)
 # make imagefile
-print(reportHeight);
-print(reportWidth);
 if (!is.null(reportHeight)&!is.null(reportWidth)) apriSensorImage(gTotal,reportFileLabel,height=reportHeight,width=reportWidth)
 if (!is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel,height=reportHeight)
 if (!is.null(reportWidth)) apriSensorImage(gTotal,reportFileLabel,width=reportWidth)
 if (is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel)
-print(paste0("Report saved as ",reportFileLabel,'.json'))
+print(paste0("Report saved as ",reportFileLabel,'.png'))
 
 
 if(is.null(reportConfig$correlPlots)==FALSE) {

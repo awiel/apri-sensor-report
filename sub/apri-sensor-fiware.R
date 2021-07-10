@@ -25,25 +25,26 @@ print(paste('script','start Rscript: ', Sys.time(),cmdArgs[4]))
 #library(httr)
 #library(RColorBrewer)
 
-cacheFolder<-cachePath
+
 useCache<-FALSE
 pmTop<-5000
 
-readCacheFile<-function(fileName) {
+readCacheFile<-function(cachePath,fileName) {
   #cacheFilePath<-paste(fileLocation,fileName,sep='')
   #print(cacheFilePath)
 #  setwd(fileLocation)
-  readRDS(paste0(cacheFolder,fileName))
+  readRDS(paste0(cachePath,fileName))
 }
-saveCacheFile<-function(fileName,object) {
+saveCacheFile<-function(cachePath,fileName,object) {
   print("Save cachefile")
   print(fileName)
 #  setwd(fileLocation)
-  saveRDS(object, file = paste0(cacheFolder,fileName))
+  saveRDS(object, file = paste0(cachePath,fileName))
 }
 
 
-getFiwareData<-function(dfIn,fiwareService,fiwareServicePath,key,foi,ops,opPerRow='true',dateFrom=NULL,dateTo=NULL,aggregateInd=NULL) {
+getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=NULL,foi=NULL,ops=NULL,opPerRow='true'
+                        ,opsc=NULL,dateFrom=NULL,dateTo=NULL,aggregateInd=NULL,cachePath=NULL) {
   # eg2. SCNM5CCF7F2F62F3:SCNM5CCF7F2F62F3_a,pm25:pm25_alias,pm10
   # https://aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/?fiwareService=aprisensor_in&fiwareServicePath=/pmsa003&key=sensorId&foiOps=SCNM5CCF7F2F62F3:SCNM5CCF7F2F62F3_a,pm25:pm25_alias
   
@@ -64,9 +65,9 @@ getFiwareData<-function(dfIn,fiwareService,fiwareServicePath,key,foi,ops,opPerRo
   if(useCache==TRUE) {
     cached<-FALSE
     allCache<-FALSE
-    if (file.exists (paste0(cacheFolder,fileName))) {
+    if (file.exists (paste0(cachePath,fileName))) {
       print("Load cache:")
-      cacheFile <-readCacheFile(fileName)
+      cacheFile <-readCacheFile(cachePath,fileName)
       # volgende regel kan eruit als alle cache is omgezet en date bevat
       #    cacheFile$date<-as.POSIXct(cacheFile$dateObserved, format="%Y-%m-%dT%H:%M")
       maxDateObservedCache<-max(cacheFile$date)
@@ -176,7 +177,7 @@ getFiwareData<-function(dfIn,fiwareService,fiwareServicePath,key,foi,ops,opPerRo
     }
     print(paste("In cache is: ",nrow(cacheFileNew)))
     if (nrow(cacheFileNew)>0) {
-      saveCacheFile(fileName,cacheFileNew)
+      saveCacheFile(cachePath,fileName,cacheFileNew)
       print("Cache saved to file")
     }
   }
