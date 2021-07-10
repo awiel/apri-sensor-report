@@ -13,6 +13,13 @@ if (length(args)==0) {
 
 
 scriptPath='/data/Alfresco/opt/R/apri-sensor/'
+subPath=paste0(scriptPath,'sub/')
+reportPath=paste0(scriptPath,'report/')
+configPath=paste0(scriptPath,'config/')
+imagePath<-paste0(scriptPath,'image/')
+cachePath<-paste0(scriptPath,'tmp/cache/')
+plotPath<-paste0(scriptPath,'plot/')
+
 ###
 #library(grid)
 ##install.packages("magick")
@@ -29,18 +36,18 @@ library(magick)
 #library(RColorBrewer)
 library(jsonlite)
 
-source(paste0(scriptPath,"sub/apri-sensor-fiware.R"))
-source(paste0(scriptPath,"sub/apri-sensor-plot.R"))
+source(paste0(subPath,"apri-sensor-fiware.R"))
+source(paste0(subPath,"apri-sensor-plot.R"))
 
-sensorTypes<-json_data<-fromJSON(paste0(scriptPath,"config/apri-sensor-sensorTypes.json"))
-sensorIds<-json_data<-fromJSON(paste0(scriptPath,"config/apri-sensor-sensorIds.json"))
-logo<-image_read(paste0(scriptPath,"image/logo-scapeler.png"))
+sensorTypes<-json_data<-fromJSON(paste0(configPath,"apri-sensor-sensorTypes.json"))
+sensorIds<-json_data<-fromJSON(paste0(configPath,"apri-sensor-sensorIds.json"))
+logo<-image_read(paste0(imagePath,"logo-scapeler.png"))
 
 print(paste("Start report for reportId",reportId))
-reportFileName<-paste0(scriptPath,"report/",reportId,".json")
+reportFileName<-paste0(reportPath,reportId,".json")
 print(reportFileName)
-json_data <- fromJSON(reportFileName)
-reportConfig <- json_data
+json_data<-fromJSON(reportFileName)
+reportConfig<-json_data
 print('report config file ok')
 
 print("as dataframe sensorIds")
@@ -227,91 +234,93 @@ if (!is.null(reportHeight)&!is.null(reportWidth)) apriSensorImage(gTotal,reportF
 if (!is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel,height=reportHeight)
 if (!is.null(reportWidth)) apriSensorImage(gTotal,reportFileLabel,width=reportWidth)
 if (is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel)
-print(paste("Report saved as",reportFileLabel))
+print(paste0("Report saved as ",reportFileLabel,'.json'))
 
 
 if(is.null(reportConfig$correlPlots)==FALSE) {
   reportCorrelPlots<-reportConfig$correlPlots
-  print("loop correlPlots")
-  for (i in 1:nrow(reportCorrelPlots)) {
-    #  str(reportCorrelPlots)
-    #  print(reportCorrelPlots$active[i])
-    plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
-    captionText<-paste0('Datum: ',format(plotDateTime,"%d-%m-%Y %H:%M"))
-    if (reportCorrelPlots$active[i]!="FALSE") {
-      #total <- subset(total, total$sensorType == 'pm25')
-      dfX<- subset(total, (total$sensorId == reportCorrelPlots$xSensorId[i] & total$sensorType==reportCorrelPlots$xSensorType[i]))
-      dfXMin<-min(dfX$sensorValue)
-      dfXMax<-max(dfX$sensorValue)
-      dfX$mDate<-strftime(dfX$date, format = "%Y%m%d%H%M" )
-      dfY<- subset(total, (total$sensorId == reportCorrelPlots$ySensorId[i] & total$sensorType==reportCorrelPlots$ySensorType[i]))
-      dfYMin<-min(dfY$sensorValue)
-      dfYMax<-max(dfY$sensorValue)
-      dfY$mDate<-strftime(dfY$date, format = "%Y%m%d%H%M" )
-      dfXRes<-(dfXMax-dfXMin)/20
-      dfYRes<-(dfYMax-dfYMin)/20
-      print('Correlationplot: ')
-      #    str(dfX)
-      #    str(dfY)
-      #    plot(dfX$sensorValue, dfY$sensorValue)
-      dfMerged<-merge(dfX, dfY, by= 'mDate', sort = TRUE)
-      #    str(dfMerged)
-      # formula <- y ~ poly(x, 3, raw = TRUE)
-      b <- ggplot(dfMerged, aes(x = sensorValue.x, y = sensorValue.y)) +
-        stat_cor(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*1,size=1.0,
-                 aes(label =  paste( ..r.label.., ..rr.label.., sep = "~~~~")),) +
-        stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*2,size=1.0) +
-        #   stat_cor(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*3,size=0.9,formula=formula) +
-        #   stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*4,size=0.9,formula=formula) +
-        theme_bw()+
-        theme(text = element_text(size = rel(1.8))
-              , element_line(colour = 'green', size = 0.1)
-              #, plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1), 
-              , plot.title = element_text(face="bold",size = rel(1.8), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1), 
-              , plot.subtitle=element_text(size = rel(2.2), hjust =0,margin=margin(3,0,8,0)) # 0.5) #,face="bold")
-              #, plot.caption=element_text(size = rel(1.5),hjust=0,color = "black", face="italic")
-              , plot.caption=element_text(size = rel(1.1),hjust=0,color = "black", face="italic")
-              #        , plot.caption.position =  "plot"
-              #, axis.text=element_text(size = rel(0.9))
-              , axis.text=element_text(size = rel(0.9))
-              , axis.text.y.right=element_text(size = rel(0.9))
-              #, axis.line = element_line(colour = "black", size = 0.1)
-              , axis.line = element_line(colour = "black", size = 0.01)
-              , axis.ticks = element_line(colour = "black", size = 0.01)
-              #, legend.text=element_text(size = rel(1.9))
-              , legend.text=element_text(size = rel(1.5))
-              #, legend.title=element_text(size = rel(2.0)) #,face="bold")
-              , legend.title=element_text(size = rel(1.7)) #,face="bold")
-              , legend.position="top"
-              , legend.justification="right"
-              , legend.margin=margin(0,0,0,0)
-              , legend.box.margin=margin(-10,-10,-10,-10) # t r b l
-              , panel.border = element_rect(colour = "black", fill=NA, size=0.1)
-              , legend.key.height=unit(0.5,"line")
-              , legend.key = element_rect(color = NA, fill = NA)
-              , legend.key.width=unit(0.3,"cm")
-        )  +
-        labs(x=paste(reportCorrelPlots$xLabel[i],'\n\nperiode: ',periodetext1,' tm ',periodetext2,'\n',sep=''),
-             y=reportCorrelPlots$yLabel[i],title=paste("ApriSensor ",reportCorrelPlots$fileLabel[i])
-             # , subtitle=''
-             , caption=captionText) +
-        geom_point(color = "#00AFBB", size = 0.001) +
-        geom_smooth(method = lm, se = FALSE, size=0.1,color='#00AFBB')
-      #   print(ggplot_build(b))
-      #   reg<-lm(sensorValue.y ~ sensorValue.x, data = dfMerged)
-      #   print(reg)
-      #   coeff=coefficients(reg)
-      #   print(coeff)
-      # b<-b + geom_abline(intercept = coeff[1], slope = coeff[2], color="red", linetype="dashed", size=1.5)
-      #  b<-b + geom_abline(intercept = -0.02, slope = 0.00087, color="red", linetype="dashed", size=0.5)
-      apriSensorImage(b,paste0(reportFileLabel,'-',reportCorrelPlots$fileLabel[i]),height=1.9,width=2.1)
-      if (is.null(reportCorrelPlots$save[i])==FALSE && is.na(reportCorrelPlots$save[i])==FALSE ) {
-        if (reportCorrelPlots$save[i]=='TRUE') {
-          timeStamp<-paste0(substr(dfMerged$mDate[1],1,11),'0')
-          fileNameTimeStamp<-paste0(reportFileLabel,'-',reportCorrelPlots$fileLabel[i],'_',timeStamp)
-          print(fileNameTimeStamp)
-          #apriSensorImage(b,fileNameTimeStamp,height=2.4,width=3.2,subFolder='correl')
-          apriSensorImage(b,fileNameTimeStamp,height=1.9,width=2.1,subFolder='correl')
+  if (nrow(reportCorrelPlots)>0) {
+    for (i in 1:nrow(reportCorrelPlots)) {
+      #  str(reportCorrelPlots)
+      #  print(reportCorrelPlots$active[i])
+      plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+      captionText<-paste0('Datum: ',format(plotDateTime,"%d-%m-%Y %H:%M"))
+      if (reportCorrelPlots$active[i]!="FALSE") {
+        print("plot correlPlot")
+        #total <- subset(total, total$sensorType == 'pm25')
+        dfX<- subset(total, (total$sensorId == reportCorrelPlots$xSensorId[i] & total$sensorType==reportCorrelPlots$xSensorType[i]))
+        dfXMin<-min(dfX$sensorValue)
+        dfXMax<-max(dfX$sensorValue)
+        dfX$mDate<-strftime(dfX$date, format = "%Y%m%d%H%M" )
+        dfY<- subset(total, (total$sensorId == reportCorrelPlots$ySensorId[i] & total$sensorType==reportCorrelPlots$ySensorType[i]))
+        dfYMin<-min(dfY$sensorValue)
+        dfYMax<-max(dfY$sensorValue)
+        dfY$mDate<-strftime(dfY$date, format = "%Y%m%d%H%M" )
+        dfXRes<-(dfXMax-dfXMin)/20
+        dfYRes<-(dfYMax-dfYMin)/20
+        print('Correlationplot: ')
+        #    str(dfX)
+        #    str(dfY)
+        #    plot(dfX$sensorValue, dfY$sensorValue)
+        dfMerged<-merge(dfX, dfY, by= 'mDate', sort = TRUE)
+        #    str(dfMerged)
+        # formula <- y ~ poly(x, 3, raw = TRUE)
+        b <- ggplot(dfMerged, aes(x = sensorValue.x, y = sensorValue.y)) +
+          stat_cor(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*1,size=1.0,
+                   aes(label =  paste( ..r.label.., ..rr.label.., sep = "~~~~")),) +
+          stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*2,size=1.0) +
+          #   stat_cor(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*3,size=0.9,formula=formula) +
+          #   stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*4,size=0.9,formula=formula) +
+          theme_bw()+
+          theme(text = element_text(size = rel(1.8))
+                , element_line(colour = 'green', size = 0.1)
+                #, plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1), 
+                , plot.title = element_text(face="bold",size = rel(1.8), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1), 
+                , plot.subtitle=element_text(size = rel(2.2), hjust =0,margin=margin(3,0,8,0)) # 0.5) #,face="bold")
+                #, plot.caption=element_text(size = rel(1.5),hjust=0,color = "black", face="italic")
+                , plot.caption=element_text(size = rel(1.1),hjust=0,color = "black", face="italic")
+                #        , plot.caption.position =  "plot"
+                #, axis.text=element_text(size = rel(0.9))
+                , axis.text=element_text(size = rel(0.9))
+                , axis.text.y.right=element_text(size = rel(0.9))
+                #, axis.line = element_line(colour = "black", size = 0.1)
+                , axis.line = element_line(colour = "black", size = 0.01)
+                , axis.ticks = element_line(colour = "black", size = 0.01)
+                #, legend.text=element_text(size = rel(1.9))
+                , legend.text=element_text(size = rel(1.5))
+                #, legend.title=element_text(size = rel(2.0)) #,face="bold")
+                , legend.title=element_text(size = rel(1.7)) #,face="bold")
+                , legend.position="top"
+                , legend.justification="right"
+                , legend.margin=margin(0,0,0,0)
+                , legend.box.margin=margin(-10,-10,-10,-10) # t r b l
+                , panel.border = element_rect(colour = "black", fill=NA, size=0.1)
+                , legend.key.height=unit(0.5,"line")
+                , legend.key = element_rect(color = NA, fill = NA)
+                , legend.key.width=unit(0.3,"cm")
+          )  +
+          labs(x=paste(reportCorrelPlots$xLabel[i],'\n\nperiode: ',periodetext1,' tm ',periodetext2,'\n',sep=''),
+               y=reportCorrelPlots$yLabel[i],title=paste("ApriSensor ",reportCorrelPlots$fileLabel[i])
+               # , subtitle=''
+               , caption=captionText) +
+          geom_point(color = "#00AFBB", size = 0.001) +
+          geom_smooth(method = lm, se = FALSE, size=0.1,color='#00AFBB')
+        #   print(ggplot_build(b))
+        #   reg<-lm(sensorValue.y ~ sensorValue.x, data = dfMerged)
+        #   print(reg)
+        #   coeff=coefficients(reg)
+        #   print(coeff)
+        # b<-b + geom_abline(intercept = coeff[1], slope = coeff[2], color="red", linetype="dashed", size=1.5)
+        #  b<-b + geom_abline(intercept = -0.02, slope = 0.00087, color="red", linetype="dashed", size=0.5)
+        apriSensorImage(b,paste0(reportFileLabel,'-',reportCorrelPlots$fileLabel[i]),height=1.9,width=2.1)
+        if (is.null(reportCorrelPlots$save[i])==FALSE && is.na(reportCorrelPlots$save[i])==FALSE ) {
+          if (reportCorrelPlots$save[i]=='TRUE') {
+            timeStamp<-paste0(substr(dfMerged$mDate[1],1,11),'0')
+            fileNameTimeStamp<-paste0(reportFileLabel,'-',reportCorrelPlots$fileLabel[i],'_',timeStamp)
+            print(fileNameTimeStamp)
+            #apriSensorImage(b,fileNameTimeStamp,height=2.4,width=3.2,subFolder='correl')
+            apriSensorImage(b,fileNameTimeStamp,height=1.9,width=2.1,subFolder='correl')
+          }
         }
       }
     }

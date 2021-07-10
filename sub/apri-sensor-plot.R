@@ -58,13 +58,17 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
       strip.text.y = element_text(size = rel(2.6)),
       strip.background = element_rect(colour="black", fill="grey", size=0.3)
     )
+  print('annotation')
+  browser()
   if(is.null(ylim)!=TRUE) {
+    print("test1")
     gTotal<-gTotal +
       annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
       annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
       annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0)
   }
   if(is.null(treshold)!=TRUE) {
+    print("test2")
     gTotal<-gTotal +
       geom_hline(yintercept = treshold,size=0.10,color='darkgreen') +
       annotate("text", x = statsPosX, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
@@ -96,7 +100,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
 }
 
 apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL,width=3.8,height=2.28,dpi="print",units='in',subFolder='') {
-  filePath <- paste0(scriptPath,"plot/")
+  filePath<-plotPath
   if (!is.null(fileSuffix)) fileSuffix<-paste0('-',fileSuffix)
   if (!is.null(fileDate)) fileDate<-paste0('-',fileDate)
   fileName <- paste('aprisensor','_',fileLabel,fileSuffix,'.png',sep='')

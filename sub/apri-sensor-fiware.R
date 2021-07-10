@@ -4,8 +4,6 @@
 cmdArgs = commandArgs(trailingOnly = FALSE)
 print(paste('script','start Rscript: ', Sys.time(),cmdArgs[4]))
 
-scriptPath='/data/Alfresco/opt/R/apri-sensor/'
-
 
 ##install.packages("ggplot2")
 ##install.packages("scales")
@@ -27,7 +25,7 @@ scriptPath='/data/Alfresco/opt/R/apri-sensor/'
 #library(httr)
 #library(RColorBrewer)
 
-cacheFolder<-paste0(scriptPath,'tmp/cache/')
+cacheFolder<-cachePath
 useCache<-FALSE
 pmTop<-5000
 
