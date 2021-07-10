@@ -37,3 +37,15 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Reports
+/report/*.json
+
+# config files
+/config/*.json
+
+# report cache-files
+/tmp/cache/*
+
+# plot output files
+/plot/*

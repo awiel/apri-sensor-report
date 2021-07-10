@@ -1,0 +1,320 @@
+#!/usr/bin/env Rscript
+options(width = 100)
+args = commandArgs(trailingOnly=TRUE)
+# test if there is at least one argument: if not, return an error
+defaultReport<-'0D28-pm25'
+if (length(args)==0 && is.null(defaultReport)) {
+  stop(" Commandline parameter voor reportID is missing, process stopped.", call.=FALSE)
+}
+if (length(args)==0) {
+  print(" Commandline parameter voor reportID is missing, default taken")
+  reportId<-defaultReport
+} else reportId<-args[1]
+
+
+scriptPath='/data/Alfresco/opt/R/apri-sensor/'
+###
+#library(grid)
+##install.packages("magick")
+##install.packages("RJSONIO")
+##install.packages("ggpubr")
+#library(ggpubr)
+#library(RJSONIO)
+
+#install.packages("tidyverse") # voor o.a. ggplot2
+#install.packages("ggplot2")
+library(ggplot2)
+ggplot()
+library(magick)
+#library(RColorBrewer)
+library(jsonlite)
+
+source(paste0(scriptPath,"sub/apri-sensor-fiware.R"))
+source(paste0(scriptPath,"sub/apri-sensor-plot.R"))
+
+sensorTypes<-json_data<-fromJSON(paste0(scriptPath,"config/apri-sensor-sensorTypes.json"))
+sensorIds<-json_data<-fromJSON(paste0(scriptPath,"config/apri-sensor-sensorIds.json"))
+logo<-image_read(paste0(scriptPath,"image/logo-scapeler.png"))
+
+print(paste("Start report for reportId",reportId))
+reportFileName<-paste0(scriptPath,"report/",reportId,".json")
+print(reportFileName)
+json_data <- fromJSON(reportFileName)
+reportConfig <- json_data
+print('report config file ok')
+
+print("as dataframe sensorIds")
+dfSensorIds<-as.data.frame(sensorIds)
+
+#str(reportConfig)
+reportTitle <- reportConfig$title
+reportFileLabel <- reportConfig$fileLabel
+reportSubTitle<-reportConfig$subTitle #'fijnstof PM2.5'
+reportYLim <- reportConfig$yLim
+reportHeight <- reportConfig$height
+reportWidth <- reportConfig$width
+reportTreshold <- reportConfig$treshold
+reportTresholdLabel <- reportConfig$tresholdLabel
+
+periodType<-reportConfig$periodType
+
+#dateFrom<-'2020-11-15T11:00:00'
+#dateTo<-'2020-11-15T13:00:00'
+#dateFrom<-'2020-11-16T16:00:00'
+#dateTo<-'2020-11-17T1600:00'
+
+meanMinutes<-reportConfig$mean$nr
+period<-''
+keeps <- c("sensorId","dateObserved","sensorValue")
+
+sensorIds<-reportConfig$sensorIds
+pm25Treshold<-TRUE
+dfTmp<-NULL
+print("loop sensorIds")
+dfTmpMlr1<-NULL
+for (i in 1:nrow(sensorIds)) {
+  reportSensorTypes<-sensorIds$sensorTypes[[i]]
+  if (sensorIds$active[i]!="FALSE") {
+    observableProperties<-NULL
+    for (j in 1:nrow(reportSensorTypes)) {
+      #  if (reportSensorTypes$active[j]=="TRUE") {
+      if (is.null(observableProperties)) {
+        observableProperties<-reportSensorTypes$sensorType[j]
+      } else {
+        observableProperties<-paste(observableProperties,reportSensorTypes$sensorType[j],sep=',')
+      }
+      #  } 
+    }
+    if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='dag') {
+      aggregateInd<-'D'
+    } else {
+      aggregateInd<-NULL
+    }
+    if (periodType == "actual") {
+      dfTmpOne<-getFiwareData(NULL,sensorIds$fiwareService[i],sensorIds$fiwareServicePath[i],sensorIds$key[i],sensorIds$sensorId[i],observableProperties)
+    } else { # hist
+      dfTmpOne<-getFiwareData(NULL,sensorIds$fiwareService[i],sensorIds$fiwareServicePath[i],sensorIds$key[i],sensorIds$sensorId[i],observableProperties,dateFrom=reportConfig$dateFrom,dateTo=reportConfig$dateTo,aggregateInd=aggregateInd)
+    }
+    
+    #    calib<-FALSE
+    if (is.null(sensorIds$calibrateFaseOne[i])==FALSE && is.na(sensorIds$calibrateFaseOne[i])==FALSE) {
+      if (sensorIds$calibrateFaseOne[i]=="TRUE") {
+        dfTmpCal1<-dfTmpOne %>% left_join(dfCalibrations, by = c("sensorType" = "sensorType","sensorId"="sensorId"))
+        dfTmpCal1$sensorId<-as.factor(paste0(dfTmpCal1$sensorId,'-c1'))
+        dfTmpCal1$sensorType<-as.factor(dfTmpCal1$sensorType)
+        dfTmpCal1$sensorValue<-(dfTmpCal1$sensorValue+dfTmpCal1$offset)*dfTmpCal1$factor*dfTmpCal1$factor2
+        #        str(dfTmpCal1)
+        keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+        dfTmpCal1 <- dfTmpCal1[keeps]
+        #        str(dfTmpCal1)
+        if (sensorIds$showRawData[i]=="TRUE") {
+          dfTmpStack<-rbind(dfTmpStack,dfTmpCal1)
+        } else {
+          dfTmpStack<-dfTmpCal1
+        }
+        #        calib<-TRUE
+      }
+      if (sensorIds$calibrateFaseOne[i]=="MLR") {
+        dfRHum<- subset(dfTmpOne, dfTmpOne$sensorType=='rHum')
+        dfRHum$rHum<-dfRHum$sensorValue
+        dfTemperature<- subset(dfTmpOne, dfTmpOne$sensorType=='temperature')
+        dfTemperature$temperature<-dfTemperature$sensorValue
+        dfTmpMlr1<-dfTemperature %>% left_join(dfRHum, by = c("date" = "date"))
+        keepsMlr1 <- c("date", "rHum","temperature")
+        dfTmpMlr1 <- dfTmpMlr1[keepsMlr1]
+        # if(is.null(dfTmpMlr1)==TRUE) {
+        #   print('#################')
+        #   dfTmpMlr1<-dfTmpOne
+        # } else {
+        #   print('$$$$$$$$$$$$$$$$')
+        #   dfTmpMlr1<-dfTemperature %>% left_join(dfRHum, by = c("date" = "date"))
+        # } 
+        dfTmpOne<-NULL
+        str(dfTmpMlr1)
+      }
+    }
+    if (is.null(sensorIds$calibrateFaseTwo[i])==FALSE && is.na(sensorIds$calibrateFaseTwo[i])==FALSE) {
+      if (sensorIds$calibrateFaseTwo[i]=="MLR") {
+        if(is.null(dfTmpMlr1)==FALSE) {
+          dfTmpMlr2<-dfTmpOne %>% left_join(dfTmpMlr1, by = c("date" = "date"))
+          if (dfTmpMlr2$sensorType[1]=='pm25' || dfTmpMlr2$sensorType[1]=='pm25_pm25') {
+            print('Calculate MLR for PM2.5')
+            
+            #dfTmpMlr2$sensorValue1<-dfTmpMlr2$sensorValue
+            dfTmpMlr2<-dfTmpMlr2 %>% mutate(sensorValue = ifelse(sensorValue>=5,
+                                                                 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature)
+                                                                 , sensorValue))
+            
+            #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
+            #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
+            #              ,dfTmpMlr2$sensorValue)
+            dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
+            str(dfTmpMlr2)
+            keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+            dfTmpMlr2 <- dfTmpMlr2[keeps]
+          }
+          str(dfTmpMlr2)
+          dfTmpOne<-dfTmpMlr2
+        }
+        dfTmpMlr1<-NULL
+      }
+    }
+    
+    #    if (calib==FALSE) {
+    if (is.null(dfTmpOne)==FALSE) {
+      dfTmpStack<-dfTmpOne
+      # multiply factor e.g. ips7100 1L -> 0.1L = multiply by 0.1
+      if (is.null(sensorIds$multiply[i])==FALSE && is.na(sensorIds$multiply[i])==FALSE) {
+        dfTmpStack$sensorValue<-dfTmpStack$sensorValue*sensorIds$multiply[i]
+      }
+      #    if (is.null(pm25Treshold)==FALSE) {
+      #      if (observableProperties=="pm25") {
+      #        pm25Treshold<-NULL
+      #        dfPm25Treshold <- subset(dfTmpOne, sensorType == 'pm25')
+      #        dfPm25Treshold$sensorId<-'treshold'
+      #        dfPm25Treshold$sensorValue<-25  # WHO 24 hours mean
+      #        dfTmpStack<-rbind(dfTmpStack,dfPm25Treshold)
+      #      }
+      #    } 
+      dfTmp<-rbind(dfTmp,dfTmpStack)
+    }
+  }
+}
+
+dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+dfTmp$minute <- sapply(format(dfTmp$date, "%M"), as.numeric)
+dfTmp$hour <- sapply(format(dfTmp$date, "%H"), as.numeric)
+dfTmp$foi <- dfTmp$sensorId
+dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
+
+keeps <- c("date", "sensorValue","sensorType","sensorId")
+total <- dfTmp[keeps]
+total$tmp2 = as.character(total$sensorId);
+total$foiLocation=factor(substr(total$tmp2,regexpr('S.*$',total$tmp2),50));
+total$type = c(0, cumsum(diff(total$date) > 99999600))  # tijdsduur in seconden als minumum waarde voor onderbrekingen van grafieklijn 
+total$sensorType = factor(total$sensorType, levels=names(sensorTypes))
+print(paste('y-limit=',reportYLim))
+if (is.null(reportYLim)) {
+  ylim <- NULL
+} else {
+  if(reportYLim=="ZERO"){
+    ylim <- c(0, max(total$sensorValue))
+  }
+  if(reportYLim=="MINMAX"){
+    ylim <- c(min(total$sensorValue), max(total$sensorValue))
+  }
+}
+
+period <- range(total$date);
+periodetext1 <- strftime(period[1], format = "%Y-%m-%d %H:%M uur" )
+periodetext2 <- strftime(period[2], format = "%Y-%m-%d %H:%M uur")
+print("ggplot")
+#total <- subset(total, total$sensorType == 'pm25')
+# plot graph
+dateBreaks<-"1 hour"
+dateLabels<-"%H"
+aggregateTxt<-"gemiddeld per minuut"
+if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='dag') {
+  dateBreaks<-"1 month"
+  dateLabels<-"%m"
+  aggregateTxt<-"gemiddeld per dag"
+}
+gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle,ylim,treshold=reportTreshold,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels,aggregateTxt=aggregateTxt)
+# make imagefile
+print(reportHeight);
+print(reportWidth);
+if (!is.null(reportHeight)&!is.null(reportWidth)) apriSensorImage(gTotal,reportFileLabel,height=reportHeight,width=reportWidth)
+if (!is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel,height=reportHeight)
+if (!is.null(reportWidth)) apriSensorImage(gTotal,reportFileLabel,width=reportWidth)
+if (is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel)
+print(paste("Report saved as",reportFileLabel))
+
+
+if(is.null(reportConfig$correlPlots)==FALSE) {
+  reportCorrelPlots<-reportConfig$correlPlots
+  print("loop correlPlots")
+  for (i in 1:nrow(reportCorrelPlots)) {
+    #  str(reportCorrelPlots)
+    #  print(reportCorrelPlots$active[i])
+    plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+    captionText<-paste0('Datum: ',format(plotDateTime,"%d-%m-%Y %H:%M"))
+    if (reportCorrelPlots$active[i]!="FALSE") {
+      #total <- subset(total, total$sensorType == 'pm25')
+      dfX<- subset(total, (total$sensorId == reportCorrelPlots$xSensorId[i] & total$sensorType==reportCorrelPlots$xSensorType[i]))
+      dfXMin<-min(dfX$sensorValue)
+      dfXMax<-max(dfX$sensorValue)
+      dfX$mDate<-strftime(dfX$date, format = "%Y%m%d%H%M" )
+      dfY<- subset(total, (total$sensorId == reportCorrelPlots$ySensorId[i] & total$sensorType==reportCorrelPlots$ySensorType[i]))
+      dfYMin<-min(dfY$sensorValue)
+      dfYMax<-max(dfY$sensorValue)
+      dfY$mDate<-strftime(dfY$date, format = "%Y%m%d%H%M" )
+      dfXRes<-(dfXMax-dfXMin)/20
+      dfYRes<-(dfYMax-dfYMin)/20
+      print('Correlationplot: ')
+      #    str(dfX)
+      #    str(dfY)
+      #    plot(dfX$sensorValue, dfY$sensorValue)
+      dfMerged<-merge(dfX, dfY, by= 'mDate', sort = TRUE)
+      #    str(dfMerged)
+      # formula <- y ~ poly(x, 3, raw = TRUE)
+      b <- ggplot(dfMerged, aes(x = sensorValue.x, y = sensorValue.y)) +
+        stat_cor(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*1,size=1.0,
+                 aes(label =  paste( ..r.label.., ..rr.label.., sep = "~~~~")),) +
+        stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*2,size=1.0) +
+        #   stat_cor(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*3,size=0.9,formula=formula) +
+        #   stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*4,size=0.9,formula=formula) +
+        theme_bw()+
+        theme(text = element_text(size = rel(1.8))
+              , element_line(colour = 'green', size = 0.1)
+              #, plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1), 
+              , plot.title = element_text(face="bold",size = rel(1.8), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1), 
+              , plot.subtitle=element_text(size = rel(2.2), hjust =0,margin=margin(3,0,8,0)) # 0.5) #,face="bold")
+              #, plot.caption=element_text(size = rel(1.5),hjust=0,color = "black", face="italic")
+              , plot.caption=element_text(size = rel(1.1),hjust=0,color = "black", face="italic")
+              #        , plot.caption.position =  "plot"
+              #, axis.text=element_text(size = rel(0.9))
+              , axis.text=element_text(size = rel(0.9))
+              , axis.text.y.right=element_text(size = rel(0.9))
+              #, axis.line = element_line(colour = "black", size = 0.1)
+              , axis.line = element_line(colour = "black", size = 0.01)
+              , axis.ticks = element_line(colour = "black", size = 0.01)
+              #, legend.text=element_text(size = rel(1.9))
+              , legend.text=element_text(size = rel(1.5))
+              #, legend.title=element_text(size = rel(2.0)) #,face="bold")
+              , legend.title=element_text(size = rel(1.7)) #,face="bold")
+              , legend.position="top"
+              , legend.justification="right"
+              , legend.margin=margin(0,0,0,0)
+              , legend.box.margin=margin(-10,-10,-10,-10) # t r b l
+              , panel.border = element_rect(colour = "black", fill=NA, size=0.1)
+              , legend.key.height=unit(0.5,"line")
+              , legend.key = element_rect(color = NA, fill = NA)
+              , legend.key.width=unit(0.3,"cm")
+        )  +
+        labs(x=paste(reportCorrelPlots$xLabel[i],'\n\nperiode: ',periodetext1,' tm ',periodetext2,'\n',sep=''),
+             y=reportCorrelPlots$yLabel[i],title=paste("ApriSensor ",reportCorrelPlots$fileLabel[i])
+             # , subtitle=''
+             , caption=captionText) +
+        geom_point(color = "#00AFBB", size = 0.001) +
+        geom_smooth(method = lm, se = FALSE, size=0.1,color='#00AFBB')
+      #   print(ggplot_build(b))
+      #   reg<-lm(sensorValue.y ~ sensorValue.x, data = dfMerged)
+      #   print(reg)
+      #   coeff=coefficients(reg)
+      #   print(coeff)
+      # b<-b + geom_abline(intercept = coeff[1], slope = coeff[2], color="red", linetype="dashed", size=1.5)
+      #  b<-b + geom_abline(intercept = -0.02, slope = 0.00087, color="red", linetype="dashed", size=0.5)
+      apriSensorImage(b,paste0(reportFileLabel,'-',reportCorrelPlots$fileLabel[i]),height=1.9,width=2.1)
+      if (is.null(reportCorrelPlots$save[i])==FALSE && is.na(reportCorrelPlots$save[i])==FALSE ) {
+        if (reportCorrelPlots$save[i]=='TRUE') {
+          timeStamp<-paste0(substr(dfMerged$mDate[1],1,11),'0')
+          fileNameTimeStamp<-paste0(reportFileLabel,'-',reportCorrelPlots$fileLabel[i],'_',timeStamp)
+          print(fileNameTimeStamp)
+          #apriSensorImage(b,fileNameTimeStamp,height=2.4,width=3.2,subFolder='correl')
+          apriSensorImage(b,fileNameTimeStamp,height=1.9,width=2.1,subFolder='correl')
+        }
+      }
+    }
+  }
+} # end of correlation plot loop
+

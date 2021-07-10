@@ -1,0 +1,39 @@
+{
+  "title":"Resultaten van de ApriSensor sensor"
+  ,"subTitle":"Fijnstof PM2.5"
+  ,"fileLabel":"5678-pm25"
+  ,"mean":{"nr":1,"text":"minuut"}
+  ,"dateFrom":"2020-12-05T12:00:00"
+  ,"dateTo":"2020-12-05T19:00:00"
+  ,"periodTypeActual":"actual"
+  ,"periodType":"actual"
+  ,"xperiodType":"hist"
+  ,"periodSpan":"24h"
+  ,"yLim":"ZERO"
+  ,"treshold":25
+  ,"tresholdLabel":"WHO richtlijn"
+  ,"sensorIds": [
+    {"sensorId":"SCRP0000000012345678:SCRP0000000012345678_sps30","label":"Duo sps30 (5678)"
+      ,"active":"TRUE"
+      ,"fiwareServiceHour":"aprisensor_hour"
+      ,"fiwareService":"aprisensor_in"
+      ,"fiwareServicePathDefault":"/sps30"
+      ,"fiwareServicePath":"/sps30"
+      ,"fiwareServicePathHour":"/sps30_hour"
+      ,"key":"sensorId"
+      ,"sensorTypes":[
+        {"sensorType":"pm25:pm25_pm25","treshold":"TRUE","yearTreshold":"TRUE","corrfactor":1}
+      ]
+    }
+      ]
+  ,"correlPlots": [
+    {"title":"Duo Sensirion SPS30 & Piera IPS7100"
+     ,"fileLabel":"correl-1"
+     ,"active":"FALSE"
+     ,"save":"TRUE"
+     ,"xSensorId":"SCRP0000000012345678_sps30","xSensorType":"pm25_pm25","xLabel":"PM2.5 Duo SPS30 (5678)"
+     ,"ySensorId":"SCRP0000000012345678_ips7100","ySensorType":"pm25_pm25","yLabel":"PM2.5 Duo IPS7100 (5678)"
+    }
+  ]
+}
+
