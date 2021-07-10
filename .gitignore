@@ -49,3 +49,6 @@ vignettes/*.pdf
 
 # plot output files
 /plot/*
+
+# R project file
+apri-sensor-report.Rproj
