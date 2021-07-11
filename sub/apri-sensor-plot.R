@@ -23,8 +23,8 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     print("ylim is not NULL")
     gTotal<-gTotal+scale_y_continuous( sec.axis=sec_axis(~.*1),limits = ylim)
   }
-  print(dateBreaks)
-  print(dateLabels)
+  #print(dateBreaks)
+  #print(dateLabels)
   
   gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver()) +
     theme(text = element_text(size = rel(2.0))
@@ -58,22 +58,24 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
       strip.text.y = element_text(size = rel(2.6)),
       strip.background = element_rect(colour="black", fill="grey", size=0.3)
     )
-  print('annotation')
+  #print('annotation')
 
   if(is.null(ylim)!=TRUE) {
-    print("test1")
     gTotal<-gTotal +
       annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
       annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
       annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0)
   }
+
   if(is.null(treshold)!=TRUE) {
-    print("test2")
-    gTotal<-gTotal +
-      geom_hline(yintercept = treshold,size=0.10,color='darkgreen') +
-      annotate("text", x = statsPosX, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
-      annotate("text", x = statsPosX+statsXResolution*14, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
-      annotate("text", x = statsPosX+statsXResolution*28, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0)
+    print('geom_line treshold')
+    if(treshold<statsMax) {
+      gTotal<-gTotal +
+        geom_hline(yintercept = treshold,size=0.10,color='darkgreen') +
+        annotate("text", x = statsPosX, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
+        annotate("text", x = statsPosX+statsXResolution*14, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
+        annotate("text", x = statsPosX+statsXResolution*28, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0)
+    }
   }
   
   return (gTotal +

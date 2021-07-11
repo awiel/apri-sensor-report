@@ -233,14 +233,16 @@ if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='dag') {
   dateLabels<-"%m"
   aggregateTxt<-"gemiddeld per dag"
 }
+
 gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle,ylim,treshold=reportTreshold,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels,aggregateTxt=aggregateTxt)
+
+
 # make imagefile
 if (!is.null(reportHeight)&!is.null(reportWidth)) apriSensorImage(gTotal,reportFileLabel,height=reportHeight,width=reportWidth)
 if (!is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel,height=reportHeight)
 if (!is.null(reportWidth)) apriSensorImage(gTotal,reportFileLabel,width=reportWidth)
 if (is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel)
 print(paste0("Report saved as ",reportFileLabel,'.png'))
-
 
 if(is.null(reportConfig$correlPlots)==FALSE) {
   reportCorrelPlots<-reportConfig$correlPlots
