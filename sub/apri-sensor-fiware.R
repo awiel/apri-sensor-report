@@ -44,12 +44,14 @@ saveCacheFile<-function(cachePath,fileName,object) {
 
 
 getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=NULL,foi=NULL,ops=NULL,opPerRow='true'
-                        ,opsc=NULL,dateFrom=NULL,dateTo=NULL,aggregateInd=NULL,cachePath=NULL) {
+                        ,opsc=NULL,dateFrom=NULL,dateTo=NULL,aggregateInd=NULL,cachePath=NULL
+                        ,source=NULL,sensorId=NULL,datastream=NULL,sensorType=NULL) {
   # eg2. SCNM5CCF7F2F62F3:SCNM5CCF7F2F62F3_a,pm25:pm25_alias,pm10
   # https://aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/?fiwareService=aprisensor_in&fiwareServicePath=/pmsa003&key=sensorId&foiOps=SCNM5CCF7F2F62F3:SCNM5CCF7F2F62F3_a,pm25:pm25_alias
   
   #fileName<-paste(paste(fiwareService,str_replace_all(fiwareServicePath, '/', '_'),key,foi,ops,sep='#'),'.Rda',sep='')
   fileName<-paste(paste(foi,fiwareService,gsub("/", "_", fiwareServicePath),ops,key,opPerRow,sep='#'),'.rds',sep='')
+  fileName<-gsub(":","_",fileName)
   
   dateFromOldestInCache<-Sys.time()-(24*60*60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
   if (is.null(dateFrom)) {
@@ -97,30 +99,50 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
     }
   }
   paramDate<-paste("&dateFrom=",dateFrom,"&dateTo=",dateTo,sep='')
-  if (fiwareService == '' | fiwareServicePath=='/tsi3007' | substr(fiwareService,1,6)=='orion-' | substr(fiwareService,1,1)=='#') {
-    dbSuffix <-''
-  } else {
-    if (dateFrom<"2021-05-05T21:12") {
+  
+  if (is.null(source) || is.na(source)) {  # source == defaults to fiware
+    
+    if (fiwareService == '' | fiwareServicePath=='/tsi3007' | substr(fiwareService,1,6)=='orion-' | substr(fiwareService,1,1)=='#') {
       dbSuffix <-''
     } else {
-      dbSuffix <-'_202107'
+      if (dateFrom<"2021-05-05T21:12") {
+        dbSuffix <-''
+      } else {
+        dbSuffix <-'_202107'
+      }
+    }
+    if (substr(fiwareService,1,1)=='#') {
+      fiwareService<-substr(fiwareService,2,999)
+    }
+    url <- paste("https://aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/"
+                 ,"?fiwareService=",fiwareService,dbSuffix
+                 ,"&fiwareServicePath=",fiwareServicePath
+                 ,"&key=",key
+                 ,"&opPerRow=",opPerRow
+                 ,"&foiOps=",foi,",",ops
+                 , paramDate
+                 ,sep='')
+    #,"&dateFrom=",dateFrom
+    #,"&dateTo=",dateTo
+    print(url)
+    dfResult <- read.csv(url, header = TRUE, sep = ";", quote = "\"")
+  }
+  if (!is.null(source) && !is.na(source)) {
+    if (source == 'samenmeten') {  # source == samenmeten api 
+      # /NBI_TN012/12-pm25
+      url <- paste("https://samenmeten.openiod.org/api/v1/thing/"
+                   ,sensorId,"/"
+                   ,datastream
+                   ,'?sensorType=',sensorType
+                   ,paramDate
+                   ,sep='')
+      print(url)
+      dfResult<-jsonlite::fromJSON(url,simplifyDataFrame = TRUE)
+      dfResult$sensorId<-as.factor(dfResult$sensorId)
+      dfResult$sensorType<-as.factor(dfResult$sensorType)
+      dfResult$dateObserved<-as.factor(dfResult$dateObserved)
     }
   }
-  if (substr(fiwareService,1,1)=='#') {
-    fiwareService<-substr(fiwareService,2,999)
-  }
-  url <- paste("https://aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/"
-               ,"?fiwareService=",fiwareService,dbSuffix
-               ,"&fiwareServicePath=",fiwareServicePath
-               ,"&key=",key
-               ,"&opPerRow=",opPerRow
-               ,"&foiOps=",foi,",",ops
-               , paramDate
-               ,sep='')
-  #,"&dateFrom=",dateFrom
-  #,"&dateTo=",dateTo
-  print(url)
-  dfResult <- read.csv(url, header = TRUE, sep = ";", quote = "\"")
   
   if (ops=='pm1,pm25,pm10') {
     dfResultMax <- subset(dfResult, dfResult$sensorValue >= pmTop)

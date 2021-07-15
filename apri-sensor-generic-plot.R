@@ -97,17 +97,29 @@ for (i in 1:nrow(sensorIds)) {
       aggregateInd<-NULL
     }
     if (periodType == "actual") {
+      t<-strsplit(observableProperties, ":")#[[1,1]]
       dfTmpOne<-getFiwareData(dfIn=NULL
-              ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
-              ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
-              ,cachePath=cachePath)
+          ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
+          ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
+          ,cachePath=cachePath
+          ,source=sensorIds$source[i]
+          ,sensorId=sensorIds$sensorId[i]
+          ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
+          ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
+      )
     } else { # hist
       dfTmpOne<-getFiwareData(dfIn=NULL
-              ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
-              ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
-              ,dateFrom=reportConfig$dateFrom,dateTo=reportConfig$dateTo
-              ,aggregateInd=aggregateInd
-              ,cachePath=cachePath)
+          ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
+          ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
+          ,dateFrom=reportConfig$dateFrom
+          ,dateTo=reportConfig$dateTo
+          ,aggregateInd=aggregateInd
+          ,cachePath=cachePath
+          ,source=sensorIds$source[i]
+          ,sensorId=sensorIds$sensorId[i]
+          ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
+          ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
+      )
     }
     
     #    calib<-FALSE
