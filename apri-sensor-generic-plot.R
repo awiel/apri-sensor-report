@@ -12,7 +12,8 @@ if (length(args)==0) {
 } else reportId<-args[1]
 
 
-scriptPath='/data/Alfresco/opt/R/apri-sensor-report/'
+#scriptPath='/data/Alfresco/opt/R/apri-sensor-report/'
+scriptPath='.'
 subPath=paste0(scriptPath,'sub/')
 reportPath=paste0(scriptPath,'report/')
 configPath=paste0(scriptPath,'config/')
