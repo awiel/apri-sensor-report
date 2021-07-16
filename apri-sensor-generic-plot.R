@@ -13,7 +13,7 @@ if (length(args)==0) {
 
 
 #scriptPath='/data/Alfresco/opt/R/apri-sensor-report/'
-scriptPath='.'
+scriptPath='./'
 subPath=paste0(scriptPath,'sub/')
 reportPath=paste0(scriptPath,'report/')
 configPath=paste0(scriptPath,'config/')
