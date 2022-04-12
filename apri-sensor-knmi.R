@@ -231,7 +231,7 @@ foitext <- paste('Data van het KNMI https://data.knmi.nl/ (KNMI)',sep="");
 #print(total)
 #path <- "/opt/SCAPE604/images/R/apri-sensor/"
 #fileprefix <- paste("",foitext,'_',foilabel,sep='')
-fileprefix <- paste(plotPath,'knmi','_',foilabel,sep='')
+fileprefix <- paste(plotPath,'/knmi','_',foilabel,sep='')
 filedate = ''
 filename <- paste(fileprefix, filedate,'.png',sep='');
 #ggsave(filename, path=filepath, width=12, height=5, plot = p)
