@@ -48,11 +48,11 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
                         ,source=NULL,sensorId=NULL,datastream=NULL,sensorType=NULL) {
   # eg2. SCNM5CCF7F2F62F3:SCNM5CCF7F2F62F3_a,pm25:pm25_alias,pm10
   # https://aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/?fiwareService=aprisensor_in&fiwareServicePath=/pmsa003&key=sensorId&foiOps=SCNM5CCF7F2F62F3:SCNM5CCF7F2F62F3_a,pm25:pm25_alias
-  
+
   #fileName<-paste(paste(fiwareService,str_replace_all(fiwareServicePath, '/', '_'),key,foi,ops,sep='#'),'.Rda',sep='')
   fileName<-paste(paste(foi,fiwareService,gsub("/", "_", fiwareServicePath),ops,key,opPerRow,sep='#'),'.rds',sep='')
   fileName<-gsub(":","_",fileName)
-  
+
   dateFromOldestInCache<-Sys.time()-(24*60*60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
   if (is.null(dateFrom)) {
     useCache<-TRUE
@@ -74,7 +74,7 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
       #    cacheFile$date<-as.POSIXct(cacheFile$dateObserved, format="%Y-%m-%dT%H:%M")
       maxDateObservedCache<-max(cacheFile$date)
       print(paste("Max from cache is:",maxDateObservedCache))
-      
+
       tmpDateObservedFrom<-as.POSIXct(dateFrom, format="%Y-%m-%dT%H:%M:%S")
       tmpDateObservedTo<-as.POSIXct(dateTo, format="%Y-%m-%dT%H:%M:%S")
       if (tmpDateObservedFrom < maxDateObservedCache) {
@@ -99,22 +99,26 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
     }
   }
   paramDate<-paste("&dateFrom=",dateFrom,"&dateTo=",dateTo,sep='')
-  
-  if (is.null(source) || is.na(source)) {  # source == defaults to fiware
-    
-    if (fiwareService == '' | fiwareServicePath=='/tsi3007' | substr(fiwareService,1,6)=='orion-' | substr(fiwareService,1,1)=='#') {
+
+  if (is.null(source) || is.na(source)) {
+    # source == defaults to fiware
+    source<-'fiware'
+    if (fiwareService == '' || fiwareServicePath=='/knmi' || fiwareServicePath=='/tsi3007' |
+      substr(fiwareService,1,6)=='orion-' || substr(fiwareService,1,1)=='#') {
       dbSuffix <-''
     } else {
       if (dateFrom<"2021-05-05T21:12") {
         dbSuffix <-''
       } else {
-        dbSuffix <-'_202107'
+        dbSuffix<-paste0('_',substr(dateTo,1,4),substr(dateTo,6,7))
+        print(dbSuffix)
       }
     }
     if (substr(fiwareService,1,1)=='#') {
       fiwareService<-substr(fiwareService,2,999)
     }
-    url <- paste("https://aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/"
+    if (is.null(source) || (!is.null(source) && source=='fiware')) {
+      url <- paste("https://aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/"
                  ,"?fiwareService=",fiwareService,dbSuffix
                  ,"&fiwareServicePath=",fiwareServicePath
                  ,"&key=",key
@@ -122,14 +126,18 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
                  ,"&foiOps=",foi,",",ops
                  , paramDate
                  ,sep='')
-    #,"&dateFrom=",dateFrom
-    #,"&dateTo=",dateTo
-    print(url)
-    dfResult <- read.csv(url, header = TRUE, sep = ";", quote = "\"")
+      #,"&dateFrom=",dateFrom
+      #,"&dateTo=",dateTo
+      print(url)
+      dfResult <- read.csv(url, header = TRUE, sep = ";", quote = "\"")
+    }
   }
   if (!is.null(source) && !is.na(source)) {
-    if (source == 'samenmeten') {  # source == samenmeten api 
+    if (source == 'samenmeten') {  # source == samenmeten api
       # /NBI_TN012/12-pm25
+      splitTmp<-strsplit(ops,split=':')[[1]]
+      ops<-splitTmp[1]
+
       url <- paste("https://samenmeten.openiod.org/api/v1/thing/"
                    ,sensorId,"/"
                    ,datastream
@@ -141,9 +149,18 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
       dfResult$sensorId<-as.factor(dfResult$sensorId)
       dfResult$sensorType<-as.factor(dfResult$sensorType)
       dfResult$dateObserved<-as.factor(dfResult$dateObserved)
+
+      if (length(dfResult)>0) {
+        if (length(splitTmp)>1) {
+          dfResult$sensorType<-splitTmp[2]
+        } else {
+          dfResult$sensorType<-dfResult$datastream
+        }
+      }
+
     }
   }
-  
+
   if (ops=='pm1,pm25,pm10') {
     dfResultMax <- subset(dfResult, dfResult$sensorValue >= pmTop)
     if (as.numeric(nrow(dfResultMax)>=1)) {
@@ -158,25 +175,34 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
     if (is.null(aggregateInd)) {
       print("test aggrgateInd")
     }
-    if (is.null(aggregateInd)) aggrTmp <- TRUE
+    if (is.null(aggregateInd)) aggrTmp <- FALSE
     if (!is.null(aggregateInd)) {
       if (aggregateInd!="N")  aggrTmp <- TRUE
     }
     if (aggrTmp == TRUE) {
-      if (!is.null(aggregateInd) && aggregateInd == 'D') {
-        print("aggregate dfResult per day")
-        dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%d")
-        dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
-        dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
+      if (!is.null(aggregateInd)) {
+        if (aggregateInd == 'D') {
+          print("aggregate dfResult per day")
+          dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%d")
+          dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
+          dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
+        } else {
+          print("aggregate dfResult per minute")
+          dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M")
+          dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
+          dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
+        }
       } else {
-        print("aggregate dfResult")
-        dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M")
-        dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
-        dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
+        print("aggregate dfResult none")
+        dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
       }
     } else {
+      print("aggrgate deResult none plus keeps")
       dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
+      keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+      dfResult <- dfResult[keeps]
     }
+    
     if (!is.null(dfResult$sensorType[1]) && dfResult$sensorType[1]=='bme680_gasResistance') {
       #dfTmpGas<-fiwareGetSensorSelectRecords(NULL,'aprisensor_in','/bme680','sensorId','SCRP00000000504b9dd5','gasResistance:bme680_gasResistance')
       dfResult$sensorValue<-(1000000 - dfResult$sensorValue)/1000
@@ -206,7 +232,3 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
   if (is.null(dfIn)) return(cacheFileNew)
   else return(rbind(dfIn,cacheFileNew) )
 }
-
-
-
-
