@@ -26,7 +26,7 @@ plotPath<-paste0(scriptPath,'plot/')
 ##install.packages("magick")
 ##install.packages("RJSONIO")
 ##install.packages("ggpubr")
-#library(ggpubr)
+library(ggpubr)
 #library(RJSONIO)
 
 #install.packages("tidyverse") # voor o.a. ggplot2
@@ -90,7 +90,7 @@ for (i in 1:nrow(sensorIds)) {
       } else {
         observableProperties<-paste(observableProperties,reportSensorTypes$sensorType[j],sep=',')
       }
-      #  } 
+      #  }
     }
     if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='dag') {
       aggregateInd<-'D'
@@ -122,7 +122,7 @@ for (i in 1:nrow(sensorIds)) {
           ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
       )
     }
-    
+
     #    calib<-FALSE
     if (is.null(sensorIds$calibrateFaseOne[i])==FALSE && is.na(sensorIds$calibrateFaseOne[i])==FALSE) {
       if (sensorIds$calibrateFaseOne[i]=="TRUE") {
@@ -155,7 +155,7 @@ for (i in 1:nrow(sensorIds)) {
         # } else {
         #   print('$$$$$$$$$$$$$$$$')
         #   dfTmpMlr1<-dfTemperature %>% left_join(dfRHum, by = c("date" = "date"))
-        # } 
+        # }
         dfTmpOne<-NULL
         str(dfTmpMlr1)
       }
@@ -166,12 +166,12 @@ for (i in 1:nrow(sensorIds)) {
           dfTmpMlr2<-dfTmpOne %>% left_join(dfTmpMlr1, by = c("date" = "date"))
           if (dfTmpMlr2$sensorType[1]=='pm25' || dfTmpMlr2$sensorType[1]=='pm25_pm25') {
             print('Calculate MLR for PM2.5')
-            
+
             #dfTmpMlr2$sensorValue1<-dfTmpMlr2$sensorValue
             dfTmpMlr2<-dfTmpMlr2 %>% mutate(sensorValue = ifelse(sensorValue>=5,
                                                                  14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature)
                                                                  , sensorValue))
-            
+
             #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
             #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
             #              ,dfTmpMlr2$sensorValue)
@@ -186,7 +186,7 @@ for (i in 1:nrow(sensorIds)) {
         dfTmpMlr1<-NULL
       }
     }
-    
+
     #    if (calib==FALSE) {
     if (is.null(dfTmpOne)==FALSE) {
       dfTmpStack<-dfTmpOne
@@ -202,7 +202,7 @@ for (i in 1:nrow(sensorIds)) {
       #        dfPm25Treshold$sensorValue<-25  # WHO 24 hours mean
       #        dfTmpStack<-rbind(dfTmpStack,dfPm25Treshold)
       #      }
-      #    } 
+      #    }
       dfTmp<-rbind(dfTmp,dfTmpStack)
     }
   }
@@ -218,7 +218,7 @@ keeps <- c("date", "sensorValue","sensorType","sensorId")
 total <- dfTmp[keeps]
 total$tmp2 = as.character(total$sensorId);
 total$foiLocation=factor(substr(total$tmp2,regexpr('S.*$',total$tmp2),50));
-total$type = c(0, cumsum(diff(total$date) > 99999600))  # tijdsduur in seconden als minumum waarde voor onderbrekingen van grafieklijn 
+total$type = c(0, cumsum(diff(total$date) > 99999600))  # tijdsduur in seconden als minumum waarde voor onderbrekingen van grafieklijn
 total$sensorType = factor(total$sensorType, levels=names(sensorTypes))
 print(paste('y-limit=',reportYLim))
 if (is.null(reportYLim)) {
@@ -294,8 +294,8 @@ if(is.null(reportConfig$correlPlots)==FALSE) {
           theme_bw()+
           theme(text = element_text(size = rel(1.8))
                 , element_line(colour = 'green', size = 0.1)
-                #, plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1), 
-                , plot.title = element_text(face="bold",size = rel(1.8), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1), 
+                #, plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1),
+                , plot.title = element_text(face="bold",size = rel(1.8), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1),
                 , plot.subtitle=element_text(size = rel(2.2), hjust =0,margin=margin(3,0,8,0)) # 0.5) #,face="bold")
                 #, plot.caption=element_text(size = rel(1.5),hjust=0,color = "black", face="italic")
                 , plot.caption=element_text(size = rel(1.1),hjust=0,color = "black", face="italic")
@@ -346,4 +346,3 @@ if(is.null(reportConfig$correlPlots)==FALSE) {
     }
   }
 } # end of correlation plot loop
-
