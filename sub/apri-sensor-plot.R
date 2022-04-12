@@ -25,11 +25,11 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   }
   #print(dateBreaks)
   #print(dateLabels)
-  
+
   gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver()) +
     theme(text = element_text(size = rel(2.0))
           , element_line(colour = 'green', size = 0.2)
-          , plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1), 
+          , plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1),
           , plot.subtitle=element_text(size = rel(2.2), hjust =0,margin=margin(3,0,8,0)) # 0.5) #,face="bold")
           , plot.caption=element_text(size = rel(1.5),hjust=0,color = "black", face="italic")
           #        , plot.caption.position =  "plot"
@@ -77,7 +77,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
         annotate("text", x = statsPosX+statsXResolution*28, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0)
     }
   }
-  
+
   return (gTotal +
             #    scale_colour_manual(values = c(
             #    "red"
@@ -103,15 +103,14 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
 
 apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL,width=3.8,height=2.28,dpi="print",units='in',subFolder='') {
   sprintf("%s is best", "1")
-  filePath<-plotPath
   if (!is.null(fileSuffix)) fileSuffix<-paste0('-',fileSuffix)
   if (!is.null(fileDate)) fileDate<-paste0('-',fileDate)
   fileName <- paste('aprisensor','_',fileLabel,fileSuffix,'.png',sep='')
-  
-  ggsave(fileName, path=filePath, width=width, height=height, plot = apriSensorPlot,units=units)
-  #ggsave(fileName, path=filePath, width=3.8, height=height, plot = apriSensorPlot,dpi=dpi,units=units)
-  
-  plotImg <- image_read(paste(filePath,'/',fileName,sep=''))
+
+  ggsave(fileName, path=plotPath, width=width, height=height, plot = apriSensorPlot,units=units)
+  #ggsave(fileName, path=plotPath, width=3.8, height=height, plot = apriSensorPlot,dpi=dpi,units=units)
+
+  plotImg <- image_read(paste(plotPath,'/',fileName,sep=''))
   logo <- logo %>%
     image_annotate("Powered By FIWARE", color = "black", size = 30,
                    location = "+16-3", gravity = "southeast")
@@ -121,6 +120,5 @@ apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL
   }
   print(plotPath)
   print(fileName)
-  image_write(final_plot, paste0(plotPath,fileName))
+  image_write(final_plot, paste0(plotPath,'/',fileName))
 }
-
