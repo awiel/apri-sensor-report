@@ -11,7 +11,7 @@ if (length(args)==0) {
   reportId<-defaultReport
 } else reportId<-args[1]
 
-
+# defaults:
 #scriptPath='/data/Alfresco/opt/R/apri-sensor-report/'
 scriptPath='./'
 subPath=paste0(scriptPath,'sub/')
@@ -20,6 +20,9 @@ configPath=paste0(scriptPath,'config/')
 imagePath<-paste0(scriptPath,'image/')
 cachePath<-paste0(scriptPath,'tmp/cache/')
 plotPath<-paste0(scriptPath,'plot/')
+
+source(paste0(configPath,"apri-sensor-config.R"))
+
 
 ###
 #library(grid)

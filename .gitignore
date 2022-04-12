@@ -42,7 +42,7 @@ vignettes/*.pdf
 /report/*.json
 
 # config files
-/config/*.json
+/config/*
 
 # report cache-files
 /tmp/cache/*
