@@ -100,11 +100,8 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
   }
   paramDate<-paste("&dateFrom=",dateFrom,"&dateTo=",dateTo,sep='')
 
-  if (is.null(source) || is.na(source)) {
-    # source == defaults to fiware
-    source<-'fiware'
-    if (fiwareService == '' || fiwareServicePath=='/knmi' || fiwareServicePath=='/tsi3007' |
-      substr(fiwareService,1,6)=='orion-' || substr(fiwareService,1,1)=='#') {
+  if (!is.null(fiwareService) && !is.null(fiwareServicePath)) {
+    if (fiwareService == '' || fiwareServicePath=='/knmi' || fiwareServicePath=='/tsi3007' || substr(fiwareService,1,6)=='orion-' | substr(fiwareService,1,1)=='#') {
       dbSuffix <-''
     } else {
       if (dateFrom<"2021-05-05T21:12") {
@@ -112,13 +109,17 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
       } else {
         dbSuffix<-paste0('_',substr(dateTo,1,4),substr(dateTo,6,7))
         print(dbSuffix)
+        #dbSuffix <-'_202111'
       }
     }
-    if (substr(fiwareService,1,1)=='#') {
-      fiwareService<-substr(fiwareService,2,999)
-    }
-    if (is.null(source) || (!is.null(source) && source=='fiware')) {
-      url <- paste("https://aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/"
+  }
+
+  if (substr(fiwareService,1,1)=='#') {
+    fiwareService<-substr(fiwareService,2,999)
+  }
+
+  if (is.null(source) || (!is.null(source) && source=='fiware')) {
+    url <- paste("https://aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/"
                  ,"?fiwareService=",fiwareService,dbSuffix
                  ,"&fiwareServicePath=",fiwareServicePath
                  ,"&key=",key
@@ -126,12 +127,12 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
                  ,"&foiOps=",foi,",",ops
                  , paramDate
                  ,sep='')
-      #,"&dateFrom=",dateFrom
-      #,"&dateTo=",dateTo
-      print(url)
-      dfResult <- read.csv(url, header = TRUE, sep = ";", quote = "\"")
-    }
+    #,"&dateFrom=",dateFrom
+    #,"&dateTo=",dateTo
+    print(url)
+    dfResult <- read.csv(url, header = TRUE, sep = ";", quote = "\"")
   }
+
   if (!is.null(source) && !is.na(source)) {
     if (source == 'samenmeten') {  # source == samenmeten api
       # /NBI_TN012/12-pm25
@@ -157,7 +158,6 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
           dfResult$sensorType<-dfResult$datastream
         }
       }
-
     }
   }
 
@@ -202,7 +202,7 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
       keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
       dfResult <- dfResult[keeps]
     }
-    
+
     if (!is.null(dfResult$sensorType[1]) && dfResult$sensorType[1]=='bme680_gasResistance') {
       #dfTmpGas<-fiwareGetSensorSelectRecords(NULL,'aprisensor_in','/bme680','sensorId','SCRP00000000504b9dd5','gasResistance:bme680_gasResistance')
       dfResult$sensorValue<-(1000000 - dfResult$sensorValue)/1000
