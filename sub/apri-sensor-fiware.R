@@ -161,6 +161,11 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
     }
   }
 
+  dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
+  keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+  dfResult <- dfResult[keeps]
+
+
   if (ops=='pm1,pm25,pm10') {
     dfResultMax <- subset(dfResult, dfResult$sensorValue >= pmTop)
     if (as.numeric(nrow(dfResultMax)>=1)) {
@@ -169,45 +174,7 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
       dfResult<-rbind(dfResult1,dfResultMax)
     }
   }
-  if (nrow(dfResult)>0) {
-    aggrTmp<-FALSE
-    print(aggregateInd)
-    if (is.null(aggregateInd)) {
-      print("test aggrgateInd")
-    }
-    if (is.null(aggregateInd)) aggrTmp <- FALSE
-    if (!is.null(aggregateInd)) {
-      if (aggregateInd!="N")  aggrTmp <- TRUE
-    }
-    if (aggrTmp == TRUE) {
-      if (!is.null(aggregateInd)) {
-        if (aggregateInd == 'D') {
-          print("aggregate dfResult per day")
-          dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%d")
-          dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
-          dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
-        } else {
-          print("aggregate dfResult per minute")
-          dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M")
-          dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
-          dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
-        }
-      } else {
-        print("aggregate dfResult none")
-        dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
-      }
-    } else {
-      print("aggrgate deResult none plus keeps")
-      dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
-      keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
-      dfResult <- dfResult[keeps]
-    }
 
-    if (!is.null(dfResult$sensorType[1]) && dfResult$sensorType[1]=='bme680_gasResistance') {
-      #dfTmpGas<-fiwareGetSensorSelectRecords(NULL,'aprisensor_in','/bme680','sensorId','SCRP00000000504b9dd5','gasResistance:bme680_gasResistance')
-      dfResult$sensorValue<-(1000000 - dfResult$sensorValue)/1000
-    }
-  }
   if (useCache==FALSE){
     cacheFileNew <- dfResult
   }
@@ -229,6 +196,52 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
       print("Cache saved to file")
     }
   }
-  if (is.null(dfIn)) return(cacheFileNew)
-  else return(rbind(dfIn,cacheFileNew) )
+
+#### aggregate ? (cache is not aggregated!!)
+  dfResult<-cacheFileNew
+  if (length(dfResult)>0 && nrow(dfResult)>0) {
+    aggrTmp<-FALSE
+    print(aggregateInd)
+    if (is.null(aggregateInd)) {
+      print("test aggregateInd")
+    }
+    if (is.null(aggregateInd)) aggrTmp <- FALSE
+    if (!is.null(aggregateInd)) {
+      if (aggregateInd!="N")  aggrTmp <- TRUE
+    }
+    if (aggrTmp == TRUE) {
+      if (!is.null(aggregateInd)) {
+        if (aggregateInd == 'D') {
+          print("aggregate dfResult per day")
+          dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%d")
+          dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
+          dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
+        } else {
+          print("aggregate dfResult per minute")
+          dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M")
+          dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
+          dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
+        }
+      } else {
+        print("aggregate dfResult none")
+        #dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
+        #keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+        #dfResult <- dfResult[keeps]
+      }
+    } else {
+      print("aggregate dfResult none 2")
+      #print("aggregate dfResult none plus keeps")
+      #dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
+      #keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+      #dfResult <- dfResult[keeps]
+    }
+
+    if (!is.null(dfResult$sensorType[1]) && dfResult$sensorType[1]=='bme680_gasResistance') {
+      #dfTmpGas<-fiwareGetSensorSelectRecords(NULL,'aprisensor_in','/bme680','sensorId','SCRP00000000504b9dd5','gasResistance:bme680_gasResistance')
+      dfResult$sensorValue<-(1000000 - dfResult$sensorValue)/1000
+    }
+  }
+
+  if (is.null(dfIn)) return(dfResult)
+  else return(rbind(dfIn,dfResult) )
 }

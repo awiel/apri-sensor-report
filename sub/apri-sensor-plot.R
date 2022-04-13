@@ -1,14 +1,23 @@
+
 library(scales)
 
-apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,treshold=NULL,tresholdLabel=NULL,dateBreaks="1 hour",dateLabels="%H",aggregateTxt='gemiddeld per minuut') {
+apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
+    treshold=NULL,tresholdLabel=NULL,
+    dateBreaks="1 hour",dateLabels="%H",aggregateTxt='gemiddeld per minuut',
+    yzoom=NULL) {
   plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
   captionText<-paste0('Datum: ',format(plotDateTime,"%d-%m-%Y %H:%M"))
-  statsPosX<-min(dfTotal$date) #+60*60
-  statsPosXMax<-max(dfTotal$date) #+60*60
+  statsPosX<-min(dfTotal$date, na.rm = TRUE) #+60*60
+  statsPosXMax<-max(dfTotal$date, na.rm = TRUE) #+60*60
   statsXResolution<-(statsPosXMax-statsPosX)/32
-  statsMin<-round(min(dfTotal$sensorValue),digits=1)
-  statsMean<-round(mean(dfTotal$sensorValue),digits=1)
-  statsMax<-round(max(dfTotal$sensorValue),digits=1)
+  statsMin<-round(min(dfTotal$sensorValue, na.rm = TRUE),digits=1)
+  statsMean<-round(mean(dfTotal$sensorValue, na.rm = TRUE),digits=1)
+  statsMax<-round(max(dfTotal$sensorValue, na.rm = TRUE),digits=1)
+  if(is.null(treshold)!=TRUE) {
+    if(treshold>statsMax) {
+      ylim<-c(0,treshold*1.1)
+    }
+  }
   statsResolution<-(statsMax-statsMin)/16
   gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation)
                   ,col = brewer.pal(n = 8, name = "RdYlBu")) +
@@ -16,17 +25,35 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   #    stat_summary(fun.y = mean, geom="line", size=0.5,color='grey') +
   #    stat_smooth(method="loess",span=0.2,size=0.1,se = FALSE,show.legend=FALSE) + #, linetype = "dashed") +
   #scale_y_continuous( sec.axis=sec_axis(~.*1),limits = ylim) + #c(0,max(dfTotal$sensorValue))) +
+  if(!is.null(yzoom)) {
+    print("yzoom is not NULL")
+    gTotal<-gTotal+scale_y_continuous( limits = yzoom )
+  }
   if(is.null(ylim)) {
     print("ylim is NULL")
     gTotal<-gTotal+scale_y_continuous( sec.axis=sec_axis(~.*1))
   } else {
     print("ylim is not NULL")
-    gTotal<-gTotal+scale_y_continuous( sec.axis=sec_axis(~.*1),limits = ylim)
+    if (statsMax>50000) {
+      #gTotal<-gTotal+scale_y_continuous( sec.axis=sec_axis(~.*1),limits = ylim,labels = label_number(suffix = " K", scale = 1e-3))
+      #gTotal<-gTotal+scale_y_continuous( sec.axis=sec_axis(~.*1,breaks = seq(statsMin, statsMax, round((statsMax-statsMin)/8/10)*10),labels = label_number(suffix = " K", scale = 1e-3)),limits = ylim,labels = label_number(suffix = " K", scale = 1e-3))
+      gTotal<-gTotal+scale_y_continuous(n.breaks = 8, sec.axis=sec_axis(~.*1,labels = label_number(suffix = " K", scale = 1e-3)),limits = ylim,labels = label_number(suffix = " K", scale = 1e-3))
+      #gTotal<-gTotal+scale_y_continuous( sec.axis=sec_axis(~.*1),limits = ylim,sec.labels = label_number(suffix = " K", scale = 1e-3),labels = label_number(suffix = " K", scale = 1e-3))
+    } else {
+      gTotal<-gTotal+scale_y_continuous( sec.axis=sec_axis(~.*1),limits = ylim)
+    }
   }
   #print(dateBreaks)
   #print(dateLabels)
-
-  gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver()) +
+  #gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver()) +
+  print( statsPosXMax-statsPosX)
+  if (statsPosXMax-statsPosX<12) {
+    gTotal<-gTotal+  scale_x_datetime()
+  } else {
+    gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver())
+  }
+  gTotal<-gTotal+
+#  gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver()) +
     theme(text = element_text(size = rel(2.0))
           , element_line(colour = 'green', size = 0.2)
           , plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1),
@@ -68,14 +95,15 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   }
 
   if(is.null(treshold)!=TRUE) {
-    print('geom_line treshold')
-    if(treshold<statsMax) {
+    #print('geom_line treshold')
+    #if(treshold<statsMax) {
       gTotal<-gTotal +
         geom_hline(yintercept = treshold,size=0.10,color='darkgreen') +
         annotate("text", x = statsPosX, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
         annotate("text", x = statsPosX+statsXResolution*14, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
         annotate("text", x = statsPosX+statsXResolution*28, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0)
-    }
+    #}
+
   }
 
   return (gTotal +
@@ -102,7 +130,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
 }
 
 apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL,width=3.8,height=2.28,dpi="print",units='in',subFolder='') {
-  sprintf("%s is best", "1")
+  #sprintf("%s is best", "1")
   if (!is.null(fileSuffix)) fileSuffix<-paste0('-',fileSuffix)
   if (!is.null(fileDate)) fileDate<-paste0('-',fileDate)
   fileName <- paste('aprisensor','_',fileLabel,fileSuffix,'.png',sep='')
@@ -120,5 +148,8 @@ apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL
   }
   print(plotPath)
   print(fileName)
-  image_write(final_plot, paste0(plotPath,'/',fileName))
+#  image_write(final_plot, paste0(plotPath,'/',fileName))
+  image_write(final_plot, paste0(plotPath,'/',subFolder,fileName))
+  print(paste0(plotPath,'/',subFolder,fileName))
+
 }

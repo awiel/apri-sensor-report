@@ -98,7 +98,11 @@ for (i in 1:nrow(sensorIds)) {
     if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='dag') {
       aggregateInd<-'D'
     } else {
-      aggregateInd<-NULL
+      if (meanMinutes==0) {
+        aggregateInd<-NULL
+      } else {
+        aggregateInd<-'M' #minute
+      }
     }
     if (periodType == "actual") {
       t<-strsplit(observableProperties, ":")#[[1,1]]
@@ -106,6 +110,7 @@ for (i in 1:nrow(sensorIds)) {
           ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
           ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
           ,cachePath=cachePath
+          ,aggregateInd=aggregateInd,
           ,source=sensorIds$source[i]
           ,sensorId=sensorIds$sensorId[i]
           ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
@@ -119,6 +124,7 @@ for (i in 1:nrow(sensorIds)) {
           ,dateTo=reportConfig$dateTo
           ,aggregateInd=aggregateInd
           ,cachePath=cachePath
+          ,aggregateInd=aggregateInd,
           ,source=sensorIds$source[i]
           ,sensorId=sensorIds$sensorId[i]
           ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
