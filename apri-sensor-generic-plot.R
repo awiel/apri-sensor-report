@@ -122,7 +122,6 @@ for (i in 1:nrow(sensorIds)) {
           ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
           ,dateFrom=reportConfig$dateFrom
           ,dateTo=reportConfig$dateTo
-          ,aggregateInd=aggregateInd
           ,cachePath=cachePath
           ,aggregateInd=aggregateInd,
           ,source=sensorIds$source[i]
@@ -217,11 +216,24 @@ for (i in 1:nrow(sensorIds)) {
   }
 }
 
-dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+#dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+#dfTmp$minute <- sapply(format(dfTmp$date, "%M"), as.numeric)
+#dfTmp$hour <- sapply(format(dfTmp$date, "%H"), as.numeric)
+#dfTmp$foi <- dfTmp$sensorId
+#dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
+
+dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M:%S")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
 dfTmp$minute <- sapply(format(dfTmp$date, "%M"), as.numeric)
 dfTmp$hour <- sapply(format(dfTmp$date, "%H"), as.numeric)
 dfTmp$foi <- dfTmp$sensorId
-dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
+if (meanMinutes==0) {
+  print('No mean calculation')
+#  #dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
+} else {
+  print('xx mean calculation')
+  dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
+}
+
 
 keeps <- c("date", "sensorValue","sensorType","sensorId")
 total <- dfTmp[keeps]

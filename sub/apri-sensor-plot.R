@@ -21,7 +21,8 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   statsResolution<-(statsMax-statsMin)/16
   gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation)
                   ,col = brewer.pal(n = 8, name = "RdYlBu")) +
-    theme_bw()
+    theme_bw();
+
   #    stat_summary(fun.y = mean, geom="line", size=0.5,color='grey') +
   #    stat_smooth(method="loess",span=0.2,size=0.1,se = FALSE,show.legend=FALSE) + #, linetype = "dashed") +
   #scale_y_continuous( sec.axis=sec_axis(~.*1),limits = ylim) + #c(0,max(dfTotal$sensorValue))) +
@@ -43,6 +44,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
       gTotal<-gTotal+scale_y_continuous( sec.axis=sec_axis(~.*1),limits = ylim)
     }
   }
+
   #print(dateBreaks)
   #print(dateLabels)
   #gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver()) +
