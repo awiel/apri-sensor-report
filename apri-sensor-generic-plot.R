@@ -267,6 +267,9 @@ if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='dag') {
   dateLabels<-"%m"
   aggregateTxt<-"gemiddeld per dag"
 }
+if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==0) {
+  aggregateTxt<-"gemiddeld per 20 seconden"
+}
 
 gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle,ylim,treshold=reportTreshold,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels,aggregateTxt=aggregateTxt)
 
