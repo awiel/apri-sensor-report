@@ -215,6 +215,23 @@ for (i in 1:nrow(sensorIds)) {
             keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
             dfTmpMlr2 <- dfTmpMlr2[keeps]
           }
+          if (dfTmpMlr2$sensorType[1]=='pm10' || dfTmpMlr2$sensorType[1]=='pm10_pm10') {
+            print('Calculate MLR for PM10')
+
+            #dfTmpMlr2$sensorValue1<-dfTmpMlr2$sensorValue
+            dfTmpMlr2<-dfTmpMlr2 %>% mutate(sensorValue = ifelse(sensorValue>=5,
+              14.7 + (0.3151*sensorValue) + (-0.0948*rHum) + (0.2445*temperature)
+              , sensorValue))
+
+          #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
+          #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
+          #              ,dfTmpMlr2$sensorValue)
+            dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
+          str(dfTmpMlr2)
+            keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+            dfTmpMlr2 <- dfTmpMlr2[keeps]
+          }
+
           str(dfTmpMlr2)
           dfTmpOne<-dfTmpMlr2
         }
