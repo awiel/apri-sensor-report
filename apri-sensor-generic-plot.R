@@ -242,11 +242,38 @@ total$foiLocation=factor(substr(total$tmp2,regexpr('S.*$',total$tmp2),50));
 total$type = c(0, cumsum(diff(total$date) > 99999600))  # tijdsduur in seconden als minumum waarde voor onderbrekingen van grafieklijn
 total$sensorType = factor(total$sensorType, levels=names(sensorTypes))
 print(paste('y-limit=',reportYLim))
+yZoom<-NULL
 if (is.null(reportYLim)) {
   ylim <- NULL
 } else {
   if(reportYLim=="ZERO"){
     ylim <- c(0, max(total$sensorValue))
+  }
+  if(reportYLim=="ZERO60"){
+    ylim <- c(0, 60)
+  }
+  if(reportYLim=="ZERO100"){
+    ylim <- c(0, 100)
+    #yZoom <- c(0, 100)
+  }
+  if(reportYLim=="ZERO150"){
+    ylim <- c(0, 150)
+    #yZoom <- c(0, 100)
+  }
+  if(reportYLim=="ZERO200"){
+    ylim <- c(0, 200)
+  }
+  if(reportYLim=="ZERO300"){
+    ylim <- c(0, 300)
+  }
+  if(reportYLim=="ZERO500"){
+    ylim <- c(0, 500)
+  }
+  if(reportYLim=="ZERO800"){
+    ylim <- c(0, 800)
+  }
+  if(reportYLim=="ZERO1500"){
+    ylim <- c(0, 1500)
   }
   if(reportYLim=="MINMAX"){
     ylim <- c(min(total$sensorValue), max(total$sensorValue))
@@ -263,9 +290,14 @@ dateBreaks<-"1 hour"
 dateLabels<-"%H"
 aggregateTxt<-"gemiddeld per minuut"
 if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='dag') {
-  dateBreaks<-"1 month"
-  dateLabels<-"%m"
+  dateBreaks<-"2 days"
+  dateLabels<-"%d"
   aggregateTxt<-"gemiddeld per dag"
+}
+if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='10 seconden') {
+  #dateBreaks<-"1 month"
+  #dateLabels<-"%m"
+  aggregateTxt<-"gemiddeld per 10 seconden"
 }
 if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==0) {
   aggregateTxt<-"gemiddeld per 20 seconden"
