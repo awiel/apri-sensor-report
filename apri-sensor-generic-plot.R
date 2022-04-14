@@ -1,5 +1,8 @@
 #!/usr/bin/env Rscript
 options(width = 100)
+
+library('dplyr')
+
 args = commandArgs(trailingOnly=TRUE)
 # test if there is at least one argument: if not, return an error
 #defaultReport<-'0D28-pm25'
