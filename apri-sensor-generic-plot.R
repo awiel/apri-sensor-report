@@ -2,7 +2,7 @@
 options(width = 100)
 args = commandArgs(trailingOnly=TRUE)
 # test if there is at least one argument: if not, return an error
-defaultReport<-'0D28-pm25'
+#defaultReport<-'0D28-pm25'
 if (length(args)==0 && is.null(defaultReport)) {
   stop(" Commandline parameter voor reportID is missing, process stopped.", call.=FALSE)
 }
@@ -132,6 +132,30 @@ for (i in 1:nrow(sensorIds)) {
     }
 
     #    calib<-FALSE
+    if (is.null(sensorIds$pmCoarseBase[i])==FALSE && is.na(sensorIds$pmCoarseBase[i])==FALSE) {
+      if (sensorIds$pmCoarseBase[i]=="TRUE") {
+        dfTmpOne$date<-strftime(dfTmpOne$date, format = "%Y%m%d%H%M" )
+        dfTmpOne$coarseBaseValue<-dfTmpOne$sensorValue
+        keeps <- c("date","coarseBaseValue")
+        dfTmpCoarseBase<-dfTmpOne[keeps]
+        dfTmpOne<-NULL
+      }
+    }
+    if (is.null(sensorIds$pmCoarse[i])==FALSE && is.na(sensorIds$pmCoarse[i])==FALSE) {
+      if (sensorIds$pmCoarse[i]=="TRUE") {
+        dfTmpOne$date<-strftime(dfTmpOne$date, format = "%Y%m%d%H%M" )
+        keeps <- c("sensorId","sensorType","date","sensorValue","dateObserved")
+        dfTmpCoarse<-dfTmpOne[keeps]
+        print('test dfMerged')
+        print(str(dfTmpCoarseBase))
+        print(str(dfTmpCoarse))
+        dfMerged<-merge(dfTmpCoarse,dfTmpCoarseBase, by= 'date', sort = TRUE)
+        dfMerged$sensorValue<-dfMerged$sensorValue-dfMerged$coarseBaseValue
+        str(dfMerged)
+        dfTmpOne<-dfMerged[keeps]
+      }
+    }
+
     if (is.null(sensorIds$calibrateFaseOne[i])==FALSE && is.na(sensorIds$calibrateFaseOne[i])==FALSE) {
       if (sensorIds$calibrateFaseOne[i]=="TRUE") {
         dfTmpCal1<-dfTmpOne %>% left_join(dfCalibrations, by = c("sensorType" = "sensorType","sensorId"="sensorId"))
@@ -303,7 +327,8 @@ if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==0) {
   aggregateTxt<-"gemiddeld per 20 seconden"
 }
 
-gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle,ylim,treshold=reportTreshold,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels,aggregateTxt=aggregateTxt)
+gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle,ylim,treshold=reportTreshold,
+  tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels,aggregateTxt=aggregateTxt,yzoom=yZoom)
 
 
 # make imagefile
