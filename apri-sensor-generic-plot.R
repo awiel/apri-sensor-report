@@ -352,10 +352,23 @@ gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSub
 
 
 # make imagefile
-if (!is.null(reportHeight)&!is.null(reportWidth)) apriSensorImage(gTotal,reportFileLabel,height=reportHeight,width=reportWidth)
-if (!is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel,height=reportHeight)
-if (!is.null(reportWidth)) apriSensorImage(gTotal,reportFileLabel,width=reportWidth)
-if (is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel)
+if (!is.null(reportHeight)) {
+  if (!is.null(reportWidth)) {
+    apriSensorImage(gTotal,reportFileLabel,height=reportHeight,width=reportWidth)
+  } else {
+    apriSensorImage(gTotal,reportFileLabel,height=reportHeight)
+  }
+} else {
+  if (!is.null(reportWidth)) {
+    apriSensorImage(gTotal,reportFileLabel,width=reportWidth)
+  } else {
+    apriSensorImage(gTotal,reportFileLabel)
+  }
+}
+#if (!is.null(reportHeight)&!is.null(reportWidth)) apriSensorImage(gTotal,reportFileLabel,height=reportHeight,width=reportWidth)
+#if (!is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel,height=reportHeight)
+#if (!is.null(reportWidth)) apriSensorImage(gTotal,reportFileLabel,width=reportWidth)
+#if (is.null(reportHeight)) apriSensorImage(gTotal,reportFileLabel)
 print(paste0("Report saved as ",reportFileLabel,'.png'))
 
 if(is.null(reportConfig$correlPlots)==FALSE) {
