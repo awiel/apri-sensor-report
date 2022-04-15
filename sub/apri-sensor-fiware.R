@@ -56,7 +56,7 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
   dateFromOldestInCache<-Sys.time()-(24*60*60-1) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
   if (is.null(dateFrom)) {
     useCache<-TRUE
-    dateFrom<-format(Sys.time()-(24*60*60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
+    dateFrom<-format(Sys.time()-(24*60*60-1) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
                      ,"%Y-%m-%dT%H:%M:%S")
     dateTo<-format(Sys.time() - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
                    ,"%Y-%m-%dT%H:%M:%S")
