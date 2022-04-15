@@ -53,7 +53,7 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
   fileName<-paste(paste(foi,fiwareService,gsub("/", "_", fiwareServicePath),ops,key,opPerRow,sep='#'),'.rds',sep='')
   fileName<-gsub(":","_",fileName)
 
-  dateFromOldestInCache<-Sys.time()-(24*60*60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
+  dateFromOldestInCache<-Sys.time()-(24*60*60-1) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
   if (is.null(dateFrom)) {
     useCache<-TRUE
     dateFrom<-format(Sys.time()-(24*60*60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
