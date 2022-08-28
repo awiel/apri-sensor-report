@@ -48,12 +48,32 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   #print(dateBreaks)
   #print(dateLabels)
   #gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver()) +
-  print( statsPosXMax-statsPosX)
-  if (statsPosXMax-statsPosX<12) {
-    gTotal<-gTotal+  scale_x_datetime()
-  } else {
+  dt<-difftime(statsPosXMax,statsPosX,units='hours')
+  print(dt)
+  if (dt<30) {
+    print('breaks <30 hours')
+    dateBreaks<-'1 hours'
     gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver())
+  } else {
+    if (dt<75) {
+      print('breaks <75 hours')
+      dateBreaks<-'2 hours'
+      gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver())
+  #    gTotal<-gTotal+  scale_x_date(breaks = function(x) seq.Date(from = min(x), 
+  #                                               to = max(x), 
+  #                                               by = "3 hours"),
+  #              minor_breaks = function(x) seq.Date(from = min(x), 
+  #                                                  to = max(x), 
+  #                                                  by = "1 hour"))
+    } else {
+      print('breaks else')
+      gTotal<-gTotal+  scale_x_datetime()
+    }
   }
+
+
+
+
   gTotal<-gTotal+
 #  gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver()) +
     theme(text = element_text(size = rel(2.0))

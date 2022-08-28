@@ -45,7 +45,7 @@ saveCacheFile<-function(cachePath,fileName,object) {
 
 getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=NULL,foi=NULL,ops=NULL,opPerRow='true'
                         ,opsc=NULL,dateFrom=NULL,dateTo=NULL,aggregateInd=NULL,cachePath=NULL
-                        ,source=NULL,sensorId=NULL,datastream=NULL,sensorType=NULL) {
+                        ,source=NULL,sensorId=NULL,datastream=NULL,sensorType=NULL,periodSpan=NULL) {
   # eg2. SCNM5CCF7F2F62F3:SCNM5CCF7F2F62F3_a,pm25:pm25_alias,pm10
   # https://aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/?fiwareService=aprisensor_in&fiwareServicePath=/pmsa003&key=sensorId&foiOps=SCNM5CCF7F2F62F3:SCNM5CCF7F2F62F3_a,pm25:pm25_alias
 
@@ -53,11 +53,31 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
   fileName<-paste(paste(foi,fiwareService,gsub("/", "_", fiwareServicePath),ops,key,opPerRow,sep='#'),'.rds',sep='')
   fileName<-gsub(":","_",fileName)
 
-  dateFromOldestInCache<-Sys.time()-(24*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
+  print(periodSpan)
+  print(is.numeric(periodSpan))
+  if (is.null(periodSpan)) {
+    dateFromOldestInCache<-Sys.time()-(24*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
+  } else {
+      if (is.numeric(periodSpan)) {
+        dateFromOldestInCache<-Sys.time()-(periodSpan*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
+      } else {
+        dateFromOldestInCache<-Sys.time()-(24*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
+      }
+  }
   if (is.null(dateFrom)) {
     useCache<-TRUE
-    dateFrom<-format(Sys.time()-(24*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
+    if (is.null(periodSpan)) {
+      dateFrom<-format(Sys.time()-(24*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
                      ,"%Y-%m-%dT%H:%M:%S")
+    } else {
+      if (is.numeric(periodSpan)) {
+        dateFrom<-format(Sys.time()-(periodSpan*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
+                     ,"%Y-%m-%dT%H:%M:%S")
+      } else {
+        dateFrom<-format(Sys.time()-(24*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
+                     ,"%Y-%m-%dT%H:%M:%S")
+      }
+    }
     dateTo<-format(Sys.time() - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
                    ,"%Y-%m-%dT%H:%M:%S")
     print("Standaard periode:")
@@ -101,7 +121,9 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
   paramDate<-paste("&dateFrom=",dateFrom,"&dateTo=",dateTo,sep='')
 
   if (!is.null(fiwareService) && !is.null(fiwareServicePath)) {
-    if (fiwareService == '' || fiwareServicePath=='/knmi' || fiwareServicePath=='/tsi3007' || substr(fiwareService,1,6)=='orion-' | substr(fiwareService,1,1)=='#') {
+    if (fiwareService == '' || fiwareServicePath=='/knmi' || fiwareServicePath=='/tsi3007' || 
+           substr(fiwareService,1,6)=='orion-' || substr(fiwareService,1,1)=='#' ||
+           fiwareService == 'as_v0' || fiwareService == 'luchtmeetnet_v0' || fiwareService == 'luftdaten_v0'   ) {
       dbSuffix <-''
     } else {
       if (dateFrom<"2021-05-05T21:12") {
@@ -131,11 +153,16 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
     #,"&dateTo=",dateTo
     print(url)
     dfResult <- read.csv(url, header = TRUE, sep = ";", quote = "\"")
+    if (key=='station') { # knmi data
+      dfResult$sensorId=dfResult$station
+    }
   }
 
   if (!is.null(source) && !is.na(source)) {
     if (source == 'samenmeten') {  # source == samenmeten api
       # /NBI_TN012/12-pm25
+      print('test')
+      print(ops)
       splitTmp<-strsplit(ops,split=':')[[1]]
       ops<-splitTmp[1]
 

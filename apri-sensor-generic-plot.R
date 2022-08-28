@@ -70,6 +70,7 @@ reportTreshold <- reportConfig$treshold
 reportTresholdLabel <- reportConfig$tresholdLabel
 
 periodType<-reportConfig$periodType
+periodSpan<-reportConfig$periodSpan
 
 #dateFrom<-'2020-11-15T11:00:00'
 #dateTo<-'2020-11-15T13:00:00'
@@ -118,6 +119,7 @@ for (i in 1:nrow(sensorIds)) {
           ,sensorId=sensorIds$sensorId[i]
           ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
           ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
+          ,periodSpan=periodSpan
       )
     } else { # hist
       dfTmpOne<-getFiwareData(dfIn=NULL
@@ -149,7 +151,7 @@ for (i in 1:nrow(sensorIds)) {
         dfTmpOne$date<-strftime(dfTmpOne$date, format = "%Y%m%d%H%M" )
         keeps <- c("sensorId","sensorType","date","sensorValue","dateObserved")
         dfTmpCoarse<-dfTmpOne[keeps]
-        print('test dfMerged')
+        print('test dfMerged pmCoarse ')
         print(str(dfTmpCoarseBase))
         print(str(dfTmpCoarse))
         dfMerged<-merge(dfTmpCoarse,dfTmpCoarseBase, by= 'date', sort = TRUE)
@@ -269,7 +271,10 @@ for (i in 1:nrow(sensorIds)) {
 #dfTmp$foi <- dfTmp$sensorId
 #dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
 
+print('test2-0')
+print("test2")
 dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M:%S")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+print("test3")
 dfTmp$minute <- sapply(format(dfTmp$date, "%M"), as.numeric)
 dfTmp$hour <- sapply(format(dfTmp$date, "%H"), as.numeric)
 dfTmp$foi <- dfTmp$sensorId
