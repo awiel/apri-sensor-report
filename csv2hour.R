@@ -14,3 +14,4 @@ dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean,
 dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
 
 write.csv(dfResult,paste0('hour_',csvFile), row.names = FALSE)
+

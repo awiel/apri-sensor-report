@@ -1,7 +1,12 @@
 #!/usr/bin/env Rscript
 options(width = 100)
 
+#install.packages(c('purrr','tidyselect','tibble','utf8','fansi','cli','pillar','magrittr','lifecycle','glue','generics','R6','rlang','dplyr'))
+#install.packages(c('withr','colorspace','scales','ggplot2'))
+#install.packages('broom','carData','broom','tidyr')
+#install.packages('zoo')
 library('dplyr')
+library('zoo')
 
 args = commandArgs(trailingOnly=TRUE)
 # test if there is at least one argument: if not, return an error
@@ -71,6 +76,7 @@ reportTresholdLabel <- reportConfig$tresholdLabel
 
 periodType<-reportConfig$periodType
 periodSpan<-reportConfig$periodSpan
+if (!is.null(reportConfig$incident) && reportConfig$incident=='T') incident<-T else incident<-F;
 
 #dateFrom<-'2020-11-15T11:00:00'
 #dateTo<-'2020-11-15T13:00:00'
@@ -114,7 +120,7 @@ for (i in 1:nrow(sensorIds)) {
           ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
           ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
           ,cachePath=cachePath
-          ,aggregateInd=aggregateInd,
+          ,aggregateInd=aggregateInd
           ,source=sensorIds$source[i]
           ,sensorId=sensorIds$sensorId[i]
           ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
@@ -128,11 +134,16 @@ for (i in 1:nrow(sensorIds)) {
           ,dateFrom=reportConfig$dateFrom
           ,dateTo=reportConfig$dateTo
           ,cachePath=cachePath
-          ,aggregateInd=aggregateInd,
+          ,aggregateInd=aggregateInd
           ,source=sensorIds$source[i]
           ,sensorId=sensorIds$sensorId[i]
           ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
           ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
+          ,csvFileName=sensorIds$csvFileName[i]
+          ,csvPath=sensorIds$csvPath[i]
+          ,csvType=sensorIds$csvType[i]
+          ,rdaFileName=sensorIds$rdaFileName[i]
+          ,rdaPath=sensorIds$rdaPath[i]
       )
     }
 
@@ -206,9 +217,11 @@ for (i in 1:nrow(sensorIds)) {
             if (dfTmpMlr2$sensorType[1]=="pm25" || dfTmpMlr2$sensorType[1]=="pm25_pm25") {
               print("Calculate MLR for PM2.5")
 
-              #dfTmpMlr2$sensorValue1<-dfTmpMlr2$sensorValue
-              dfTmpMlr2<-dfTmpMlr2 %>% mutate(sensorValue = ifelse(sensorValue>=5,
-                                                                   14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature)
+              dfTmpMlr2$sensorValueTmp<-dfTmpMlr2$sensorValue
+              dfTmpMlr2<-dfTmpMlr2 %>%
+                mutate(sensorValue = 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature) ) %>%
+                mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
+                                                                   sensorValueTmp
                                                                    , sensorValue))
 
               #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
@@ -222,10 +235,17 @@ for (i in 1:nrow(sensorIds)) {
             if (dfTmpMlr2$sensorType[1]=='pm10' || dfTmpMlr2$sensorType[1]=='pm10_pm10') {
               print('Calculate MLR for PM10')
 
-              #dfTmpMlr2$sensorValue1<-dfTmpMlr2$sensorValue
-              dfTmpMlr2<-dfTmpMlr2 %>% mutate(sensorValue = ifelse(sensorValue>=5,
-                14.7 + (0.3151*sensorValue) + (-0.0948*rHum) + (0.2445*temperature)
-                , sensorValue))
+              dfTmpMlr2$sensorValueTmp<-dfTmpMlr2$sensorValue
+              dfTmpMlr2<-dfTmpMlr2 %>%
+                mutate(sensorValue = 14.7 + (0.3151*sensorValue) + (-0.0948*rHum) + (0.2445*temperature) ) %>%
+                mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
+                                            sensorValueTmp
+                                            , sensorValue))
+              
+#              #dfTmpMlr2$sensorValue1<-dfTmpMlr2$sensorValue
+#              dfTmpMlr2<-dfTmpMlr2 %>% mutate(sensorValue = ifelse(sensorValue>=5,
+#                14.7 + (0.3151*sensorValue) + (-0.0948*rHum) + (0.2445*temperature)
+#                , sensorValue))
 
             #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
             #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
@@ -271,26 +291,27 @@ for (i in 1:nrow(sensorIds)) {
 #dfTmp$foi <- dfTmp$sensorId
 #dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
 
-print('test2-0')
-print("test2")
 dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M:%S")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
-print("test3")
 dfTmp$minute <- sapply(format(dfTmp$date, "%M"), as.numeric)
 dfTmp$hour <- sapply(format(dfTmp$date, "%H"), as.numeric)
-dfTmp$foi <- dfTmp$sensorId
-if (meanMinutes==0) {
-  print('No mean calculation')
-#  #dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
+dfTmp$foi <- dfTmp$sensorId 
+if(nrow(dfTmp==0)) {
+  #print('no (new) records retrieved')
 } else {
-  print('xx mean calculation')
-  dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
+  if (meanMinutes==0) {
+    print('No mean calculation')
+    #  #dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
+  } else {
+    print(paste('xx mean calculation',dfTmp$minute,'%%',meanMinutes,' rows:',nrow(dfTmp)))
+    dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
+  }
 }
 
 
 keeps <- c("date", "sensorValue","sensorType","sensorId")
 total <- dfTmp[keeps]
-total$tmp2 = as.character(total$sensorId);
-total$foiLocation=factor(substr(total$tmp2,regexpr('S.*$',total$tmp2),50));
+#total$tmp2 = as.character(total$sensorId);
+total$foiLocation=factor(substr(as.character(total$sensorId),regexpr('S.*$',as.character(total$sensorId)),50));
 total$type = c(0, cumsum(diff(total$date) > 99999600))  # tijdsduur in seconden als minumum waarde voor onderbrekingen van grafieklijn
 total$sensorType = factor(total$sensorType, levels=names(sensorTypes))
 print(paste('y-limit=',reportYLim))
@@ -355,8 +376,11 @@ if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==0) {
   aggregateTxt<-"gemiddeld per 20 seconden"
 }
 
-gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle,ylim,treshold=reportTreshold,
-  tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels,aggregateTxt=aggregateTxt,yzoom=yZoom)
+gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle
+  ,ylim,treshold=reportTreshold
+  ,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels
+  ,aggregateTxt=aggregateTxt,yzoom=yZoom,
+  incident=incident)
 
 
 # make imagefile

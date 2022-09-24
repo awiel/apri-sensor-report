@@ -45,7 +45,10 @@ saveCacheFile<-function(cachePath,fileName,object) {
 
 getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=NULL,foi=NULL,ops=NULL,opPerRow='true'
                         ,opsc=NULL,dateFrom=NULL,dateTo=NULL,aggregateInd=NULL,cachePath=NULL
-                        ,source=NULL,sensorId=NULL,datastream=NULL,sensorType=NULL,periodSpan=NULL) {
+                        ,source=NULL,sensorId=NULL,datastream=NULL,sensorType=NULL,periodSpan=NULL
+                        ,csvPath='./data/csv/',csvFileName=NULL,csvType="2"
+                        ,rdaPath='./data/Rda/',rdaFileName=NULL
+  ) {
   # eg2. SCNM5CCF7F2F62F3:SCNM5CCF7F2F62F3_a,pm25:pm25_alias,pm10
   # https://aprisensor-in.openiod.org/apri-sensor-service/v1/getSelectionData/?fiwareService=aprisensor_in&fiwareServicePath=/pmsa003&key=sensorId&foiOps=SCNM5CCF7F2F62F3:SCNM5CCF7F2F62F3_a,pm25:pm25_alias
 
@@ -136,7 +139,7 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
     }
   }
 
-  if (substr(fiwareService,1,1)=='#') {
+  if (!is.null(fiwareService) && substr(fiwareService,1,1)=='#') {
     fiwareService<-substr(fiwareService,2,999)
   }
 
@@ -158,6 +161,64 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
     }
   }
 
+  if (!is.null(source) && !is.na(source)) {
+    if (source == 'csv') {  # source == csv dataset
+      # /NBI_TN012/12-pm25
+      print('test')
+      print(dateFrom)
+      print(dateTo)
+      
+      print(ops)
+      csvFile<-paste0(csvPath,csvFileName)
+      print(paste('csv: (',getwd(),') ',csvFile))
+      if (csvType=='1') {
+        dfResult<-read.csv(csvFile)
+        if ("sensorType" %in% colnames(dfResult)==F) {
+          dfResult$sensorType<-'pm25'
+          dfResult$sensorValue<-dfResult$pm25mlr
+        } 
+        print(head(dfResult))
+      } else {
+        dfResult<-read.csv2(csvFile)
+      }
+      dfResult<-subset(dfResult,dfResult$dateObserved>=dateFrom)
+      dfResult<-subset(dfResult,dfResult$dateObserved<=dateTo)
+      dfResult$sensorId<-as.factor(dfResult$sensorId)
+      dfResult$sensorType<-as.factor(dfResult$sensorType)
+      dfResult$dateObserved<-as.factor(dfResult$dateObserved)
+    }
+  }
+
+  if (!is.null(source) && !is.na(source)) {
+    if (source == 'rda') {  # source == Rda dataset
+      print('test')
+      print(dateFrom)
+      print(dateTo)
+      
+      print(ops)
+      rdaFile<-paste0(rdaPath,rdaFileName)
+      print(paste('rda: (',getwd(),') ',rdaFile))
+      dfResult<-readRDS(rdaFile)
+      if ("sensorType" %in% colnames(dfResult)==F) {
+        dfResult$sensorType<-'pm25'
+        dfResult$sensorValue<-dfResult$pm25mlr
+      } 
+      tmpDateObservedFrom<-as.POSIXct(dateFrom, format="%Y-%m-%dT%H:%M:%S")
+      tmpDateObservedTo<-as.POSIXct(dateTo, format="%Y-%m-%dT%H:%M:%S")
+      
+      dfResult<-subset(dfResult,dfResult$date>=tmpDateObservedFrom)
+      dfResult<-subset(dfResult,dfResult$date<=tmpDateObservedTo)
+      dfResult$sensorId<-as.factor(dfResult$sensorId)
+      dfResult$sensorType<-as.factor(dfResult$sensorType)
+      # Project Castricum
+      if (sensorId=='SCRP000000009e652147' ||sensorId=='SCRP000000008b6eb7a5' || sensorId=='SCRP00000000c321df78') {
+        dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S")
+      }
+      dfResult$dateObserved<-as.factor(dfResult$dateObserved)
+      print(head(dfResult))
+    }
+  }
+  
   if (!is.null(source) && !is.na(source)) {
     if (source == 'samenmeten') {  # source == samenmeten api
       # /NBI_TN012/12-pm25

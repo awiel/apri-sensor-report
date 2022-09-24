@@ -1,10 +1,12 @@
 
 library(scales)
+library(tidyr)
 
 apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     treshold=NULL,tresholdLabel=NULL,
     dateBreaks="1 hour",dateLabels="%H",aggregateTxt='gemiddeld per minuut',
-    yzoom=NULL) {
+    yzoom=NULL,
+    incident=F) {
   plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
   captionText<-paste0('Datum: ',format(plotDateTime,"%d-%m-%Y %H:%M"))
   statsPosX<-min(dfTotal$date, na.rm = TRUE) #+60*60
@@ -19,6 +21,143 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     }
   }
   statsResolution<-(statsMax-statsMin)/16
+
+  # Incidents signaling
+  if (incident==T) {
+    
+    rcMarge<-0.7 # marge for rc (richtingscoefficient) Higher is steeper (up or down)
+    topValueCorr<- 2 # marge for top value
+    maxTimePerIncident<-8 # assume x minutes per cigarette incident
+    
+    print('use rolling median')
+    #    dfTotalMa<-rollmean(dfTotal$sensorValue,k=5, fill = if (na.pad) NA, na.pad = FALSE)
+    # dfTotal$ma<-rollmean(dfTotal$sensorValue,61, fill = NA)
+    dfTotal$sensorValueMa<-rollmedian(dfTotal$sensorValue,3, na.pad=T)
+    dfTotal$diffDateLag<-as.numeric(dfTotal$date-lag(dfTotal$date,2))
+    dfTotal$rcLag<-round((dfTotal$sensorValueMa-lag(dfTotal$sensorValueMa,2)) / dfTotal$diffDateLag, digits=3)
+    dfTotal$diffDateLead<-as.numeric(lead(dfTotal$date,2)-dfTotal$date)
+    dfTotal$rcLead<-round((lead(dfTotal$sensorValueMa,2)-dfTotal$sensorValueMa) / dfTotal$diffDateLead, digits=3)
+    
+    #print('############ 1')
+    # Determine rolling median not using ('extreme') high and low values 
+    dfTotal$sensorValue2<-dfTotal$sensorValueMa
+    dfTotal$sensorValue2[which(dfTotal$rcLag<0 & dfTotal$rcLag< (-1*rcMarge) )]<-NA
+    dfTotal$sensorValue2[which(dfTotal$rcLag>0 & dfTotal$rcLag> rcMarge)]<-NA
+    dfTotal$sensorValue2[which(dfTotal$rcLead<0 & dfTotal$rcLead< (-1*rcMarge) )]<-NA
+    dfTotal$sensorValue2[which(dfTotal$rcLead>0 & dfTotal$rcLead> rcMarge)]<-NA
+    # (re)fill NA records
+    dfTotal<-dfTotal %>% tidyr::fill(sensorValue2, .direction = 'downup')
+    dfTotal$ma<-rollmedian(dfTotal$sensorValue2,121, na.pad=T)# +1 # extra marge for rolling median
+    # fill NA with previous/upcoming value
+    dfTotal<-tidyr::fill(dfTotal, ma, .direction = 'downup')
+    # determine value (topValue) above rolling mean  correction margin)
+    dfTotal$topValue<-dfTotal$sensorValueMa-dfTotal$ma-topValueCorr
+    dfTotal$topValue[which(dfTotal$topValue <= 0 & (
+                (  (dfTotal$rcLag > 0 & dfTotal$rcLag <rcMarge) | 
+                   (dfTotal$rcLag < 0 & dfTotal$rcLag >rcMarge*-1) ) 
+                  &
+                (  (dfTotal$rcLead > 0 & dfTotal$rcLead < rcMarge) | 
+                   (dfTotal$rcLead < 0 & dfTotal$rcLead >rcMarge*-1) ) 
+    ) ) ] <-NA 
+    dfTotal$topValue[which(dfTotal$topValue < 0 )] <-0 
+    dfTotal$topValue[which(dfTotal$topValue == 0 & (is.na(lag(dfTotal$topValue))|lead(dfTotal$topValue)==0)  & (is.na(lead(dfTotal$topValue))|lead(dfTotal$topValue)==0) )] <-NA 
+    dfTotal$topValue[which(dfTotal$topValue == 0 & is.na(lag(dfTotal$topValue)) & is.na(lead(dfTotal$topValue)) )] <-NA 
+#    dfTotal$topValue[which(dfTotal$topValue >= 0 )] <- dfTotal$topValue[which(dfTotal$topValue >= 0 )] - maCorr #- rcMarge
+    #dfTotal$piek<-dfTotal$sensorValue
+    #dfTotal$piek[which(is.na(dfTotal$topValue) )]<-NA
+    
+    #print(split(dfTotal$topValue, is.na(dfTotal$topValue)))
+    #print(split(dfTotal, cumsum(c(TRUE, diff(dfTotal$topValue >= 0) != 0))) )
+    #    tmp<-split(dfTotal, cumsum(c(TRUE, diff(!is.na(dfTotal$topValue)) != 0L)),drop=T) 
+    #    str(tmp)
+    #    tmp$xx<-which(tmp$topValue>0)
+    #    str(tmp)
+    #    incidentNr=0;
+    dfTotal$incidentNr<-NA;
+    #    for ( i in 1:nrow(dfTotal) ) {
+    #    print(head(dfTotal));
+    #    dfTotal$incidentnr<-1;
+    #    print(head(dfTotal));
+    #    print(dfTotal[[1]])
+    dfTotal$incidentNr[which(dfTotal$topValue>=0 & is.na(lag(dfTotal$topValue))
+                             )] <- which(dfTotal$topValue>=0 & is.na(lag(dfTotal$topValue) ))
+    #    dfTotal$incidentNr[which(dfTotal$topValue>=0 & !is.na(lag(dfTotal$incidentNr))
+    #    )] <- which(dfTotal$topValue>=0 & is.na(lag(dfTotal$topValue) )
+    #    print(dfTotal$incidentNr)
+    print(nrow(dfTotal))
+    dfTotal$incidentNr<-na.locf0(dfTotal$incidentNr )
+    dfTotal$incidentNr[which(is.na(dfTotal$topValue))] <- NA
+    print(dfTotal$incidentNr)
+    #    print(length( na.locf(dfTotal$incidentNr )))
+    #    print(dfTotal$incidentNr )
+    #    dfTotal$incidentNr[which( is.na(dfTotal$topValue))] <- na.locf(dfTotal$incidentNr )
+    #    print(dfTotal$incidentNr)
+    #      {
+    #        incidentNr<-incidentNr+1;
+    #      }
+    #      if (dfTotal[i]$topValue>=0 ) {
+    #        dfTotal[i]$incidentNr<-incidentNr;
+    #      }
+    #    }
+    
+    dfIncidents<-dfTotal
+
+    # slechts 1 periode met lage piek niet als incident zien
+   # dfIncidents<-subset(dfIncidents,!(lag(dfIncidents$incidentNr)!=dfIncidents$incidentNr&lead(dfIncidents$incidentNr)!=dfIncidents$incidentNr&dfIncidents$topValue<5) )
+    
+    dfIncidents<-subset(dfIncidents,!is.na(dfIncidents$topValue)&dfIncidents$topValue>2)
+    # date cycle from 4AM till 4AM
+    dfIncidents$day<-as.POSIXct(format(dfIncidents$date-4*60*60,'%Y-%m-%d'), format="%Y-%m-%d")
+    dfIncidents$dayHour<-as.POSIXct(format(dfIncidents$date,'%Y-%m-%dT%H'), format="%Y-%m-%dT%H")
+#    print(dfIncidents$dayHour)
+#    print(dfIncidents$day)
+    print(head(dfIncidents));
+    print(dfIncidents[c('date','sensorValue','diffDateLag','diffDateLead','rcLag','rcLead','sensorValueMa','ma','topValue','incidentNr')]);
+    
+    dfIncidentDay <- dfIncidents %>% 
+      group_by(incidentNr)  %>%
+      summarise(dateStart=min(date),
+                dateEnd=max(date),
+                day=min(day),
+                dayHour=min(dayHour),
+                max_value = max(topValue),
+                total_count = n(),
+                incidentScore = ceiling(n()/maxTimePerIncident), # assume 5 minutes per cigarette
+                .groups = 'drop') %>% 
+      as.data.frame()
+    print(dfIncidentDay)
+    
+    dfIncidentDayHour <- dfIncidents %>% 
+      group_by(incidentNr)  %>%
+      summarise(dateStart=min(date),dateEnd=max(date),
+                day=min(day),
+                dayHour=min(dayHour),
+                max_value = max(topValue),
+                total_count = n(),
+                incidentScore = ceiling(n()/maxTimePerIncident), # assume 5 minutes per cigarette
+                .groups = 'drop') %>% 
+      as.data.frame()
+    
+    dfIncidentDayHourStats <- dfIncidentDay %>% 
+      group_by(dayHour)  %>%
+      summarise(dayHour=min(dayHour),
+                max_value = max(max_value),
+                count = sum(incidentScore),
+                .groups = 'drop') %>% 
+      as.data.frame()
+    print(dfIncidentDayHourStats)
+    
+    dfIncidentStats <- dfIncidentDay %>% 
+      group_by(day)  %>%
+      summarise(day=min(day),
+                max_value = max(max_value),
+                count = sum(incidentScore),
+                .groups = 'drop') %>% 
+      as.data.frame()
+    
+    print(dfIncidentStats)
+  }
+  
   gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation)
                   ,col = brewer.pal(n = 8, name = "RdYlBu")) +
     theme_bw();
@@ -66,14 +205,23 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   #                                                  to = max(x), 
   #                                                  by = "1 hour"))
     } else {
-      print('breaks else')
+      if (dt<500) {
+        print('breaks <500 hours')
+        dateBreaks<-'1 days';dateLabels="%d"
+        gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver())
+        #    gTotal<-gTotal+  scale_x_date(breaks = function(x) seq.Date(from = min(x), 
+        #                                               to = max(x), 
+        #                                               by = "3 hours"),
+        #              minor_breaks = function(x) seq.Date(from = min(x), 
+        #                                                  to = max(x), 
+        #                                                  by = "1 hour"))
+      } else {
+        print('breaks else')
       gTotal<-gTotal+  scale_x_datetime()
+      }
     }
   }
-
-
-
-
+  
   gTotal<-gTotal+
 #  gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver()) +
     theme(text = element_text(size = rel(2.0))
@@ -125,9 +273,44 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
         annotate("text", x = statsPosX+statsXResolution*14, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
         annotate("text", x = statsPosX+statsXResolution*28, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0)
     #}
-
   }
 
+  if (incident==T) {
+#        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=sensorValueMa),colour='green',size=0.2)
+#        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=ma),colour='yellow',size=0.2)
+#    gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
+#    gTotal<-gTotal + geom_point(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
+#    gTotal<-gTotal + geom_point(data=dfIncidentDayHourStats,aes(x=dayHour,y=count*2),colour='blue',size=0.1) 
+#    gTotal<-gTotal + geom_point(data=dfIncidentStats,aes(x=day,y=count*2),colour='blue',size=0.1) 
+    dfIncidentStats$foiLocation<-'loc.'
+    gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=day+statsXResolution,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
+
+    gTotal<-gTotal +
+     annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Incident index: "),size=1.4,hjust=0)
+#    if (nrow(dfIncidentStats) >=1) {
+#      gTotal<-gTotal +      annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("  ",dfIncidentStats$day[[1]],': ',dfIncidentStats$count[[1]],'x'),size=1.2,hjust=0)
+#    }
+#    if (nrow(dfIncidentStats) >=2) {
+#      gTotal<-gTotal +  annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("  ",dfIncidentStats$day[[2]],': ',dfIncidentStats$count[[2]],'x'),size=1.2,hjust=0)
+#    } 
+#    if (nrow(dfIncidentStats) >=3) {
+#      gTotal<-gTotal +     annotate("text", x = statsPosX, y = statsMax-statsResolution*4, label = paste0("  ",dfIncidentStats$day[[3]],': ',dfIncidentStats$count[[3]],'x'),size=1.2,hjust=0)
+#    } 
+#    if (nrow(dfIncidentStats) >=4) {
+#      gTotal<-gTotal + annotate("text", x = statsPosX, y = statsMax-statsResolution*5, label = paste0("  ",dfIncidentStats$day[[4]],': ',dfIncidentStats$count[[4]],'x'),size=1.2,hjust=0)
+#    } 
+#    if (nrow(dfIncidentStats) >=5) {
+#      gTotal<-gTotal + annotate("text", x = statsPosX, y = statsMax-statsResolution*6, label = paste0("  ",dfIncidentStats$day[[5]],': ',dfIncidentStats$count[[5]],'x'),size=1.2,hjust=0)
+#    } 
+#    if (nrow(dfIncidentStats) >=6) {
+#      gTotal<-gTotal + annotate("text", x = statsPosX, y = statsMax-statsResolution*7, label = paste0("  ",dfIncidentStats$day[[6]],': ',dfIncidentStats$count[[6]],'x'),size=1.2,hjust=0)
+#    } 
+#    if (nrow(dfIncidentStats) >=7) {
+#      gTotal<-gTotal + annotate("text", x = statsPosX, y = statsMax-statsResolution*8, label = paste0("  ",dfIncidentStats$day[[7]],': ',dfIncidentStats$count[[7]],'x'),size=1.2,hjust=0)
+#    } 
+  }
+    #geom_line(data=as.data.frame(bb),aes(x=b,y=a))
+  
   return (gTotal +
             #    scale_colour_manual(values = c(
             #    "red"
