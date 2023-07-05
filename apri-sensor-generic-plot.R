@@ -114,7 +114,11 @@ for (i in 1:nrow(sensorIds)) {
       if (meanMinutes==0) {
         aggregateInd<-NULL
       } else {
-        aggregateInd<-'M' #minute
+        if (meanMinutes==10) {
+          aggregateInd<-'A' # 10 minutes
+        } else {
+          aggregateInd<-'M' #minute
+        }
       }
     }
     if (periodType == "actual") {
@@ -491,7 +495,7 @@ if(is.null(reportConfig$correlPlots)==FALSE) {
             fileNameTimeStamp<-paste0(reportFileLabel,'-',reportCorrelPlots$fileLabel[i],'_',timeStamp)
             print(fileNameTimeStamp)
             #apriSensorImage(b,fileNameTimeStamp,height=2.4,width=3.2,subFolder='correl')
-            apriSensorImage(b,fileNameTimeStamp,height=1.9,width=2.1,subFolder='correl')
+            apriSensorImage(b,fileNameTimeStamp,height=2.0,width=2.1,subFolder='correl')
           }
         }
       }
