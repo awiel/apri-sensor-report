@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 options(width = 100)
 
-# Rscript apri-sensor-generic-plot.R AFF4-pm25-csv-locatie-2
+# start in terminal: Rscript apri-sensor-generic-plot.R AFF4-pm25-csv-locatie-2
 
 #install.packages(c('purrr','tidyselect','tibble','utf8','fansi','cli','pillar','magrittr','lifecycle','glue','generics','R6','rlang','dplyr'))
 #install.packages(c('withr','colorspace','scales','ggplot2'))
