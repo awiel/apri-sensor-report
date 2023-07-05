@@ -1,16 +1,19 @@
 #!/usr/bin/env Rscript
 options(width = 100)
 
+# Rscript apri-sensor-generic-plot.R AFF4-pm25-csv-locatie-2
+
 #install.packages(c('purrr','tidyselect','tibble','utf8','fansi','cli','pillar','magrittr','lifecycle','glue','generics','R6','rlang','dplyr'))
 #install.packages(c('withr','colorspace','scales','ggplot2'))
 #install.packages('broom','carData','broom','tidyr')
 #install.packages('zoo')
+#install.packages('ggpubr')
 library('dplyr')
 library('zoo')
 
 args = commandArgs(trailingOnly=TRUE)
 # test if there is at least one argument: if not, return an error
-#defaultReport<-'0D28-pm25'
+defaultReport<-'AFF4-pm25-csv-locatie-2'
 if (length(args)==0 && is.null(defaultReport)) {
   stop(" Commandline parameter voor reportID is missing, process stopped.", call.=FALSE)
 }
@@ -375,6 +378,9 @@ if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='10 seconden') {
 if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==0) {
   aggregateTxt<-"gemiddeld per 20 seconden"
 }
+if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==10) {
+  aggregateTxt<-"gemiddeld per 10 minuten"
+}
 
 gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle
   ,ylim,treshold=reportTreshold
@@ -492,3 +498,4 @@ if(is.null(reportConfig$correlPlots)==FALSE) {
     }
   }
 } # end of correlation plot loop
+

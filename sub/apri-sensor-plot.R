@@ -26,8 +26,8 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   if (incident==T) {
     
     rcMarge<-0.7 # marge for rc (richtingscoefficient) Higher is steeper (up or down)
-    topValueCorr<- 2 # marge for top value
-    maxTimePerIncident<-8 # assume x minutes per cigarette incident
+    topValueCorr<- 5 # 4 # 3 # 2 # marge for top value. Hoger is minder incidenten
+    maxTimePerIncident<-10 # assume x minutes per cigarette incident
     
     print('use rolling median')
     #    dfTotalMa<-rollmean(dfTotal$sensorValue,k=5, fill = if (na.pad) NA, na.pad = FALSE)
@@ -111,6 +111,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     dfIncidents$dayHour<-as.POSIXct(format(dfIncidents$date,'%Y-%m-%dT%H'), format="%Y-%m-%dT%H")
 #    print(dfIncidents$dayHour)
 #    print(dfIncidents$day)
+    print("head(dfIncidents)")
     print(head(dfIncidents));
     print(dfIncidents[c('date','sensorValue','diffDateLag','diffDateLead','rcLag','rcLead','sensorValueMa','ma','topValue','incidentNr')]);
     
@@ -154,6 +155,8 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
                 count = sum(incidentScore),
                 .groups = 'drop') %>% 
       as.data.frame()
+    dfIncidentStats$date<-as.POSIXct(dfIncidentStats$day, format="%Y-%m-%d")
+    #dfIncidents$day<-as.POSIXct(format(dfIncidents$date-4*60*60,'%Y-%m-%d'), format="%Y-%m-%d")
     
     print(dfIncidentStats)
   }
@@ -276,18 +279,34 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   }
 
   if (incident==T) {
-#        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=sensorValueMa),colour='green',size=0.2)
-#        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=ma),colour='yellow',size=0.2)
-#    gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
-#    gTotal<-gTotal + geom_point(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
-#    gTotal<-gTotal + geom_point(data=dfIncidentDayHourStats,aes(x=dayHour,y=count*2),colour='blue',size=0.1) 
-#    gTotal<-gTotal + geom_point(data=dfIncidentStats,aes(x=day,y=count*2),colour='blue',size=0.1) 
+       # gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=sensorValueMa),colour='green',size=0.2)
+      #  gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=ma),colour='brown',size=0.5)
+    #gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
+    #gTotal<-gTotal + geom_point(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
+    #gTotal<-gTotal + geom_point(data=dfIncidentDayHourStats,aes(x=dayHour,y=count*2),colour='blue',size=0.1) 
+    
     dfIncidentStats$foiLocation<-'loc.'
-    gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=day+statsXResolution,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
-
+    minDate<-min(dfIncidentStats$date)
+    if (minDate>=min(dfIncidentStats$date)) {
+      graphStart<-minDate
+    } else {
+      graphStart<-min(dfIncidentStats$date)
+    }
+    print(head(dfIncidentStats))
+    statsPosX<-min(dfIncidentStats$date, na.rm = TRUE) #+60*60
+    statsPosXMax<-max(dfIncidentStats$date, na.rm = TRUE) #+60*60
+    statsXResolution<-(statsPosXMax-statsPosX)/32
+    #gTotal<-gTotal + geom_point(data=dfIncidentStats,aes(x=graphStart,y=count*2),colour='blue',size=0.1) 
+    #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=graphStart+statsXResolution,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
+    #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=day+statsXResolution*4,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
+    #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+statsXResolution,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
+    gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+60*60*5,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
+    #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+60*60*14,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
+    
     gTotal<-gTotal +
-     annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Incident index: "),size=1.4,hjust=0)
-#    if (nrow(dfIncidentStats) >=1) {
+     #annotate("text", x = statsPosX+60*60*14, y = statsMax-statsResolution*1, label = paste0("Incident index: "),size=1.4,hjust=0)
+     annotate("text", x = statsPosX+60*60*5, y = statsMax-statsResolution*1, label = paste0("Incident index: "),size=1.4,hjust=0)
+    #    if (nrow(dfIncidentStats) >=1) {
 #      gTotal<-gTotal +      annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("  ",dfIncidentStats$day[[1]],': ',dfIncidentStats$count[[1]],'x'),size=1.2,hjust=0)
 #    }
 #    if (nrow(dfIncidentStats) >=2) {
@@ -309,7 +328,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
 #      gTotal<-gTotal + annotate("text", x = statsPosX, y = statsMax-statsResolution*8, label = paste0("  ",dfIncidentStats$day[[7]],': ',dfIncidentStats$count[[7]],'x'),size=1.2,hjust=0)
 #    } 
   }
-    #geom_line(data=as.data.frame(bb),aes(x=b,y=a))
+  # geom_line(data=as.data.frame(bb),aes(x=b,y=a))
   
   return (gTotal +
             #    scale_colour_manual(values = c(
@@ -345,9 +364,9 @@ apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL
 
   plotImg <- image_read(paste(plotPath,'/',fileName,sep=''))
   logo <- logo %>%
-    image_annotate("Powered By FIWARE", color = "black", size = 30,
+    image_annotate("", color = "black", size = 30,
                    location = "+16-3", gravity = "southeast")
-  final_plot <- image_composite(plotImg, image_scale(logo,"140"), gravity = "southeast", offset = "+40+40")
+  final_plot <- image_composite(plotImg, image_scale(logo,"220"), gravity = "southeast", offset = "+40+20")
   if (subFolder != '') {
     subFolder<-paste0(subFolder,'/')
   }

@@ -46,7 +46,7 @@ saveCacheFile<-function(cachePath,fileName,object) {
 getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=NULL,foi=NULL,ops=NULL,opPerRow='true'
                         ,opsc=NULL,dateFrom=NULL,dateTo=NULL,aggregateInd=NULL,cachePath=NULL
                         ,source=NULL,sensorId=NULL,datastream=NULL,sensorType=NULL,periodSpan=NULL
-                        ,csvPath='./data/csv/',csvFileName=NULL,csvType="2"
+                        ,csvPath='./data/csv/',csvFileName=NULL,csvType='2'
                         ,rdaPath='./data/Rda/',rdaFileName=NULL
   ) {
   # eg2. SCNM5CCF7F2F62F3:SCNM5CCF7F2F62F3_a,pm25:pm25_alias,pm10
@@ -124,6 +124,7 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
   paramDate<-paste("&dateFrom=",dateFrom,"&dateTo=",dateTo,sep='')
 
   if (!is.null(fiwareService) && !is.null(fiwareServicePath)) {
+    # when first character is # then service name as is, without the #
     if (fiwareService == '' || fiwareServicePath=='/knmi' || fiwareServicePath=='/tsi3007' || 
            substr(fiwareService,1,6)=='orion-' || substr(fiwareService,1,1)=='#' ||
            fiwareService == 'as_v0' || fiwareService == 'luchtmeetnet_v0' || fiwareService == 'luftdaten_v0'   ) {
@@ -170,7 +171,11 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
       
       print(ops)
       csvFile<-paste0(csvPath,csvFileName)
-      print(paste('csv: (',getwd(),') ',csvFile))
+      print(paste('csv: (',getwd(),') ',csvFile,' csvType:',csvType))
+
+      if (is.null(csvType)) {
+        csvType='2'
+      }
       if (csvType=='1') {
         dfResult<-read.csv(csvFile)
         if ("sensorType" %in% colnames(dfResult)==F) {
