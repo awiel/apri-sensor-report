@@ -2,6 +2,8 @@
 library(scales)
 library(tidyr)
 
+# Rscript apri-sensor-generic-plot.R AFF4-pm25-csv-locatie-2
+
 apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     treshold=NULL,tresholdLabel=NULL,
     dateBreaks="1 hour",dateLabels="%H",aggregateTxt='gemiddeld per minuut',
@@ -27,7 +29,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     
     rcMarge<-0.7 # marge for rc (richtingscoefficient) Higher is steeper (up or down)
     topValueCorr<- 5 # 4 # 3 # 2 # marge for top value. Hoger is minder incidenten
-    maxTimePerIncident<-10 # assume x minutes per cigarette incident
+    maxTimePerIncident<-10 #8 # assume x minutes per cigarette incident
     
     print('use rolling median')
     #    dfTotalMa<-rollmean(dfTotal$sensorValue,k=5, fill = if (na.pad) NA, na.pad = FALSE)
@@ -272,18 +274,20 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     #if(treshold<statsMax) {
       gTotal<-gTotal +
         geom_hline(yintercept = treshold,size=0.10,color='darkgreen') +
-        annotate("text", x = statsPosX, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
-        annotate("text", x = statsPosX+statsXResolution*14, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
-        annotate("text", x = statsPosX+statsXResolution*28, y = treshold+statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0)
+        #annotate("text", x = statsPosX, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
+        #annotate("text", x = statsPosX+statsXResolution*7, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0,color='darkgreen') +
+        annotate("text", x = statsPosX+statsXResolution*15, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0,color='darkgreen')
     #}
   }
 
   if (incident==T) {
-       # gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=sensorValueMa),colour='green',size=0.2)
-      #  gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=ma),colour='brown',size=0.5)
-    #gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
-    #gTotal<-gTotal + geom_point(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
-    #gTotal<-gTotal + geom_point(data=dfIncidentDayHourStats,aes(x=dayHour,y=count*2),colour='blue',size=0.1) 
+    #        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=sensorValueMa),colour='green',size=0.2)
+    #        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=ma),colour='yellow',size=0.2)
+    #    gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
+    #    gTotal<-gTotal + geom_point(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
+    #    gTotal<-gTotal + geom_point(data=dfIncidentDayHourStats,aes(x=dayHour,y=count*2),colour='blue',size=0.1) 
+    #    gTotal<-gTotal + geom_point(data=dfIncidentStats,aes(x=day,y=count*2),colour='blue',size=0.1) 
+      
     
     dfIncidentStats$foiLocation<-'loc.'
     minDate<-min(dfIncidentStats$date)
