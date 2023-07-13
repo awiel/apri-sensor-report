@@ -27,9 +27,10 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   # Incidents signaling
   if (incident==T) {
     
-    rcMarge<-0.7 # marge for rc (richtingscoefficient) Higher is steeper (up or down)
-    topValueCorr<- 5 # 4 # 3 # 2 # marge for top value. Hoger is minder incidenten
-    maxTimePerIncident<-10 #8 # assume x minutes per cigarette incident
+    rcMarge<- 0.7 # 0.7 # marge for rc (richtingscoefficient) Higher is steeper (up or down)
+    topValueCorr<- 6 # 5 # 4 # 3 # 2 # marge for top value. Hoger is minder incidenten
+    maxTimePerIncident<-9 #8 # assume x minutes per cigarette incident
+    rollMedianParam <-121  # 121
     
     print('use rolling median')
     #    dfTotalMa<-rollmean(dfTotal$sensorValue,k=5, fill = if (na.pad) NA, na.pad = FALSE)
@@ -49,7 +50,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     dfTotal$sensorValue2[which(dfTotal$rcLead>0 & dfTotal$rcLead> rcMarge)]<-NA
     # (re)fill NA records
     dfTotal<-dfTotal %>% tidyr::fill(sensorValue2, .direction = 'downup')
-    dfTotal$ma<-rollmedian(dfTotal$sensorValue2,121, na.pad=T)# +1 # extra marge for rolling median
+    dfTotal$ma<-rollmedian(dfTotal$sensorValue2,rollMedianParam, na.pad=T)  # 121 # +1 # extra marge for rolling median
     # fill NA with previous/upcoming value
     dfTotal<-tidyr::fill(dfTotal, ma, .direction = 'downup')
     # determine value (topValue) above rolling mean  correction margin)
@@ -281,10 +282,10 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   }
 
   if (incident==T) {
-    #        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=sensorValueMa),colour='green',size=0.2)
-    #        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=ma),colour='yellow',size=0.2)
-    #    gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
-    #    gTotal<-gTotal + geom_point(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
+            gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=sensorValueMa),colour='green',size=0.2)
+            gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=ma),colour='yellow',size=0.2)
+        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
+        gTotal<-gTotal + geom_point(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
     #    gTotal<-gTotal + geom_point(data=dfIncidentDayHourStats,aes(x=dayHour,y=count*2),colour='blue',size=0.1) 
     #    gTotal<-gTotal + geom_point(data=dfIncidentStats,aes(x=day,y=count*2),colour='blue',size=0.1) 
       
@@ -304,12 +305,12 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=graphStart+statsXResolution,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=day+statsXResolution*4,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+statsXResolution,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
-    gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+60*60*5,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
+    gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+60*60*17,y=statsMax+statsResolution*1,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+60*60*14,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
     
     gTotal<-gTotal +
      #annotate("text", x = statsPosX+60*60*14, y = statsMax-statsResolution*1, label = paste0("Incident index: "),size=1.4,hjust=0)
-     annotate("text", x = statsPosX+60*60*5, y = statsMax-statsResolution*1, label = paste0("Incident index: "),size=1.4,hjust=0)
+     annotate("text", x = statsPosX+60*60*14, y = statsMax+statsResolution*2.5, label = paste0("Incident index: "),size=1.4,hjust=0)
     #    if (nrow(dfIncidentStats) >=1) {
 #      gTotal<-gTotal +      annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("  ",dfIncidentStats$day[[1]],': ',dfIncidentStats$count[[1]],'x'),size=1.2,hjust=0)
 #    }
