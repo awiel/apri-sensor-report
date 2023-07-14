@@ -263,11 +263,13 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     )
   #print('annotation')
 
+  if (incident==F) {
   if(is.null(ylim)!=TRUE) {
     gTotal<-gTotal +
       annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
       annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
       annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0)
+  }
   }
 
   if(is.null(treshold)!=TRUE) {
@@ -305,12 +307,12 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=graphStart+statsXResolution,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=day+statsXResolution*4,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+statsXResolution,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
-    gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+60*60*17,y=statsMax+statsResolution*1,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
+    gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+60*60*17,y=statsMax-statsResolution*2,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+60*60*14,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
     
     gTotal<-gTotal +
      #annotate("text", x = statsPosX+60*60*14, y = statsMax-statsResolution*1, label = paste0("Incident index: "),size=1.4,hjust=0)
-     annotate("text", x = statsPosX+60*60*14, y = statsMax+statsResolution*2.5, label = paste0("Incident index: "),size=1.4,hjust=0)
+     annotate("text", x = statsPosX+60*60*14, y = statsMax-statsResolution*1, label = paste0("Incident index: "),size=1.4,hjust=0)
     #    if (nrow(dfIncidentStats) >=1) {
 #      gTotal<-gTotal +      annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("  ",dfIncidentStats$day[[1]],': ',dfIncidentStats$count[[1]],'x'),size=1.2,hjust=0)
 #    }
