@@ -8,8 +8,11 @@ options(width = 100)
 #install.packages('broom','carData','broom','tidyr')
 #install.packages('zoo')
 #install.packages('ggpubr')
+#install.packages('lubridate')
+
 library('dplyr')
 library('zoo')
+library('lubridate')
 
 args = commandArgs(trailingOnly=TRUE)
 # test if there is at least one argument: if not, return an error
@@ -76,6 +79,7 @@ reportHeight <- reportConfig$height
 reportWidth <- reportConfig$width
 reportTreshold <- reportConfig$treshold
 reportTresholdLabel <- reportConfig$tresholdLabel
+reportLocal <- reportConfig$local
 
 periodType<-reportConfig$periodType
 periodSpan<-reportConfig$periodSpan
@@ -298,7 +302,19 @@ for (i in 1:nrow(sensorIds)) {
 #dfTmp$foi <- dfTmp$sensorId
 #dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
 
-dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M:%S")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+
+
+#if (!is.null(reportLocal) && !is.na(reportLocal)) {
+#  # Japan
+#  if (reportLocal=='xxJA') {
+#    dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M:%S")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+#    dfTmp$date <- with_tz(dfTmp$date, tz="Asia/Tokyo")
+#  } 
+#} else {
+  dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M:%S")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+#}
+  
+
 dfTmp$minute <- sapply(format(dfTmp$date, "%M"), as.numeric)
 dfTmp$hour <- sapply(format(dfTmp$date, "%H"), as.numeric)
 dfTmp$foi <- dfTmp$sensorId 
@@ -361,8 +377,11 @@ if (is.null(reportYLim)) {
 }
 
 period <- range(total$date);
-periodetext1 <- strftime(period[1], format = "%Y-%m-%d %H:%M uur" )
-periodetext2 <- strftime(period[2], format = "%Y-%m-%d %H:%M uur")
+print(period)
+periodetext1 <- with_tz(period[1],'Japan') # strftime(with_tz(period[1],'Asia/Tokyo'), format = "%Y-%m-%d %H:%M uur %z" ,tz='JST')
+periodetext2 <- with_tz(period[2],'Japan')  # strftime(period[2], format = "%Y-%m-%d %H:%M uur %z",tz='JST',usetz=TRUE)
+print(periodetext1)
+print(periodetext2)
 print("ggplot")
 #total <- subset(total, total$sensorType == 'pm25')
 # plot graph
@@ -386,11 +405,28 @@ if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==10) {
   aggregateTxt<-"gemiddeld per 10 minuten"
 }
 
+dateText<-'Datum';
+timeZone<-'Amsterdam';
+periodeLabel<-'Periode';
+xAxisText<-'Ruwe / niet gekalibreerde meetwaarde';
+yAxisText<-'Gemeten waarde';
+
+if (!is.null(reportLocal)&&!is.na(reportLocal)) {
+  if(reportLocal=='JA') {
+    if (aggregateTxt=='gemiddeld per minuut') aggregateTxt<-'1分あたりの平均'
+    if (aggregateTxt=='gemiddeld per dag') aggregateTxt<-'1日あたりの平均'
+    if (aggregateTxt=='gemiddeld per 10 seconden') aggregateTxt<-'10秒ごとの平均'
+    if (aggregateTxt=='gemiddeld per 20 seconden') aggregateTxt<-'20秒ごとの平均'
+    if (aggregateTxt=='gemiddeld per 10 minuten') aggregateTxt<-'平均10分ごと'
+  }
+}
+
 gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle
   ,ylim,treshold=reportTreshold
   ,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels
   ,aggregateTxt=aggregateTxt,yzoom=yZoom,
-  incident=incident)
+  incident=incident
+  ,reportLocal=reportLocal)
 
 
 # make imagefile

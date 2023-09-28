@@ -8,9 +8,43 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     treshold=NULL,tresholdLabel=NULL,
     dateBreaks="1 hour",dateLabels="%H",aggregateTxt='gemiddeld per minuut',
     yzoom=NULL,
-    incident=F) {
+    incident=F,reportLocal=NULL) {
+  
+  print(reportLocal)
   plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
-  captionText<-paste0('Datum: ',format(plotDateTime,"%d-%m-%Y %H:%M"))
+  
+  dateText<-'Datum';
+  timeZone<-'Amsterdam';
+  periodeLabel<-'Periode';
+  xAxisText<-'Ruwe / niet gekalibreerde meetwaarde';
+  yAxisText<-'Gemeten waarde';
+  
+  if (!is.null(reportLocal)&&!is.na(reportLocal)) {
+    if(reportLocal=='JA') {
+      dateText<-'日付';
+      timeZone<-'Japan';
+      periodeLabel<-'期間';
+      xAxisText<-'生の/未校正の測定値';
+      yAxisText<-'測定値'
+      }
+    if(reportLocal=='NL') {
+      dateText<-'Datum';
+      timeZone<-'Netherlands';
+      periodeLabel<-'Periode';
+      xAxisText<-'Ruwe / niet gekalibreerde meetwaarde';
+      yAxisText<-'Gemeten waarde';
+    }
+    if(reportLocal=='US') {
+      dateText<-'Date';
+      timeZone<-'NewYork';
+      periodeLabel<-'Period';
+      xAxisText<-'Raw / uncalibrated measurements';
+      yAxisText<-'Measured value';
+    }
+  }
+  #captionText<-paste0(dateText,': ',format(plotDateTime,"%d-%m-%Y %H:%M"))
+  captionText<-paste0(dateText,': ',with_tz(plotDateTime,timeZone))
+  
   statsPosX<-min(dfTotal$date, na.rm = TRUE) #+60*60
   statsPosXMax<-max(dfTotal$date, na.rm = TRUE) #+60*60
   statsXResolution<-(statsPosXMax-statsPosX)/32
@@ -28,9 +62,9 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   if (incident==T) {
     
     rcMarge<- 0.7 # 0.7 # marge for rc (richtingscoefficient) Higher is steeper (up or down)
-    topValueCorr<- 6 # 5 # 4 # 3 # 2 # marge for top value. Hoger is minder incidenten
+    topValueCorr<- 2 # 6 # 5 # 4 # 3 # 2 # marge for top value. Hoger is minder incidenten
     maxTimePerIncident<-9 #8 # assume x minutes per cigarette incident
-    rollMedianParam <-121  # 121
+    rollMedianParam <- 150 # 121  # 121
     
     print('use rolling median')
     #    dfTotalMa<-rollmean(dfTotal$sensorValue,k=5, fill = if (na.pad) NA, na.pad = FALSE)
@@ -164,7 +198,9 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     print(dfIncidentStats)
   }
   
-  gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation)
+  localTimezone<-'Japan'# 'CET'
+  
+  gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation,timezone=localTimezone)
                   ,col = brewer.pal(n = 8, name = "RdYlBu")) +
     theme_bw();
 
@@ -190,20 +226,22 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     }
   }
 
+  
+  
   #print(dateBreaks)
   #print(dateLabels)
-  #gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver()) +
+  #gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver()) +
   dt<-difftime(statsPosXMax,statsPosX,units='hours')
   print(dt)
   if (dt<30) {
     print('breaks <30 hours')
     dateBreaks<-'1 hours'
-    gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver())
+    gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver())
   } else {
     if (dt<75) {
       print('breaks <75 hours')
       dateBreaks<-'2 hours'
-      gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver())
+      gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver())
   #    gTotal<-gTotal+  scale_x_date(breaks = function(x) seq.Date(from = min(x), 
   #                                               to = max(x), 
   #                                               by = "3 hours"),
@@ -214,7 +252,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
       if (dt<500) {
         print('breaks <500 hours')
         dateBreaks<-'1 days';dateLabels="%d"
-        gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver())
+        gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver())
         #    gTotal<-gTotal+  scale_x_date(breaks = function(x) seq.Date(from = min(x), 
         #                                               to = max(x), 
         #                                               by = "3 hours"),
@@ -229,7 +267,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   }
   
   gTotal<-gTotal+
-#  gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone='CET',breaks=waiver()) +
+#  gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver()) +
     theme(text = element_text(size = rel(2.0))
           , element_line(colour = 'green', size = 0.2)
           , plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1),
@@ -251,8 +289,8 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     )  +
     geom_line(aes(group=interaction(sensorId,sensorType,type)),size=0.15)+ #group=foi))+#
     guides(color = guide_legend(override.aes = list(size = 1.0) ) ) +
-    labs(x=paste('Ruwe en of ongevalideerde meetwaarde ',aggregateTxt,'\nperiode: ',periodetext1,' tm ',periodetext2,sep=''),
-         y='meetwaarde',title=paste("ApriSensor ",foiLabel), subtitle=foiText, caption=captionText) +
+    labs(x=paste(xAxisText,' ',aggregateTxt,'\n',periodeLabel,': ',periodetext1,' - ',periodetext2,sep=''),
+         y=yAxisText,title=paste("ApriSensor ",foiLabel), subtitle=foiText, caption=captionText) +
     facet_grid( sensorType ~ . , labeller=labeller(sensorType = unlist(sensorTypes[dfTotal$sensorType],use.names=T)), scales = "free") +
     #annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
     #annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
