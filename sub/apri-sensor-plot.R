@@ -18,25 +18,25 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   periodeLabel<-'Periode';
   xAxisText<-'Ruwe / niet gekalibreerde meetwaarde';
   yAxisText<-'Gemeten waarde';
+  localTimezone<-'CET'
   
   if (!is.null(reportLocal)&&!is.na(reportLocal)) {
     if(reportLocal=='JA') {
       dateText<-'日付';
-      timeZone<-'Japan';
+      localTimeZone<-'Japan';
       periodeLabel<-'期間';
       xAxisText<-'生の/未校正の測定値';
       yAxisText<-'測定値'
-      }
+      localTimezone<-'Japan'
+    }
     if(reportLocal=='NL') {
       dateText<-'Datum';
-      timeZone<-'Netherlands';
       periodeLabel<-'Periode';
       xAxisText<-'Ruwe / niet gekalibreerde meetwaarde';
       yAxisText<-'Gemeten waarde';
     }
     if(reportLocal=='US') {
       dateText<-'Date';
-      timeZone<-'NewYork';
       periodeLabel<-'Period';
       xAxisText<-'Raw / uncalibrated measurements';
       yAxisText<-'Measured value';
@@ -198,7 +198,6 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     print(dfIncidentStats)
   }
   
-  localTimezone<-'Japan'# 'CET'
   
   gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation,timezone=localTimezone)
                   ,col = brewer.pal(n = 8, name = "RdYlBu")) +

@@ -378,8 +378,16 @@ if (is.null(reportYLim)) {
 
 period <- range(total$date);
 print(period)
-periodetext1 <- with_tz(period[1],'Japan') # strftime(with_tz(period[1],'Asia/Tokyo'), format = "%Y-%m-%d %H:%M uur %z" ,tz='JST')
-periodetext2 <- with_tz(period[2],'Japan')  # strftime(period[2], format = "%Y-%m-%d %H:%M uur %z",tz='JST',usetz=TRUE)
+localTimeZone<-'CET'
+if (!is.null(reportLocal) && !is.na(reportLocal)) {
+  # Japan
+  if (reportLocal=='JA') {
+    localTimeZone<-'Japan'
+  }
+}
+
+periodetext1 <- with_tz(period[1],localTimeZone) # strftime(with_tz(period[1],'Asia/Tokyo'), format = "%Y-%m-%d %H:%M uur %z" ,tz='JST')
+periodetext2 <- with_tz(period[2],localTimeZone)  # strftime(period[2], format = "%Y-%m-%d %H:%M uur %z",tz='JST',usetz=TRUE)
 print(periodetext1)
 print(periodetext2)
 print("ggplot")
