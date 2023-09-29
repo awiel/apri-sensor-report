@@ -14,7 +14,6 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
   
   dateText<-'Datum';
-  timeZone<-'Amsterdam';
   periodeLabel<-'Periode';
   xAxisText<-'Ruwe / niet gekalibreerde meetwaarde';
   yAxisText<-'Gemeten waarde';
@@ -23,7 +22,6 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   if (!is.null(reportLocal)&&!is.na(reportLocal)) {
     if(reportLocal=='JA') {
       dateText<-'日付';
-      localTimeZone<-'Japan';
       periodeLabel<-'期間';
       xAxisText<-'生の/未校正の測定値';
       yAxisText<-'測定値'
@@ -43,7 +41,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     }
   }
   #captionText<-paste0(dateText,': ',format(plotDateTime,"%d-%m-%Y %H:%M"))
-  captionText<-paste0(dateText,': ',with_tz(plotDateTime,timeZone))
+  captionText<-paste0(dateText,': ',with_tz(plotDateTime,localTimeZone))
   
   statsPosX<-min(dfTotal$date, na.rm = TRUE) #+60*60
   statsPosXMax<-max(dfTotal$date, na.rm = TRUE) #+60*60
