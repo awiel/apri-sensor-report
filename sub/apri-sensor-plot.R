@@ -11,7 +11,8 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     incident=F,reportLocal=NULL) {
   
   print(reportLocal)
-  plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+  #plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+  plotDateTime<- as.POSIXct(format(Sys.time(),'%Y-%m-%d %H:%M:%S'), format="%Y-%m-%d %H:%M:%S")
   
   dateText<-'Datum';
   periodeLabel<-'Periode';
@@ -41,8 +42,9 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     }
   }
   #captionText<-paste0(dateText,': ',format(plotDateTime,"%d-%m-%Y %H:%M"))
-  captionText<-paste0(dateText,': ',with_tz(plotDateTime,localTimeZone))
-  
+  #captionText<-paste0(dateText,': ',with_tz(plotDateTime,localTimeZone))
+  captionText<-paste0(dateText,': ',format(with_tz(plotDateTime,localTimeZone)) )
+
   statsPosX<-min(dfTotal$date, na.rm = TRUE) #+60*60
   statsPosXMax<-max(dfTotal$date, na.rm = TRUE) #+60*60
   statsXResolution<-(statsPosXMax-statsPosX)/32
