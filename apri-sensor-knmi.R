@@ -45,7 +45,8 @@ print(args)
 
 parmStation <- args[1]
 parmStationName <- args[2]
-
+parmStation <- '06323'
+parmStationName <-'test'
 keeps <- c("sensorId","dateObserved","sensorValue")
 
 fiwareStart<-format(Sys.time()-((2+24+hours)*60*60+(60*20)),"%Y-%m-%dT%H:%M:%S") # twee meer terug als start plus 20 minuten extra
@@ -61,6 +62,7 @@ fiwarePeriodEnd<-format(Sys.time()-((hours)*60*60),"%Y-%m-%dT%H:%M:%S")
 #yesterdayStart='2022-02-26T00:00:00'
 #yesterdayEnd='2022-02-26T22:00:00'
 dfTmpWind<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station',parmStation,'windSpeed,windDirection',opPerRow='false',dateFrom=fiwareStart,dateTo=fiwareEnd)
+
 if (parmStation=="06225") {
   dfTmpRain<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station','06257','rainfall',dateFrom=fiwareStart,dateTo=fiwareEnd) #,rainDuration')
   dfTmpTemperature<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station','06257','temperature',dateFrom=fiwareStart,dateTo=fiwareEnd)

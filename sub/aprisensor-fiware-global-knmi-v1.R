@@ -79,21 +79,22 @@ fiwareGetSensorSelectRecordsKnmi<-function(dfIn,fiwareService,fiwareServicePath,
   }
   dfResult <-readr::read_delim(
     url, col_types = colTypes, delim=';'
-  #col_names = TRUE,
-  #col_types = NULL,
-  #locale = default_locale(),
-  ,na = c("undefined","", "NA")
-  #quoted_na = TRUE,
-  ,quote = "\""
-  #comment = "",
-  #trim_ws = TRUE,
-  ,skip = 0
-  #n_max = Inf,
-  #guess_max = min(1000, n_max),
-#  progress = show_progress(),
-  #skip_empty_rows = TRUE
-)
+    #col_names = TRUE,
+    #col_types = NULL,
+    #locale = default_locale(),
+    ,na = c("undefined","", "NA")
+    #quoted_na = TRUE,
+    ,quote = "\""
+    #comment = "",
+    #trim_ws = TRUE,
+    ,skip = 0
+    #n_max = Inf,
+    #guess_max = min(1000, n_max),
+    #  progress = show_progress(),
+    #skip_empty_rows = TRUE
+  )
   dfResult<-as.data.frame(dfResult)
+  dfResult<-dfResult[order(dfResult$dateObserved),]  
   if("pressure" %in% colnames(dfResult))
   {
     dfResult$sensorId<-as.factor(dfResult$station)
