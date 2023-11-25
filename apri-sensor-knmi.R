@@ -45,8 +45,8 @@ print(args)
 
 parmStation <- args[1]
 parmStationName <- args[2]
-parmStation <- '06323'
-parmStationName <-'test'
+#parmStation <- '06323'
+#parmStationName <-'test'
 keeps <- c("sensorId","dateObserved","sensorValue")
 
 fiwareStart<-format(Sys.time()-((2+24+hours)*60*60+(60*20)),"%Y-%m-%dT%H:%M:%S") # twee meer terug als start plus 20 minuten extra
