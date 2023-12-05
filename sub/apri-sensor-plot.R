@@ -235,7 +235,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   if (dt<12) {
     print('breaks <12 hours')
     #dateBreaks<-' hours'
-    # dateBreaks<-'30 min'
+    dateBreaks<-'30 min'
     dateLabels<-'%H:%M'
     gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver())
   } else {
