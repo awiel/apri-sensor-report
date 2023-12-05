@@ -54,6 +54,7 @@ library(magick)
 library(jsonlite)
 
 source(paste0(subPath,"apri-sensor-fiware.R"))
+source(paste0(subPath,"apri-sensor-aprisensor.R"))
 source(paste0(subPath,"apri-sensor-plot.R"))
 
 sensorTypes<-json_data<-fromJSON(paste0(configPath,"apri-sensor-sensorTypes.json"))
@@ -100,9 +101,12 @@ dfTmp<-NULL
 print("loop sensorIds")
 dfTmpMlr1<-NULL
 for (i in 1:nrow(sensorIds)) {
+  print(sensorIds$active[i])
   reportSensorTypes<-sensorIds$sensorTypes[[i]]
   if (sensorIds$active[i]!="FALSE") {
     observableProperties<-NULL
+    print(reportSensorTypes)
+#    print(sensorIds[i])
     for (j in 1:nrow(reportSensorTypes)) {
       #  if (reportSensorTypes$active[j]=="TRUE") {
       if (is.null(observableProperties)) {
@@ -126,36 +130,84 @@ for (i in 1:nrow(sensorIds)) {
       }
     }
     if (periodType == "actual") {
-      t<-strsplit(observableProperties, ":")#[[1,1]]
-      dfTmpOne<-getFiwareData(dfIn=NULL
-          ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
-          ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
-          ,cachePath=cachePath
-          ,aggregateInd=aggregateInd
-          ,source=sensorIds$source[i]
-          ,sensorId=sensorIds$sensorId[i]
-          ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
-          ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
-          ,periodSpan=periodSpan
-      )
+      if (!is.null(sensorIds$serviceDB[i]) && !is.na(sensorIds$serviceDB[i])) {
+        dbGroup<-sensorIds$dbGroup[i]
+        observationTypes<-observableProperties
+        if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
+          aggregation<-sensorIds$aggregation[i]
+          #aggregation<-"minute"
+        } else {
+          aggregation<-"minute"
+        }
+        dfTmpOne<-getApriSensorData(dfIn=NULL
+                ,aggregation=aggregation
+                ,dbGroup=dbGroup
+                ,sensorId=sensorIds$sensorId[i]
+                ,sensorType=sensorIds$sensorType[i]
+                ,observationTypes=observationTypes
+                ,cachePath=cachePath
+        )
+        if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+          dfTmpOne$sensorId<-sensorIds$sensorIdAlias[i]
+          #print(sensorIds$sensorIdAlias[i])
+        }
+        #print(head(dfTmpOne))
+      } else {
+        #t<-strsplit(observableProperties, ":")#[[1,1]]
+        dfTmpOne<-getFiwareData(dfIn=NULL
+                                ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
+                                ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
+                                ,cachePath=cachePath
+                                ,aggregateInd=aggregateInd
+                                ,source=sensorIds$source[i]
+                                ,sensorId=sensorIds$sensorId[i]
+                                ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
+                                ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
+                                ,periodSpan=periodSpan
+        )
+      }
     } else { # hist
-      dfTmpOne<-getFiwareData(dfIn=NULL
-          ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
-          ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
-          ,dateFrom=reportConfig$dateFrom
-          ,dateTo=reportConfig$dateTo
-          ,cachePath=cachePath
-          ,aggregateInd=aggregateInd
-          ,source=sensorIds$source[i]
-          ,sensorId=sensorIds$sensorId[i]
-          ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
-          ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
-          ,csvFileName=sensorIds$csvFileName[i]
-          ,csvPath=sensorIds$csvPath[i]
-          ,csvType=sensorIds$csvType[i]
-          ,rdaFileName=sensorIds$rdaFileName[i]
-          ,rdaPath=sensorIds$rdaPath[i]
-      )
+      if (!is.null(sensorIds$serviceDB[i]) && !is.na(sensorIds$serviceDB[i])) {
+          dfTmp<-getApriSensorData(dfIn=NULL,aggregation=aggregation,dbGroup=dbGroup,sensorId=sensorIds$sensorId[i],sensorType=sensorIds$sensorType[i],observationTypes=observationTypes
+              ,dateFrom=reportConfig$dateFrom
+              ,dateTo=reportConfig$dateTo
+              )
+          print('##test')
+          aggregation<-"minute"
+          todo<-'todo'
+          dbGroup<-NULL
+          observationTypes<-observableProperties
+          dateFrom<-reportConfig$dateFrom
+          dateTo<-reportConfig$dateTo
+          dfTmpOne<-getApriSensorData(dfIn=NULL
+                ,aggregation=aggregation
+                ,dbGroup=dbGroup
+                ,sensorId=sensorIds$sensorId[i]
+                ,sensorType=sensorIds$sensorType[i]
+                ,observationTypes=observationTypes
+                ,dateFrom=reportConfig$dateFrom
+                ,dateTo=reportConfig$dateTo
+                ,cachePath=cachePath
+         )
+      } else {
+        dfTmpOne<-getFiwareData(dfIn=NULL
+                                ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
+                                ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
+                                ,dateFrom=reportConfig$dateFrom
+                                ,dateTo=reportConfig$dateTo
+                                ,cachePath=cachePath
+                                ,aggregateInd=aggregateInd
+                                ,source=sensorIds$source[i]
+                                ,sensorId=sensorIds$sensorId[i]
+                                ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
+                                ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
+                                ,csvFileName=sensorIds$csvFileName[i]
+                                ,csvPath=sensorIds$csvPath[i]
+                                ,csvType=sensorIds$csvType[i]
+                                ,rdaFileName=sensorIds$rdaFileName[i]
+                                ,rdaPath=sensorIds$rdaPath[i]
+        )
+      }
     }
 
     #    calib<-FALSE
@@ -388,8 +440,8 @@ if (!is.null(reportLocal) && !is.na(reportLocal)) {
 
 periodetext1 <- with_tz(period[1],localTimeZone) # strftime(with_tz(period[1],'Asia/Tokyo'), format = "%Y-%m-%d %H:%M uur %z" ,tz='JST')
 periodetext2 <- with_tz(period[2],localTimeZone)  # strftime(period[2], format = "%Y-%m-%d %H:%M uur %z",tz='JST',usetz=TRUE)
-print(periodetext1)
-print(periodetext2)
+#print(periodetext1)
+#print(periodetext2)
 print("ggplot")
 #total <- subset(total, total$sensorType == 'pm25')
 # plot graph
@@ -437,7 +489,7 @@ gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSub
   ,reportLocal=reportLocal)
 
 
-# make imagefile
+print("make imagefile")
 if (!is.null(reportHeight)) {
   if (!is.null(reportWidth)) {
     apriSensorImage(gTotal,reportFileLabel,height=reportHeight,width=reportWidth)

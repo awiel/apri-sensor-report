@@ -148,9 +148,9 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     dfIncidents$dayHour<-as.POSIXct(format(dfIncidents$date,'%Y-%m-%dT%H'), format="%Y-%m-%dT%H")
 #    print(dfIncidents$dayHour)
 #    print(dfIncidents$day)
-    print("head(dfIncidents)")
-    print(head(dfIncidents));
-    print(dfIncidents[c('date','sensorValue','diffDateLag','diffDateLead','rcLag','rcLead','sensorValueMa','ma','topValue','incidentNr')]);
+  #  print("head(dfIncidents)")
+  #  print(head(dfIncidents));
+  #  print(dfIncidents[c('date','sensorValue','diffDateLag','diffDateLead','rcLag','rcLead','sensorValueMa','ma','topValue','incidentNr')]);
     
     dfIncidentDay <- dfIncidents %>% 
       group_by(incidentNr)  %>%
@@ -163,7 +163,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
                 incidentScore = ceiling(n()/maxTimePerIncident), # assume 5 minutes per cigarette
                 .groups = 'drop') %>% 
       as.data.frame()
-    print(dfIncidentDay)
+   # print(dfIncidentDay)
     
     dfIncidentDayHour <- dfIncidents %>% 
       group_by(incidentNr)  %>%
@@ -183,7 +183,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
                 count = sum(incidentScore),
                 .groups = 'drop') %>% 
       as.data.frame()
-    print(dfIncidentDayHourStats)
+  #  print(dfIncidentDayHourStats)
     
     dfIncidentStats <- dfIncidentDay %>% 
       group_by(day)  %>%
@@ -195,7 +195,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     dfIncidentStats$date<-as.POSIXct(dfIncidentStats$day, format="%Y-%m-%d")
     #dfIncidents$day<-as.POSIXct(format(dfIncidents$date-4*60*60,'%Y-%m-%d'), format="%Y-%m-%d")
     
-    print(dfIncidentStats)
+ #   print(dfIncidentStats)
   }
   
   
@@ -231,7 +231,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   #print(dateLabels)
   #gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver()) +
   dt<-difftime(statsPosXMax,statsPosX,units='hours')
-  print(dt)
+ # print(dt)
   if (dt<30) {
     print('breaks <30 hours')
     dateBreaks<-'1 hours'
