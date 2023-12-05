@@ -540,12 +540,12 @@ if(is.null(reportConfig$correlPlots)==FALSE) {
         b <- ggplot(dfMerged, aes(x = sensorValue.x, y = sensorValue.y)) +
           stat_cor(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*1,size=1.0,
                    aes(label =  paste( ..r.label.., ..rr.label.., sep = "~~~~")),) +
-          stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*2,size=1.0) +
+          stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*2,linewidth=1.0) +
           #   stat_cor(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*3,size=0.9,formula=formula) +
           #   stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*4,size=0.9,formula=formula) +
           theme_bw()+
           theme(text = element_text(size = rel(1.8))
-                , element_line(colour = 'green', size = 0.1)
+                , element_line(colour = 'green', linewidth = 0.1)
                 #, plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1),
                 , plot.title = element_text(face="bold",size = rel(1.8), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1),
                 , plot.subtitle=element_text(size = rel(2.2), hjust =0,margin=margin(3,0,8,0)) # 0.5) #,face="bold")
@@ -555,9 +555,9 @@ if(is.null(reportConfig$correlPlots)==FALSE) {
                 #, axis.text=element_text(size = rel(0.9))
                 , axis.text=element_text(size = rel(0.9))
                 , axis.text.y.right=element_text(size = rel(0.9))
-                #, axis.line = element_line(colour = "black", size = 0.1)
-                , axis.line = element_line(colour = "black", size = 0.01)
-                , axis.ticks = element_line(colour = "black", size = 0.01)
+                #, axis.line = element_line(colour = "black", linewidth = 0.1)
+                , axis.line = element_line(colour = "black", linewidth = 0.01)
+                , axis.ticks = element_line(colour = "black", linewidth = 0.01)
                 #, legend.text=element_text(size = rel(1.9))
                 , legend.text=element_text(size = rel(1.5))
                 #, legend.title=element_text(size = rel(2.0)) #,face="bold")
@@ -566,7 +566,7 @@ if(is.null(reportConfig$correlPlots)==FALSE) {
                 , legend.justification="right"
                 , legend.margin=margin(0,0,0,0)
                 , legend.box.margin=margin(-10,-10,-10,-10) # t r b l
-                , panel.border = element_rect(colour = "black", fill=NA, size=0.1)
+                , panel.border = element_rect(colour = "black", fill=NA, linewidth=0.1)
                 , legend.key.height=unit(0.5,"line")
                 , legend.key = element_rect(color = NA, fill = NA)
                 , legend.key.width=unit(0.3,"cm")

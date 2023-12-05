@@ -231,7 +231,14 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   #print(dateLabels)
   #gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver()) +
   dt<-difftime(statsPosXMax,statsPosX,units='hours')
- # print(dt)
+  print(paste0('dt: ',dt))
+  if (dt<12) {
+    print('breaks <12 hours')
+    #dateBreaks<-' hours'
+    # dateBreaks<-'30 min'
+    dateLabels<-'%H:%M'
+    gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver())
+  } else {
   if (dt<30) {
     print('breaks <30 hours')
     dateBreaks<-'1 hours'
@@ -264,11 +271,12 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
       }
     }
   }
+  }
   
   gTotal<-gTotal+
 #  gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver()) +
     theme(text = element_text(size = rel(2.0))
-          , element_line(colour = 'green', size = 0.2)
+          , element_line(colour = 'green', linewidth = 0.2)
           , plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1),
           , plot.subtitle=element_text(size = rel(2.2), hjust =0,margin=margin(3,0,8,0)) # 0.5) #,face="bold")
           , plot.caption=element_text(size = rel(1.5),hjust=0,color = "black", face="italic")
@@ -281,12 +289,12 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
           , legend.justification="right"
           , legend.margin=margin(0,0,0,0)
           , legend.box.margin=margin(-10,-10,-10,-10) # t r b l
-          , panel.border = element_rect(colour = "black", fill=NA, size=0.2)
+          , panel.border = element_rect(colour = "black", fill=NA, linewidth=0.2)
           , legend.key.height=unit(0.5,"line")
           , legend.key = element_rect(color = NA, fill = NA)
           , legend.key.width=unit(0.3,"cm")
     )  +
-    geom_line(aes(group=interaction(sensorId,sensorType,type)),size=0.15)+ #group=foi))+#
+    geom_line(aes(group=interaction(sensorId,sensorType,type)),linewidth=0.15)+ #group=foi))+#
     guides(color = guide_legend(override.aes = list(size = 1.0) ) ) +
     labs(x=paste(xAxisText,' ',aggregateTxt,'\n',periodeLabel,': ',periodetext1,' - ',periodetext2,sep=''),
          y=yAxisText,title=paste("ApriSensor ",foiLabel), subtitle=foiText, caption=captionText) +
@@ -296,7 +304,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     #annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0) +
     theme(
       strip.text.y = element_text(size = rel(2.6)),
-      strip.background = element_rect(colour="black", fill="grey", size=0.3)
+      strip.background = element_rect(colour="black", fill="grey", linewidth=0.3)
     )
   #print('annotation')
 
@@ -313,7 +321,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     #print('geom_line treshold')
     #if(treshold<statsMax) {
       gTotal<-gTotal +
-        geom_hline(yintercept = treshold,size=0.10,color='darkgreen') +
+        geom_hline(yintercept = treshold,linewidth=0.10,color='darkgreen') +
         #annotate("text", x = statsPosX, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
         #annotate("text", x = statsPosX+statsXResolution*7, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0,color='darkgreen') +
         annotate("text", x = statsPosX+statsXResolution*15, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0,color='darkgreen')
@@ -321,12 +329,12 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   }
 
   if (incident==T) {
-            gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=sensorValueMa),colour='green',size=0.2)
-            gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=ma),colour='yellow',size=0.2)
-        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
-        gTotal<-gTotal + geom_point(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.1) 
-    #    gTotal<-gTotal + geom_point(data=dfIncidentDayHourStats,aes(x=dayHour,y=count*2),colour='blue',size=0.1) 
-    #    gTotal<-gTotal + geom_point(data=dfIncidentStats,aes(x=day,y=count*2),colour='blue',size=0.1) 
+            gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=sensorValueMa),colour='green',linewidth=0.2)
+            gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=ma),colour='yellow',linewidth=0.2)
+        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=topValue),colour='black',linewidth=0.1) 
+        gTotal<-gTotal + geom_point(data=dfTotal,aes(x=date,y=topValue),colour='black',linewidth=0.1) 
+    #    gTotal<-gTotal + geom_point(data=dfIncidentDayHourStats,aes(x=dayHour,y=count*2),colour='blue',linewidth=0.1) 
+    #    gTotal<-gTotal + geom_point(data=dfIncidentStats,aes(x=day,y=count*2),colour='blue',linewidth=0.1) 
       
     
     dfIncidentStats$foiLocation<-'loc.'
