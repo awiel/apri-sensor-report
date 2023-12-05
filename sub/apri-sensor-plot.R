@@ -232,7 +232,14 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   #gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver()) +
   dt<-difftime(statsPosXMax,statsPosX,units='hours')
   print(paste0('dt: ',dt))
-  if (dt<12) {
+  if (dt<4) {
+    print('breaks <4 hours')
+    #dateBreaks<-' hours'
+    dateBreaks<-'15 min'
+    dateLabels<-'%H:%M'
+    gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver())
+  } else {
+    if (dt<12) {
     print('breaks <12 hours')
     #dateBreaks<-' hours'
     dateBreaks<-'30 min'
@@ -270,6 +277,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
       gTotal<-gTotal+  scale_x_datetime()
       }
     }
+  }
   }
   }
   
