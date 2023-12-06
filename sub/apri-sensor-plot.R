@@ -298,12 +298,15 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
           , legend.margin=margin(0,0,0,0)
           , legend.box.margin=margin(-10,-10,-10,-10) # t r b l
           , panel.border = element_rect(colour = "black", fill=NA, linewidth=0.2)
-          , legend.key.height=unit(0.5,"line")
-          , legend.key = element_rect(color = NA, fill = NA)
-          , legend.key.width=unit(0.3,"cm")
+          , legend.key.height=unit(0.1,"line")
+    #      , legend.key = element_rect(color = blues9, fill = blues9)
+    #      , legend.key = element_rect(color = NA, fill = NA)
+          , legend.key.width=unit(0.15,"cm")
     )  +
-    geom_line(aes(group=interaction(sensorId,sensorType,type)),linewidth=0.15)+ #group=foi))+#
-    guides(color = guide_legend(override.aes = list(size = 1.0) ) ) +
+   # guides(guide_legend(foiLocation="xxx") ) +
+  
+    geom_line(key_glyph = draw_key_rect, aes(group=interaction(sensorId,sensorType,type)),linewidth=0.15)+ #group=foi))+#
+   # guides(color = guide_legend(override.aes = list(size = 1.0) ) ) +
     labs(x=paste(xAxisText,' ',aggregateTxt,'\n',periodeLabel,': ',periodetext1,' - ',periodetext2,sep=''),
          y=yAxisText,title=paste("ApriSensor ",foiLabel), subtitle=foiText, caption=captionText) +
     facet_grid( sensorType ~ . , labeller=labeller(sensorType = unlist(sensorTypes[dfTotal$sensorType],use.names=T)), scales = "free") +
