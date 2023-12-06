@@ -1,6 +1,7 @@
 
 library(scales)
 library(tidyr)
+library(cowplot)
 
 # Rscript apri-sensor-generic-plot.R AFF4-pm25-csv-locatie-2
 
@@ -296,16 +297,45 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
           , legend.position="top"
           , legend.justification="right"
           , legend.margin=margin(0,0,0,0)
-          , legend.box.margin=margin(-5,-10,-10,-10) # t r b l
+          , legend.box.margin=margin(-10,-10,-10,-10) # t r b l
           , panel.border = element_rect(colour = "black", fill=NA, linewidth=0.2)
-        , legend.key.height=unit(0.1,"cm")
+        , legend.key.height=unit(0.00175,"cm")
           , legend.key = element_rect(color = "white", fill = "white")
     #      , legend.key = element_rect(color = NA, fill = NA)
-          , legend.key.width=unit(0.15,"cm")
+          , legend.key.width=unit(0.105,"cm")
     )  +
    # guides(guide_legend(foiLocation="xxx") ) +
   
-    geom_line(key_glyph = draw_key_rect, aes(group=interaction(sensorId,sensorType,type)),linewidth=0.15)+ #group=foi))+#
+#    rectangle_key_glyph(
+#      colour = NA,
+#      fill = fill,
+#      alpha = alpha,
+#      size = size,
+#      linetype = linetype,
+#      padding = unit(c(0, 0, 0, 0), "pt"),
+#      color
+#    )
+#  
+#  circle_key_glyph(
+#    colour = NA,
+#    fill = fill,
+#    alpha = alpha,
+#    size = size,
+#    linetype = linetype,
+#    padding = unit(c(0, 0, 0, 0), "pt"),
+#    color
+#  )
+  
+    geom_line(
+#      key_glyph = draw_key_rect
+    #  key_glyph = draw_key_vpath
+      key_glyph = circle_key_glyph( # cowplot
+        fill = color,
+        color = NA
+        #color = "black", linetype = 3, size = 0.3,
+        #padding = margin(2, 2, 2, 2)
+      )
+      , aes(group=interaction(sensorId,sensorType,type)),linewidth=0.15)+ #group=foi))+#
    # guides(color = guide_legend(override.aes = list(size = 1.0) ) ) +
     labs(x=paste(xAxisText,' ',aggregateTxt,'\n',periodeLabel,': ',periodetext1,' - ',periodetext2,sep=''),
          y=yAxisText,title=paste("ApriSensor ",foiLabel), subtitle=foiText, caption=captionText) +
