@@ -296,10 +296,10 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
           , legend.position="top"
           , legend.justification="right"
           , legend.margin=margin(0,0,0,0)
-          , legend.box.margin=margin(-10,-10,-10,-10) # t r b l
+          , legend.box.margin=margin(-5,-10,-10,-10) # t r b l
           , panel.border = element_rect(colour = "black", fill=NA, linewidth=0.2)
-          , legend.key.height=unit(0.1,"line")
-    #      , legend.key = element_rect(color = blues9, fill = blues9)
+        , legend.key.height=unit(0.1,"cm")
+          , legend.key = element_rect(color = "white", fill = "white")
     #      , legend.key = element_rect(color = NA, fill = NA)
           , legend.key.width=unit(0.15,"cm")
     )  +
