@@ -120,11 +120,12 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
                  , paramDate
                  ,sep='')
     print(url)
-
-    if (!is.null(splitTmp[2])) {
-      sensorType <-splitTmp[2]
-    }
-    #print(sensorType)
+    
+    print(sensorType)
+    if (length(splitTmp)>1) {
+      observationTypes<-splitTmp[2] # this is the alias
+    } 
+    
       
     myData <- fromJSON(url)
     if (aggregation=='minute') {
@@ -133,32 +134,41 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
     } else if (aggregation=='detail') {
       dfResult <-myData$observationsDetail
       dfResult$sensorId <- sensorId
-      dfResult$sensorType <- sensorType
+      dfResult$sensorType <- observationTypes
       #      dfResult <-myData
     } else {
       dfResult <-myData$observation
       dfResult$sensorId <- sensorId
-      dfResult$sensorType <- sensorType
+      dfResult$sensorType <- observationTypes
     } 
-    # print(head(dfResult))
+     
+    
+    print(head(dfResult))
 
     dfResult$dateObserved <- dfResult$dateObservedDate
-    if (!is.null(dfResult$pm10)) {
-      dfResult$sensorValue <- dfResult$pm10
-      dfResult$sensorType <- sensorType
-    }
-    if (!is.null(dfResult$pm25)) {
-      dfResult$sensorValue <- dfResult$pm25
-      dfResult$sensorType <- "pm25"
-    }
-    if (!is.null(dfResult$temperature)) {
-      dfResult$sensorValue <- dfResult$temperature
-      dfResult$sensorType <- "temperature"
-    }
-    if (!is.null(dfResult$rHum)) {
-      dfResult$sensorValue <- dfResult$rHum
-      dfResult$sensorType <- "rHum"
-    }
+#    dfResult$sensorType <- observationTypes
+    observationTypesOrg<-splitTmp[1]
+    dfResult$sensorValue <- dfResult[c(observationTypesOrg)][,1] 
+    dfResult$sensorType <- observationTypes
+    
+    print(head(dfResult))
+    
+#    if (!is.null(dfResult$pm10)) {
+#      dfResult$sensorValue <- dfResult$pm10
+#      dfResult$sensorType <- sensorType
+#    }
+#    if (!is.null(dfResult$pm25)) {
+#      dfResult$sensorValue <- dfResult$pm25
+#      dfResult$sensorType <- "pm25"
+#    }
+#    if (!is.null(dfResult$temperature)) {
+#      dfResult$sensorValue <- dfResult$temperature
+#      dfResult$sensorType <- "temperature"
+#    }
+#    if (!is.null(dfResult$rHum)) {
+#      dfResult$sensorValue <- dfResult$rHum
+#      dfResult$sensorType <- "rHum"
+#    }
     
     #   print(head(dfResult))
     
@@ -338,7 +348,9 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
       #dfResult <- dfResult[keeps]
     }
 
-    if (!is.null(dfResult$sensorType[1]) && dfResult$sensorType[1]=='bme680_gasResistance') {
+    #if (!is.null(dfResult$sensorType[1]) && dfResult$sensorType[1]=='bme680_gasResistance') {
+    print(dfResult$sensorType[1])
+    if (dfResult$sensorType[1] == 'bme680_gasResistance') {
       #dfTmpGas<-fiwareGetSensorSelectRecords(NULL,'aprisensor_in','/bme680','sensorId','SCRP00000000504b9dd5','gasResistance:bme680_gasResistance')
       dfResult$sensorValue<-(1000000 - dfResult$sensorValue)/1000
     }
