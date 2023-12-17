@@ -63,7 +63,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   if (incident==T) {
     
     rcMarge<- 0.7 # 0.7 # marge for rc (richtingscoefficient) Higher is steeper (up or down)
-    topValueCorr<- 2 # 6 # 5 # 4 # 3 # 2 # marge for top value. Hoger is minder incidenten
+    topValueCorr<- 4 # 2 # 6 # 5 # 4 # 3 # 2 # marge for top value. Hoger is minder incidenten
     maxTimePerIncident<-9 #8 # assume x minutes per cigarette incident
     rollMedianParam <- 150 # 121  # 121
     
@@ -361,6 +361,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   if(is.null(treshold)!=TRUE) {
     #print('geom_line treshold')
     #if(treshold<statsMax) {
+    print(paste("treshold:",treshold))
       gTotal<-gTotal +
         geom_hline(yintercept = treshold,linewidth=0.10,color='darkgreen') +
         #annotate("text", x = statsPosX, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
@@ -370,10 +371,10 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   }
 
   if (incident==T) {
-            gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=sensorValueMa),colour='green',linewidth=0.2)
-            gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=ma),colour='yellow',linewidth=0.2)
-        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=topValue),colour='black',linewidth=0.1) 
-        gTotal<-gTotal + geom_point(data=dfTotal,aes(x=date,y=topValue),colour='black',linewidth=0.1) 
+    #        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=sensorValueMa),colour='green',linewidth=0.2)
+    #        gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=ma),colour='yellow',linewidth=0.2)
+    #    gTotal<-gTotal + geom_line(data=dfTotal,aes(x=date,y=topValue),colour='black',linewidth=0.1) 
+    #    gTotal<-gTotal + geom_point(data=dfTotal,aes(x=date,y=topValue),colour='black',size=0.01) 
     #    gTotal<-gTotal + geom_point(data=dfIncidentDayHourStats,aes(x=dayHour,y=count*2),colour='blue',linewidth=0.1) 
     #    gTotal<-gTotal + geom_point(data=dfIncidentStats,aes(x=day,y=count*2),colour='blue',linewidth=0.1) 
       
@@ -451,10 +452,20 @@ apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL
   if (!is.null(fileSuffix)) fileSuffix<-paste0('-',fileSuffix)
   if (!is.null(fileDate)) fileDate<-paste0('-',fileDate)
   fileName <- paste('aprisensor','_',fileLabel,fileSuffix,'.png',sep='')
+  
 
+  print("testje")
+  print(fileName)
+  print(plotPath)
+  print(width)
+  print(height)
+  print(units)
+  print(apriSensorPlot)
   ggsave(fileName, path=plotPath, width=width, height=height, plot = apriSensorPlot,units=units)
   #ggsave(fileName, path=plotPath, width=3.8, height=height, plot = apriSensorPlot,dpi=dpi,units=units)
 
+  print("testje")
+  
   plotImg <- image_read(paste(plotPath,'/',fileName,sep=''))
   logo <- logo %>%
     image_annotate("", color = "black", size = 30,

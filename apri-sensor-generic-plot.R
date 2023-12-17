@@ -130,6 +130,8 @@ for (i in 1:nrow(sensorIds)) {
       }
     }
     if (periodType == "actual") {
+      print('actual')
+      
       if (!is.null(sensorIds$serviceDB[i]) && !is.na(sensorIds$serviceDB[i])) {
         dbGroup<-sensorIds$dbGroup[i]
         observationTypes<-observableProperties
@@ -167,29 +169,34 @@ for (i in 1:nrow(sensorIds)) {
         )
       }
     } else { # hist
+      print('hist')
+      
       if (!is.null(sensorIds$serviceDB[i]) && !is.na(sensorIds$serviceDB[i])) {
-          dfTmp<-getApriSensorData(dfIn=NULL,aggregation=aggregation,dbGroup=dbGroup,sensorId=sensorIds$sensorId[i],sensorType=sensorIds$sensorType[i],observationTypes=observationTypes
+        print("hist getApriSensorData")
+        dbGroup<-sensorIds$dbGroup[i]
+        observationTypes<-observableProperties
+        if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
+          aggregation<-sensorIds$aggregation[i]
+          #aggregation<-"minute"
+        } else {
+          aggregation<-"minute"
+        }
+        dfTmpOne<-getApriSensorData(dfIn=NULL
+                                    ,aggregation=aggregation
+                                    ,dbGroup=dbGroup
+                                    ,sensorId=sensorIds$sensorId[i]
+                                    ,sensorType=sensorIds$sensorType[i]
+                                    ,observationTypes=observationTypes
+                  #                  ,cachePath=cachePath
               ,dateFrom=reportConfig$dateFrom
               ,dateTo=reportConfig$dateTo
               )
-          print('##test')
-          aggregation<-"minute"
-          todo<-'todo'
-          dbGroup<-NULL
-          observationTypes<-observableProperties
-          dateFrom<-reportConfig$dateFrom
-          dateTo<-reportConfig$dateTo
-          dfTmpOne<-getApriSensorData(dfIn=NULL
-                ,aggregation=aggregation
-                ,dbGroup=dbGroup
-                ,sensorId=sensorIds$sensorId[i]
-                ,sensorType=sensorIds$sensorType[i]
-                ,observationTypes=observationTypes
-                ,dateFrom=reportConfig$dateFrom
-                ,dateTo=reportConfig$dateTo
-                ,cachePath=cachePath
-         )
+        if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+          dfTmpOne$sensorId<-sensorIds$sensorIdAlias[i]
+          #print(sensorIds$sensorIdAlias[i])
+        }
       } else {
+        print("hist getFiwareData")
         dfTmpOne<-getFiwareData(dfIn=NULL
                                 ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
                                 ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
@@ -207,8 +214,13 @@ for (i in 1:nrow(sensorIds)) {
                                 ,rdaFileName=sensorIds$rdaFileName[i]
                                 ,rdaPath=sensorIds$rdaPath[i]
         )
+        print('xxxxxxxxxxxxxxx')
+        print(head(dfTmpOne))
+        
+        
       }
     }
+    
 
     #    calib<-FALSE
     if (is.null(sensorIds$pmCoarseBase[i])==FALSE && is.na(sensorIds$pmCoarseBase[i])==FALSE) {
@@ -348,6 +360,7 @@ for (i in 1:nrow(sensorIds)) {
   }
 }
 
+
 #dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
 #dfTmp$minute <- sapply(format(dfTmp$date, "%M"), as.numeric)
 #dfTmp$hour <- sapply(format(dfTmp$date, "%H"), as.numeric)
@@ -381,7 +394,6 @@ if(nrow(dfTmp==0)) {
     dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
   }
 }
-
 
 keeps <- c("date", "sensorValue","sensorType","sensorId")
 total <- dfTmp[keeps]
@@ -442,7 +454,7 @@ periodetext1 <- with_tz(period[1],localTimeZone) # strftime(with_tz(period[1],'A
 periodetext2 <- with_tz(period[2],localTimeZone)  # strftime(period[2], format = "%Y-%m-%d %H:%M uur %z",tz='JST',usetz=TRUE)
 #print(periodetext1)
 #print(periodetext2)
-print("ggplot")
+print(">ggplot")
 #total <- subset(total, total$sensorType == 'pm25')
 # plot graph
 dateBreaks<-"1 hour"
@@ -481,6 +493,8 @@ if (!is.null(reportLocal)&&!is.na(reportLocal)) {
   }
 }
 
+print(head(total))
+print("start apriSensorPlotSingle")
 gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle
   ,ylim,treshold=reportTreshold
   ,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels
@@ -490,6 +504,10 @@ gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSub
 
 
 print("make imagefile")
+#print(head(gTotal))
+#print(reportHeight)
+#print(reportWidth)
+#gTotal
 if (!is.null(reportHeight)) {
   if (!is.null(reportWidth)) {
     apriSensorImage(gTotal,reportFileLabel,height=reportHeight,width=reportWidth)

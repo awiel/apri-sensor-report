@@ -31,9 +31,13 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
   # eg curl "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/SCRP0000001234AB/pmsa003?aggregation=detail,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
 
   #fileName<-paste(paste(fiwareService,str_replace_all(sensorType, '/', '_'),foi,ops,sep='#'),'.Rda',sep='')
-  
-  if (is.null(dbGroup)) fileName<-paste(paste('DB',sensorId,sensorType,observationTypes,aggregation,sep='#'),'.rds',sep='')
+  print('test')
+  print(dbGroup)
+  if (is.null(dbGroup) || is.na(dbGroup)) fileName<-paste(paste('DB',sensorId,sensorType,observationTypes,aggregation,sep='#'),'.rds',sep='')
   else fileName<-paste(paste('DB',sensorId,sensorType,dbGroup,observationTypes,aggregation,sep='#'),'.rds',sep='')
+  
+  print('test2')
+  
   fileName<-gsub(":","_",fileName)
 
   print(periodSpan)
@@ -102,6 +106,11 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
     }
   }
   paramDate<-paste("&dateFrom=",dateFrom,"&dateTo=",dateTo,sep='')
+  
+  print(observationTypes)
+  splitTmp<-strsplit(observationTypes,split=':')[[1]]
+  observationTypes<-splitTmp[1]
+  #print(splitTmp)
 
   # eg curl "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/SCRP0000001234AB/pmsa003?aggregation=detail,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
   url <- paste("https://aprisensor-api-v1.openiod.org/v1/observations/sensor/"
@@ -111,7 +120,12 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
                  , paramDate
                  ,sep='')
     print(url)
-    
+
+    if (!is.null(splitTmp[2])) {
+      sensorType <-splitTmp[2]
+    }
+    #print(sensorType)
+      
     myData <- fromJSON(url)
     if (aggregation=='minute') {
       dfResult <-myData$observationsMinute
@@ -127,9 +141,12 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
       dfResult$sensorType <- sensorType
     } 
     # print(head(dfResult))
-    
 
     dfResult$dateObserved <- dfResult$dateObservedDate
+    if (!is.null(dfResult$pm10)) {
+      dfResult$sensorValue <- dfResult$pm10
+      dfResult$sensorType <- sensorType
+    }
     if (!is.null(dfResult$pm25)) {
       dfResult$sensorValue <- dfResult$pm25
       dfResult$sensorType <- "pm25"

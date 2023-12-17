@@ -123,7 +123,7 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
   }
   paramDate<-paste("&dateFrom=",dateFrom,"&dateTo=",dateTo,sep='')
 
-  if (!is.null(fiwareService) && !is.null(fiwareServicePath)) {
+  if (!is.null(fiwareService) && !is.null(fiwareServicePath) && !is.na(fiwareService) && !is.na(fiwareServicePath)) {
     # when first character is # then service name as is, without the #
     if (fiwareService == '' || fiwareServicePath=='/knmi' || fiwareServicePath=='/tsi3007' || 
            substr(fiwareService,1,6)=='orion-' || substr(fiwareService,1,1)=='#' ||
@@ -140,7 +140,7 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
     }
   }
 
-  if (!is.null(fiwareService) && substr(fiwareService,1,1)=='#') {
+  if (!is.null(fiwareService) && !is.na(fiwareService) && substr(fiwareService,1,1)=='#') {
     fiwareService<-substr(fiwareService,2,999)
   }
 
@@ -165,7 +165,7 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
   if (!is.null(source) && !is.na(source)) {
     if (source == 'csv') {  # source == csv dataset
       # /NBI_TN012/12-pm25
-      print('test')
+      print('test csv')
       print(dateFrom)
       print(dateTo)
       
@@ -177,12 +177,14 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
         csvType='2'
       }
       if (csvType=='1') {
-        dfResult<-read.csv(csvFile)
+        dfResult<-read.csv(csvFile,dec = ".")
+        print("cccccccccccccccccccccccccccccccccccc")
+        print(head(dfResult))
         if ("sensorType" %in% colnames(dfResult)==F) {
           dfResult$sensorType<-'pm25'
-          dfResult$sensorValue<-dfResult$pm25mlr
+          dfResult$sensorValue<-dfResult$pm25
+          #dfResult$sensorValue<-dfResult$pm25mlr
         } 
-        print(head(dfResult))
       } else {
         dfResult<-read.csv2(csvFile)
       }
@@ -256,6 +258,8 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
 
   dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
   keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+  print('test dfResult')
+  print(head(dfResult))
   dfResult <- dfResult[keeps]
 
 
@@ -298,10 +302,12 @@ getFiwareData<-function(dfIn=NULL,fiwareService=NULL,fiwareServicePath=NULL,key=
     if (is.null(aggregateInd)) {
       print("test aggregateInd")
     }
-    if (is.null(aggregateInd)) aggrTmp <- FALSE
-    if (!is.null(aggregateInd)) {
+    if (is.null(aggregateInd) || is.na(aggregateInd)) {
+      aggrTmp <- FALSE
+    } else {
       if (aggregateInd!="N")  aggrTmp <- TRUE
     }
+
     if (aggrTmp == TRUE) {
       if (!is.null(aggregateInd)) {
         if (aggregateInd == 'D') {
