@@ -108,69 +108,59 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
   paramDate<-paste("&dateFrom=",dateFrom,"&dateTo=",dateTo,sep='')
   
   print(observationTypes)
-  splitTmp<-strsplit(observationTypes,split=':')[[1]]
-  observationTypes<-splitTmp[1]
-  #print(splitTmp)
-
+  observationTypeArray<-strsplit(observationTypes,split=',')
+  observationTypesUrl<-''
+  for (observationTypeObject in observationTypeArray[[1]]) {
+    if (observationTypesUrl=='') {
+      observationTypesUrl<-paste0(observationTypesUrl,strsplit(observationTypeObject,split=':')[[1]][1])
+    } else {
+      observationTypesUrl<-paste0(observationTypesUrl,',',strsplit(observationTypeObject,split=':')[[1]][1])
+    }
+  }
+  
   # eg curl "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/SCRP0000001234AB/pmsa003?aggregation=detail,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
   url <- paste("https://aprisensor-api-v1.openiod.org/v1/observations/sensor/"
                , sensorId,'/',sensorType
-               ,"?observationTypes=", observationTypes
+               ,"?observationTypes=", observationTypesUrl
                ,"&aggregation=", aggregation
                  , paramDate
                  ,sep='')
-    print(url)
-    
-    print(sensorType)
-    if (length(splitTmp)>1) {
-      observationTypes<-splitTmp[2] # this is the alias
-    } 
-    
-      
-    myData <- fromJSON(url)
-    if (aggregation=='minute') {
-      dfResult <-myData$observationsMinute
-#      dfResult <-myData
-    } else if (aggregation=='detail') {
-      dfResult <-myData$observationsDetail
-      dfResult$sensorId <- sensorId
-      dfResult$sensorType <- observationTypes
-      #      dfResult <-myData
-    } else {
-      dfResult <-myData$observation
-      dfResult$sensorId <- sensorId
-      dfResult$sensorType <- observationTypes
-    } 
-     
-    
-    print(head(dfResult))
+  print(url)
 
-    dfResult$dateObserved <- dfResult$dateObservedDate
-#    dfResult$sensorType <- observationTypes
-    observationTypesOrg<-splitTmp[1]
-    dfResult$sensorValue <- dfResult[c(observationTypesOrg)][,1] 
-    dfResult$sensorType <- observationTypes
+  myData <- fromJSON(url)
+  if (aggregation=='minute') {
+    dfResult <-myData$observationsMinute
+    dfResult$dateObserved<-dfResult$dateObservedDate
+  } else if (aggregation=='detail') {
+    dfResult <-myData$observationsDetail
+    dfResult$dateObserved<-dfResult$dateObservedDate
+    dfResult$sensorId <- myData$observations$sensorId[1]
+  } else {
+    dfResult <-myData$observation
+    dfResult$sensorId <- myData$observations$sensorId
+  }
     
-    print(head(dfResult))
-    
-#    if (!is.null(dfResult$pm10)) {
-#      dfResult$sensorValue <- dfResult$pm10
-#      dfResult$sensorType <- sensorType
-#    }
-#    if (!is.null(dfResult$pm25)) {
-#      dfResult$sensorValue <- dfResult$pm25
-#      dfResult$sensorType <- "pm25"
-#    }
-#    if (!is.null(dfResult$temperature)) {
-#      dfResult$sensorValue <- dfResult$temperature
-#      dfResult$sensorType <- "temperature"
-#    }
-#    if (!is.null(dfResult$rHum)) {
-#      dfResult$sensorValue <- dfResult$rHum
-#      dfResult$sensorType <- "rHum"
-#    }
-    
-    #   print(head(dfResult))
+  dfMerged<-NULL
+  for (observationTypeObject in observationTypeArray[[1]]) {
+    tmpObservationType <- strsplit(observationTypeObject,split=':')[[1]][1]
+    tmpObservationTypeAlias <- strsplit(observationTypeObject,split=':')[[1]][2]
+      
+    dfSubSet<- dfResult
+    dfSubSet$sensorValue <- dfSubSet[c(tmpObservationType)][,1]
+    if (!is.na(tmpObservationTypeAlias)) {
+      dfSubSet$sensorType <- tmpObservationTypeAlias
+    } else {
+      dfSubSet$sensorType <- tmpObservationType
+    }
+      
+    if (is.null(dfMerged)) {
+      dfMerged<-dfSubSet
+    } else {
+      dfMerged<-rbind(dfMerged,dfSubSet)
+    } 
+  }
+  
+  dfResult<-dfMerged
     
   if (!is.null(source) && !is.na(source)) {
     if (source == 'csv') {  # source == csv dataset
@@ -204,10 +194,7 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
 
   if (!is.null(source) && !is.na(source)) {
     if (source == 'rda') {  # source == Rda dataset
-      print('test')
-      print(dateFrom)
-      print(dateTo)
-      
+
       rdaFile<-paste0(rdaPath,rdaFileName)
       print(paste('rda: (',getwd(),') ',rdaFile))
       dfResult<-readRDS(rdaFile)
@@ -260,7 +247,7 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
   }
 
   dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
-  
+
   keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
   dfResult <- dfResult[keeps]
 
@@ -350,10 +337,12 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
 
     #if (!is.null(dfResult$sensorType[1]) && dfResult$sensorType[1]=='bme680_gasResistance') {
     print(dfResult$sensorType[1])
-    if (dfResult$sensorType[1] == 'bme680_gasResistance') {
-      #dfTmpGas<-fiwareGetSensorSelectRecords(NULL,'aprisensor_in','/bme680','sensorId','SCRP00000000504b9dd5','gasResistance:bme680_gasResistance')
-      dfResult$sensorValue<-(1000000 - dfResult$sensorValue)/1000
-    }
+   # if(!is.na(dfResult$sensorType[1])) {
+      if (dfResult$sensorType[1] == 'bme680_gasResistance') {
+        #dfTmpGas<-fiwareGetSensorSelectRecords(NULL,'aprisensor_in','/bme680','sensorId','SCRP00000000504b9dd5','gasResistance:bme680_gasResistance')
+        dfResult$sensorValue<-(1000000 - dfResult$sensorValue)/1000
+      }
+    #}
   }
 
   if (is.null(dfIn)) return(dfResult)
