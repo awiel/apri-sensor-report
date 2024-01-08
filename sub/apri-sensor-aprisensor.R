@@ -1,4 +1,4 @@
-##
+#
 
 cmdArgs = commandArgs(trailingOnly = FALSE)
 print(paste('script','start Rscript: ', Sys.time(),cmdArgs[4]))
@@ -128,17 +128,17 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
   print(url)
 
   myData <- fromJSON(url)
-  if (aggregation=='minute') {
-    dfResult <-myData$observationsMinute
-    dfResult$dateObserved<-dfResult$dateObservedDate
-  } else if (aggregation=='detail') {
-    dfResult <-myData$observationsDetail
-    dfResult$dateObserved<-dfResult$dateObservedDate
-    dfResult$sensorId <- myData$observations$sensorId[1]
-  } else {
-    dfResult <-myData$observation
-    dfResult$sensorId <- myData$observations$sensorId
-  }
+#  if (aggregation=='minute') {
+#    dfResult <-myData$observationsMinute
+#    dfResult$dateObserved<-dfResult$dateObservedDate
+#  } else if (aggregation=='detail') {
+#    dfResult <-myData$observationsDetail
+#    dfResult$dateObserved<-dfResult$dateObservedDate
+#    dfResult$sensorId <- myData$observations$sensorId[1]
+#  } else {
+    dfResult <-myData$observations
+#    dfResult$sensorId <- myData$observations$sensorId
+#  }
     
   dfMerged<-NULL
   for (observationTypeObject in observationTypeArray[[1]]) {
