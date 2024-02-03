@@ -128,6 +128,7 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
   print(url)
 
   myData <- fromJSON(url)
+  dfResult<-myData$observations
 #  if (aggregation=='minute') {
 #    dfResult <-myData$observationsMinute
 #    dfResult$dateObserved<-dfResult$dateObservedDate
@@ -136,7 +137,7 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
 #    dfResult$dateObserved<-dfResult$dateObservedDate
 #    dfResult$sensorId <- myData$observations$sensorId[1]
 #  } else {
-    dfResult <-myData$observations
+    # dfResult <-myData$observations
 #    dfResult$sensorId <- myData$observations$sensorId
 #  }
     
