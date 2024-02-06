@@ -10,7 +10,7 @@ options(width = 100)
 #install.packages('ggpubr')
 #install.packages('lubridate')
 
-library('dplyr')
+#library('dplyr')
 library('zoo')
 library('lubridate')
 
@@ -55,6 +55,7 @@ library(jsonlite)
 
 source(paste0(subPath,"apri-sensor-fiware.R"))
 source(paste0(subPath,"apri-sensor-aprisensor.R"))
+source(paste0(subPath,"apri-luchtmeetnet.R"))
 source(paste0(subPath,"apri-sensor-plot.R"))
 
 sensorTypes<-json_data<-fromJSON(paste0(configPath,"apri-sensor-sensorTypes.json"))
@@ -135,23 +136,38 @@ for (i in 1:nrow(sensorIds)) {
       if (!is.null(sensorIds$serviceDB[i]) && !is.na(sensorIds$serviceDB[i])) {
         dbGroup<-sensorIds$dbGroup[i]
         observationTypes<-observableProperties
-        if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
-          aggregation<-sensorIds$aggregation[i]
-          #aggregation<-"minute"
+        if (sensorIds$sensorType[i]=='lmn') {
+
+          if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+            sensorIdAlias<- sensorIds$sensorIdAlias[i]
+          } else sensorIdAlias<-NULL
+          
+          dfTmpOne<-getLuchtmeetnetData(dfIn=NULL
+                                      ,sensorId=sensorIds$sensorId[i]
+                                      ,sensorIdAlias=sensorIdAlias
+                                      ,observationTypes=observationTypes
+          )
         } else {
-          aggregation<-"minute"
-        }
-        dfTmpOne<-getApriSensorData(dfIn=NULL
-                ,aggregation=aggregation
-                ,dbGroup=dbGroup
-                ,sensorId=sensorIds$sensorId[i]
-                ,sensorType=sensorIds$sensorType[i]
-                ,observationTypes=observationTypes
-                ,cachePath=cachePath
-        )
-        if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
-          dfTmpOne$sensorId<-sensorIds$sensorIdAlias[i]
-          #print(sensorIds$sensorIdAlias[i])
+          if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
+            aggregation<-sensorIds$aggregation[i]
+            #aggregation<-"minute"
+          } else {
+            aggregation<-"minute"
+          }
+          
+          if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+            sensorIdAlias<- sensorIds$sensorIdAlias[i]
+          } else sensorIdAlias<-NULL
+          
+          dfTmpOne<-getApriSensorData(dfIn=NULL
+                                      ,aggregation=aggregation
+                                      ,dbGroup=dbGroup
+                                      ,sensorId=sensorIds$sensorId[i]
+                                      ,sensorIdAlias=sensorIdAlias
+                                      ,sensorType=sensorIds$sensorType[i]
+                                      ,observationTypes=observationTypes
+                                      ,cachePath=cachePath
+          )
         }
         #print(head(dfTmpOne))
       } else {
@@ -181,20 +197,22 @@ for (i in 1:nrow(sensorIds)) {
         } else {
           aggregation<-"minute"
         }
+
+        if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+          sensorIdAlias<- sensorIds$sensorIdAlias[i]
+        } else sensorIdAlias<-NULL
+        
         dfTmpOne<-getApriSensorData(dfIn=NULL
                                     ,aggregation=aggregation
                                     ,dbGroup=dbGroup
                                     ,sensorId=sensorIds$sensorId[i]
+                                    ,sensorIdAlias=sensorIdAlias
                                     ,sensorType=sensorIds$sensorType[i]
                                     ,observationTypes=observationTypes
                   #                  ,cachePath=cachePath
               ,dateFrom=reportConfig$dateFrom
               ,dateTo=reportConfig$dateTo
               )
-        if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
-          dfTmpOne$sensorId<-sensorIds$sensorIdAlias[i]
-          #print(sensorIds$sensorIdAlias[i])
-        }
       } else {
         print("hist getFiwareData")
         dfTmpOne<-getFiwareData(dfIn=NULL
@@ -214,10 +232,7 @@ for (i in 1:nrow(sensorIds)) {
                                 ,rdaFileName=sensorIds$rdaFileName[i]
                                 ,rdaPath=sensorIds$rdaPath[i]
         )
-        print('xxxxxxxxxxxxxxx')
-        print(head(dfTmpOne))
-        
-        
+
       }
     }
     
@@ -368,6 +383,15 @@ for (i in 1:nrow(sensorIds)) {
 #dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
 
 
+if(is.null(dfTmp)) {
+  print('No records found')
+  quit()
+}
+
+#if (length(dfTmp)<=2) {
+#  print("No records found, process stopped")
+#  quit()
+#}
 
 #if (!is.null(reportLocal) && !is.na(reportLocal)) {
 #  # Japan
@@ -383,9 +407,11 @@ for (i in 1:nrow(sensorIds)) {
 dfTmp$minute <- sapply(format(dfTmp$date, "%M"), as.numeric)
 dfTmp$hour <- sapply(format(dfTmp$date, "%H"), as.numeric)
 dfTmp$foi <- dfTmp$sensorId 
+
 if(nrow(dfTmp==0)) {
-  #print('no (new) records retrieved')
+  print('no (new) records retrieved')
 } else {
+  print('xx')
   if (meanMinutes==0) {
     print('No mean calculation')
     #  #dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
@@ -493,7 +519,6 @@ if (!is.null(reportLocal)&&!is.na(reportLocal)) {
   }
 }
 
-print(head(total))
 print("start apriSensorPlotSingle")
 gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle
   ,ylim,treshold=reportTreshold
@@ -539,6 +564,7 @@ if(is.null(reportConfig$correlPlots)==FALSE) {
         print("plot correlPlot")
         #total <- subset(total, total$sensorType == 'pm25')
         dfX<- subset(total, (total$sensorId == reportCorrelPlots$xSensorId[i] & total$sensorType==reportCorrelPlots$xSensorType[i]))
+     #   print(paste(total$sensorId,reportCorrelPlots$xSensorId[i]))
         dfXMin<-min(dfX$sensorValue)
         dfXMax<-max(dfX$sensorValue)
         dfX$mDate<-strftime(dfX$date, format = "%Y%m%d%H%M" )
@@ -558,7 +584,8 @@ if(is.null(reportConfig$correlPlots)==FALSE) {
         b <- ggplot(dfMerged, aes(x = sensorValue.x, y = sensorValue.y)) +
           stat_cor(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*1,size=1.0,
                    aes(label =  paste( ..r.label.., ..rr.label.., sep = "~~~~")),) +
-          stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*2,linewidth=1.0) +
+          stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*2,width=1.0) +
+          #stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*2,linewidth=1.0) +
           #   stat_cor(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*3,size=0.9,formula=formula) +
           #   stat_regline_equation(label.x = dfXMin+dfXRes, label.y = dfYMax-dfYRes*4,size=0.9,formula=formula) +
           theme_bw()+

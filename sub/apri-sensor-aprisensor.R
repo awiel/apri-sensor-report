@@ -19,12 +19,14 @@ saveCacheFile<-function(cachePath,fileName,object) {
   saveRDS(object, file = paste0(cachePath,fileName))
 }
 
-
-getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL,observationTypes=NULL
-                        ,aggregation=NULL,dateFrom=NULL,dateTo=NULL,aggregateInd=NULL,cachePath=NULL
-                        ,source=NULL,datastream=NULL,periodSpan=NULL
-                        ,csvPath='./data/csv/',csvFileName=NULL,csvType='2'
-                        ,rdaPath='./data/Rda/',rdaFileName=NULL
+getApriSensorData<-function(dfIn=NULL,dbGroup=NULL
+                  ,sensorId=NULL
+                  ,sensorIdAlias=NULL
+                  ,sensorType=NULL,observationTypes=NULL
+                  ,aggregation=NULL,dateFrom=NULL,dateTo=NULL,aggregateInd=NULL,cachePath=NULL
+                  ,source=NULL,datastream=NULL,periodSpan=NULL
+                  ,csvPath='./data/csv/',csvFileName=NULL,csvType='2'
+                  ,rdaPath='./data/Rda/',rdaFileName=NULL
   ) {
 
   useCache<-FALSE
@@ -71,8 +73,8 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
     print(dateTo)
   }
 
+  cached<-FALSE
   if(useCache==TRUE) {
-    cached<-FALSE
     allCache<-FALSE
     if (file.exists (paste0(cachePath,fileName))) {
       print("Load cache:")
@@ -118,6 +120,8 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
     }
   }
   
+  recordsFound <-FALSE
+  
   # eg curl "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/SCRP0000001234AB/pmsa003?aggregation=detail,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
   url <- paste("https://aprisensor-api-v1.openiod.org/v1/observations/sensor/"
                , sensorId,'/',sensorType
@@ -128,7 +132,47 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
   print(url)
 
   myData <- fromJSON(url)
-  dfResult<-myData$observations
+  if (!is.null(myData$error)) {
+    print(paste('No data. Error: ',myData$error,myData$message) )
+    #dfResult<-fromJSON('{"observations":[]}')
+    dfResult<-fromJSON('{"sensor":{"name":"Purmerend purm","sensorIdShort":"B7A5","sensorKey":"64535fae984020a4a24dc9b3","sensorType":"sps30"},"observations":[]}')
+    #dfResult<-NULL
+    if (cached==FALSE) return (NULL)
+  } else {
+    dfResult<-myData$observations
+   # dfResult<-fromJSON('{"sensor":{"name":"Purmerend purm","sensorIdShort":"B7A5","sensorKey":"64535fae984020a4a24dc9b3","sensorType":"sps30"},"observations":[]}')
+    print(length(dfResult))
+    if (length(dfResult)==0) {
+      if (cached==FALSE) return (NULL)
+    }
+      
+      recordsFound <-TRUE
+      dfMerged<-NULL
+      for (observationTypeObject in observationTypeArray[[1]]) {
+        tmpObservationType <- strsplit(observationTypeObject,split=':')[[1]][1]
+        tmpObservationTypeAlias <- strsplit(observationTypeObject,split=':')[[1]][2]
+        
+        dfSubSet<- dfResult
+        #print(tmpObservationType)
+        #print(head(length(dfSubSet)))
+        dfSubSet$sensorValue <- dfSubSet[c(tmpObservationType)][,1]
+        if (!is.na(tmpObservationTypeAlias)) {
+          dfSubSet$sensorType <- tmpObservationTypeAlias
+        } else {
+          dfSubSet$sensorType <- tmpObservationType
+        }
+        
+        if (is.null(dfMerged)) {
+          dfMerged<-dfSubSet
+        } else {
+          dfMerged<-rbind(dfMerged,dfSubSet)
+        } 
+      }
+      dfResult<-dfMerged
+    }
+    
+    
+  
 #  if (aggregation=='minute') {
 #    dfResult <-myData$observationsMinute
 #    dfResult$dateObserved<-dfResult$dateObservedDate
@@ -141,27 +185,6 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
 #    dfResult$sensorId <- myData$observations$sensorId
 #  }
     
-  dfMerged<-NULL
-  for (observationTypeObject in observationTypeArray[[1]]) {
-    tmpObservationType <- strsplit(observationTypeObject,split=':')[[1]][1]
-    tmpObservationTypeAlias <- strsplit(observationTypeObject,split=':')[[1]][2]
-      
-    dfSubSet<- dfResult
-    dfSubSet$sensorValue <- dfSubSet[c(tmpObservationType)][,1]
-    if (!is.na(tmpObservationTypeAlias)) {
-      dfSubSet$sensorType <- tmpObservationTypeAlias
-    } else {
-      dfSubSet$sensorType <- tmpObservationType
-    }
-      
-    if (is.null(dfMerged)) {
-      dfMerged<-dfSubSet
-    } else {
-      dfMerged<-rbind(dfMerged,dfSubSet)
-    } 
-  }
-  
-  dfResult<-dfMerged
     
   if (!is.null(source) && !is.na(source)) {
     if (source == 'csv') {  # source == csv dataset
@@ -236,6 +259,8 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
       dfResult$sensorId<-as.factor(dfResult$sensorId)
       dfResult$sensorType<-as.factor(dfResult$sensorType)
       dfResult$dateObserved<-as.factor(dfResult$dateObserved)
+      
+      
 
       if (length(dfResult)>0) {
         if (length(splitTmp)>1) {
@@ -247,10 +272,13 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
     }
   }
 
-  dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
-
-  keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
-  dfResult <- dfResult[keeps]
+  if (recordsFound) {
+    dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
+    
+    keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+    dfResult <- dfResult[keeps]
+    
+  }
 
 
   if (observationTypes=='pm1,pm25,pm10') {
@@ -278,15 +306,25 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
       cacheFileNew <- rbind(cacheFile,dfResult)
     }
     print(paste("In cache is: ",nrow(cacheFileNew)))
-    if (nrow(cacheFileNew)>0) {
-      saveCacheFile(cachePath,fileName,cacheFileNew)
-      print("Cache saved to file")
+    if (!is.null(cacheFileNew) ) {
+      if (nrow(cacheFileNew)>0) {
+        saveCacheFile(cachePath,fileName,cacheFileNew)
+        print("Cache saved to file")
+      }
     }
   }
 
 #### aggregate ? (cache is not aggregated!!)
   dfResult<-cacheFileNew
+  
+  print(length(dfResult))
+  print(dfResult)
+  print(nrow(dfResult))
   if (length(dfResult)>0 && nrow(dfResult)>0) {
+    if (!is.null(sensorIdAlias) && !is.na(sensorIdAlias)){
+      dfResult$sensorId<-sensorIdAlias
+    }
+    
     aggrTmp<-FALSE
     print(aggregateInd)
     if (is.null(aggregateInd)) {
@@ -337,7 +375,7 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL,sensorId=NULL,sensorType=NULL
     }
 
     #if (!is.null(dfResult$sensorType[1]) && dfResult$sensorType[1]=='bme680_gasResistance') {
-    print(dfResult$sensorType[1])
+  #  print(dfResult$sensorType[1])
    # if(!is.na(dfResult$sensorType[1])) {
       if (dfResult$sensorType[1] == 'bme680_gasResistance') {
         #dfTmpGas<-fiwareGetSensorSelectRecords(NULL,'aprisensor_in','/bme680','sensorId','SCRP00000000504b9dd5','gasResistance:bme680_gasResistance')
