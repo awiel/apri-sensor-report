@@ -10,7 +10,7 @@ options(width = 100)
 #install.packages('ggpubr')
 #install.packages('lubridate')
 
-#library('dplyr')
+library('dplyr')
 library('zoo')
 library('lubridate')
 
@@ -102,11 +102,11 @@ dfTmp<-NULL
 print("loop sensorIds")
 dfTmpMlr1<-NULL
 for (i in 1:nrow(sensorIds)) {
-  print(sensorIds$active[i])
+  #print(sensorIds$active[i])
   reportSensorTypes<-sensorIds$sensorTypes[[i]]
   if (sensorIds$active[i]!="FALSE") {
     observableProperties<-NULL
-    print(reportSensorTypes)
+    #print(reportSensorTypes)
 #    print(sensorIds[i])
     for (j in 1:nrow(reportSensorTypes)) {
       #  if (reportSensorTypes$active[j]=="TRUE") {
@@ -162,6 +162,7 @@ for (i in 1:nrow(sensorIds)) {
           dfTmpOne<-getApriSensorData(dfIn=NULL
                                       ,aggregation=aggregation
                                       ,dbGroup=dbGroup
+                                      ,source=sensorIds$source[i]
                                       ,sensorId=sensorIds$sensorId[i]
                                       ,sensorIdAlias=sensorIdAlias
                                       ,sensorType=sensorIds$sensorType[i]
@@ -252,12 +253,8 @@ for (i in 1:nrow(sensorIds)) {
         dfTmpOne$date<-strftime(dfTmpOne$date, format = "%Y%m%d%H%M" )
         keeps <- c("sensorId","sensorType","date","sensorValue","dateObserved")
         dfTmpCoarse<-dfTmpOne[keeps]
-        print('test dfMerged pmCoarse ')
-        print(str(dfTmpCoarseBase))
-        print(str(dfTmpCoarse))
         dfMerged<-merge(dfTmpCoarse,dfTmpCoarseBase, by= 'date', sort = TRUE)
         dfMerged$sensorValue<-dfMerged$sensorValue-dfMerged$coarseBaseValue
-        str(dfMerged)
         dfTmpOne<-dfMerged[keeps]
       }
     }
@@ -287,15 +284,7 @@ for (i in 1:nrow(sensorIds)) {
         dfTmpMlr1<-dfTemperature %>% left_join(dfRHum, by = c("date" = "date"))
         keepsMlr1 <- c("date", "rHum","temperature")
         dfTmpMlr1 <- dfTmpMlr1[keepsMlr1]
-        # if(is.null(dfTmpMlr1)==TRUE) {
-        #   print('#################')
-        #   dfTmpMlr1<-dfTmpOne
-        # } else {
-        #   print('$$$$$$$$$$$$$$$$')
-        #   dfTmpMlr1<-dfTemperature %>% left_join(dfRHum, by = c("date" = "date"))
-        # }
         dfTmpOne<-NULL
-        str(dfTmpMlr1)
       }
     }
     if (is.null(sensorIds$calibrateFaseTwo[i])==FALSE && is.na(sensorIds$calibrateFaseTwo[i])==FALSE) {
@@ -303,7 +292,6 @@ for (i in 1:nrow(sensorIds)) {
         if (sensorIds$calibrateFaseTwo[i]=="MLR") {
           if(is.null(dfTmpMlr1)==FALSE) {
             dfTmpMlr2<-dfTmpOne %>% left_join(dfTmpMlr1, by = c("date" = "date"))
-            print('x')
             if (dfTmpMlr2$sensorType[1]=="pm25" || dfTmpMlr2$sensorType[1]=="pm25_pm25") {
               print("Calculate MLR for PM2.5")
 
@@ -318,7 +306,6 @@ for (i in 1:nrow(sensorIds)) {
               #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
               #              ,dfTmpMlr2$sensorValue)
               dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
-              str(dfTmpMlr2)
               keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
               dfTmpMlr2 <- dfTmpMlr2[keeps]
             }
@@ -341,12 +328,10 @@ for (i in 1:nrow(sensorIds)) {
             #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
             #              ,dfTmpMlr2$sensorValue)
               dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
-            str(dfTmpMlr2)
               keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
               dfTmpMlr2 <- dfTmpMlr2[keeps]
             }
 
-            str(dfTmpMlr2)
             dfTmpOne<-dfTmpMlr2
           }
           dfTmpMlr1<-NULL
@@ -411,7 +396,6 @@ dfTmp$foi <- dfTmp$sensorId
 if(nrow(dfTmp==0)) {
   print('no (new) records retrieved')
 } else {
-  print('xx')
   if (meanMinutes==0) {
     print('No mean calculation')
     #  #dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
@@ -478,11 +462,7 @@ if (!is.null(reportLocal) && !is.na(reportLocal)) {
 
 periodetext1 <- with_tz(period[1],localTimeZone) # strftime(with_tz(period[1],'Asia/Tokyo'), format = "%Y-%m-%d %H:%M uur %z" ,tz='JST')
 periodetext2 <- with_tz(period[2],localTimeZone)  # strftime(period[2], format = "%Y-%m-%d %H:%M uur %z",tz='JST',usetz=TRUE)
-#print(periodetext1)
-#print(periodetext2)
 print(">ggplot")
-#total <- subset(total, total$sensorType == 'pm25')
-# plot graph
 dateBreaks<-"1 hour"
 dateLabels<-"%H"
 aggregateTxt<-"gemiddeld per minuut"

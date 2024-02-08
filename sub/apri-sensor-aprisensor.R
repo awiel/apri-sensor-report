@@ -31,6 +31,10 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL
 
   useCache<-FALSE
   # eg curl "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/SCRP0000001234AB/pmsa003?aggregation=detail,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
+  
+  print('source')
+  print(source)
+    #if (source == 'rda') {  # source == Rda dataset
 
   #fileName<-paste(paste(fiwareService,str_replace_all(sensorType, '/', '_'),foi,ops,sep='#'),'.Rda',sep='')
   print('test')
@@ -122,6 +126,10 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL
   
   recordsFound <-FALSE
   
+  # start van deel voor alleen de aprisensor
+  if (is.null(source) || is.na(source)) {
+    
+  
   # eg curl "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/SCRP0000001234AB/pmsa003?aggregation=detail,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
   url <- paste("https://aprisensor-api-v1.openiod.org/v1/observations/sensor/"
                , sensorId,'/',sensorType
@@ -184,7 +192,7 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL
     # dfResult <-myData$observations
 #    dfResult$sensorId <- myData$observations$sensorId
 #  }
-    
+} # einde van source aprisensor  
     
   if (!is.null(source) && !is.na(source)) {
     if (source == 'csv') {  # source == csv dataset

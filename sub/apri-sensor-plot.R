@@ -11,7 +11,6 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     yzoom=NULL,
     incident=F,reportLocal=NULL) {
   
-  print(reportLocal)
   #plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
   plotDateTime<- as.POSIXct(format(Sys.time(),'%Y-%m-%d %H:%M:%S'), format="%Y-%m-%d %H:%M:%S")
   
@@ -125,7 +124,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     print(nrow(dfTotal))
     dfTotal$incidentNr<-na.locf0(dfTotal$incidentNr )
     dfTotal$incidentNr[which(is.na(dfTotal$topValue))] <- NA
-    print(dfTotal$incidentNr)
+#    print(dfTotal$incidentNr)
     #    print(length( na.locf(dfTotal$incidentNr )))
     #    print(dfTotal$incidentNr )
     #    dfTotal$incidentNr[which( is.na(dfTotal$topValue))] <- na.locf(dfTotal$incidentNr )
@@ -386,7 +385,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     } else {
       graphStart<-min(dfIncidentStats$date)
     }
-    print(head(dfIncidentStats))
+  #  print(head(dfIncidentStats))
     statsPosX<-min(dfIncidentStats$date, na.rm = TRUE) #+60*60
     statsPosXMax<-max(dfIncidentStats$date, na.rm = TRUE) #+60*60
     statsXResolution<-(statsPosXMax-statsPosX)/32
@@ -454,18 +453,10 @@ apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL
   fileName <- paste('aprisensor','_',fileLabel,fileSuffix,'.png',sep='')
   
 
-  print("testje")
-  print(fileName)
-  print(plotPath)
-  print(width)
-  print(height)
-  print(units)
-  print(apriSensorPlot)
   ggsave(fileName, path=plotPath, width=width, height=height, plot = apriSensorPlot,units=units)
   #ggsave(fileName, path=plotPath, width=3.8, height=height, plot = apriSensorPlot,dpi=dpi,units=units)
 
-  print("testje")
-  
+
   plotImg <- image_read(paste(plotPath,'/',fileName,sep=''))
   logo <- logo %>%
     image_annotate("", color = "black", size = 30,
@@ -474,8 +465,6 @@ apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL
   if (subFolder != '') {
     subFolder<-paste0(subFolder,'/')
   }
-  print(plotPath)
-  print(fileName)
 #  image_write(final_plot, paste0(plotPath,'/',fileName))
   image_write(final_plot, paste0(plotPath,'/',subFolder,fileName))
   print(paste0(plotPath,'/',subFolder,fileName))
