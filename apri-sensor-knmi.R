@@ -123,8 +123,6 @@ ymdHM <- format(Sys.time() - as.difftime(1, unit="days"), "%y%m%d%H%M");
 # overrule e.g.
 #ymdHM <- "1809161100"
 
-print(head(dfTmpWind))
-print(head(dfTmpWindY))
 total0 <- dfTmpWind
 total0Y <- dfTmpWindY
 
