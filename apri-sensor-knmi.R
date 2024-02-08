@@ -39,7 +39,6 @@ source(paste0(subPath,"aprisensor-knmi-v1.R"))
 
 
 hours<-1
-meanMinutes <- 1  # 1 or 5
 
 args <- commandArgs(trailingOnly = TRUE)
 print(args)
@@ -65,58 +64,23 @@ fiwarePeriodEnd<-format(Sys.time()-((hours)*60*60),"%Y-%m-%dT%H:%M:%S")
 #dfTmpWind<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station',parmStation,'windSpeed,windDirection',opPerRow='false',dateFrom=fiwareStart,dateTo=fiwareEnd)
 dfTmpWind<-getStationSelectRecordsKnmi(NULL,parmStation,dateFrom=fiwareStart,dateTo=fiwareEnd)
 dfTmpWindY<-getStationSelectRecordsKnmi(NULL,parmStation,dateFrom=yesterdayStart,dateTo=yesterdayEnd)
-#print(head(dfTmpWind))
-#print(head(dfTmpWindY))
-#if (parmStation=="06225") {
-#  dfTmpRain<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station','06257','rainfall',dateFrom=fiwareStart,dateTo=fiwareEnd) #,rainDuration')
-#  dfTmpTemperature<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station','06257','temperature',dateFrom=fiwareStart,dateTo=fiwareEnd)
-#  dfTmpTemperatureY<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station','06257','temperature',dateFrom=yesterdayStart,dateTo=yesterdayEnd)
-#  dfTmpRelativeHumidity<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station','06257','relativeHumidity',dateFrom=fiwareStart,dateTo=fiwareEnd)
-#  dfTmpRelativeHumidityY<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station','06257','relativeHumidity',dateFrom=yesterdayStart,dateTo=yesterdayEnd)
-#  dfTmpSolar<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station','06257','solar',dateFrom=fiwareStart,dateTo=fiwareEnd)
-#  dfTmpSolarY<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station','06257','solar',dateFrom=yesterdayStart,dateTo=yesterdayEnd)
-#} else{
-#  dfTmpRain<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station',parmStation,'rainfall',dateFrom=fiwareStart,dateTo=fiwareEnd) #,rainDuration')
-#  dfTmpTemperature<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station',parmStation,'temperature',dateFrom=fiwareStart,dateTo=fiwareEnd)
-#  dfTmpTemperatureY<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station',parmStation,'temperature',dateFrom=yesterdayStart,dateTo=yesterdayEnd)
-#  dfTmpRelativeHumidity<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station',parmStation,'relativeHumidity',dateFrom=fiwareStart,dateTo=fiwareEnd)
-#  dfTmpRelativeHumidityY<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station',parmStation,'relativeHumidity',dateFrom=yesterdayStart,dateTo=yesterdayEnd)
-#  dfTmpSolar<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station',parmStation,'solar',dateFrom=fiwareStart,dateTo=fiwareEnd)
-#  dfTmpSolarY<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station',parmStation,'solar',dateFrom=yesterdayStart,dateTo=yesterdayEnd)
-#}
-#head(dfTmpWind)
-#head(dfTmpWind)
-#head(dfTmpTemperature)
-#head(dfTmpRelativeHumidity)
-#dfTmp<-''
-#dfTmp<-fiwareGetRecordsKnmi(dfTmp,fiwarePeriodStart,fiwarePeriodEnd,'knmi','/knmi',parmStation)  # ,station
-##saveRDS(dfTmp, file = paste("/opt/SCAPE604/R/datasets/knmi/","knmi_",parmStation,"_",fiwarePeriodStart,"-",fiwarePeriodStart,".rds",sep=''))
-##dfTmp<-fiwareGetRecordsKnmi(dfTmp,fiwarePeriodStart,fiwarePeriodEnd,'knmi','/knmi','06203')  # ,station
-##dfTmp<-fiwareGetRecordsKnmi(dfTmp,fiwarePeriodStart,fiwarePeriodEnd,'knmi','/knmi','06203')  # ,station
-
-#set.seed(1)
-#df       <- expand.grid(x = 1:10, y=1:10)
-#df$angle <- runif(100, 0, 2*pi)
-#ggplot(df, aes(x, y)) +
-#  geom_point()        +
-#  coord_equal()       +
-#  geom_spoke(aes(angle = angle), radius = 0.7, arrow=arrow(length = unit(0.2,"cm")))
-
-#onehour <- 1*60*60
-#plushours <- onehour*2
-
-meanMinutes <- 10 #  1 or 5 or 60
-
 dfTmpWind$date <- as.POSIXct(dfTmpWind$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
 dfTmpWindY$date <- as.POSIXct(dfTmpWindY$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60 + (24*60*60) ;
-#dfTmpRain$date <- as.POSIXct(dfTmpRain$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
-#dfTmpTemperature$date <- as.POSIXct(dfTmpTemperature$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
-#dfTmpTemperatureY$date <- as.POSIXct(dfTmpTemperatureY$dateObserved, format="%Y-%m-%dT%H:%M")+ (24*60*60) + (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
-#dfTmpRelativeHumidity$date <- as.POSIXct(dfTmpRelativeHumidity$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
-#dfTmpRelativeHumidityY$date <- as.POSIXct(dfTmpRelativeHumidityY$dateObserved, format="%Y-%m-%dT%H:%M")+ (24*60*60) + (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
-#dfTmpSolar$date <- as.POSIXct(dfTmpSolar$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
-#dfTmpSolarY$date <- as.POSIXct(dfTmpSolarY$dateObserved, format="%Y-%m-%dT%H:%M")+ (24*60*60) + (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
 
+if (parmStation=="06225") { # merge two stations
+  keeps<-c('station','dateObserved','date','name','wd','ws')
+  keeps_06257<-c('date','rainfall','pressure','rainDuration','temperature','rHum', 'solar')
+  dfTmpWind_06257<-getStationSelectRecordsKnmi(NULL,'06257',dateFrom=fiwareStart,dateTo=fiwareEnd)
+  dfTmpWindY_06257<-getStationSelectRecordsKnmi(NULL,'06257',dateFrom=yesterdayStart,dateTo=yesterdayEnd)
+  dfTmpWind_06257$date <- as.POSIXct(dfTmpWind_06257$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+  dfTmpWindY_06257$date <- as.POSIXct(dfTmpWindY_06257$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60 + (24*60*60) ;
+  dfTmpWind_06257<-dfTmpWind_06257[keeps_06257]
+  dfTmpWindY_06257<-dfTmpWindY_06257[keeps_06257]
+  dfTmpWind<-dfTmpWind[keeps]
+  dfTmpWindY<-dfTmpWindY[keeps]
+  dfTmpWind<-merge(dfTmpWind,dfTmpWind_06257, by= c('date'),all.x=TRUE,all.y=T,sort=T)
+  dfTmpWindY<-merge(dfTmpWindY,dfTmpWindY_06257, by= c('date'),all.x=TRUE,all.y=T,sort=T)
+}
 
 # begrenzing op max. 24 uur terug in de tijd
 ymdHM <- format(Sys.time() - as.difftime(1, unit="days"), "%y%m%d%H%M");

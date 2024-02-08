@@ -56,9 +56,8 @@ getStationSelectRecordsKnmi<-function(dfIn=NULL,station=station,dateFrom=NULL,da
   print(url)
   
   dfResult <- fromJSON(url)$features$properties
-  
   dfResult<-dfResult[order(dfResult$dateObserved),]  
-  
+
 #  if("pressure" %in% colnames(dfResult))
 #  {
 #    dfResult$sensorId<-as.factor(dfResult$station)
