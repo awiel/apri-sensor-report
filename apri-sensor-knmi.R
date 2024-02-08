@@ -108,7 +108,7 @@ dfTmpWindY<-getStationSelectRecordsKnmi(NULL,parmStation,dateFrom=yesterdayStart
 meanMinutes <- 10 #  1 or 5 or 60
 
 dfTmpWind$date <- as.POSIXct(dfTmpWind$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
-dfTmpWindY$date <- as.POSIXct(dfTmpWindY$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+dfTmpWindY$date <- as.POSIXct(dfTmpWindY$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60 + (24*60*60) ;
 #dfTmpRain$date <- as.POSIXct(dfTmpRain$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
 #dfTmpTemperature$date <- as.POSIXct(dfTmpTemperature$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
 #dfTmpTemperatureY$date <- as.POSIXct(dfTmpTemperatureY$dateObserved, format="%Y-%m-%dT%H:%M")+ (24*60*60) + (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
@@ -121,12 +121,13 @@ dfTmpWindY$date <- as.POSIXct(dfTmpWindY$dateObserved, format="%Y-%m-%dT%H:%M")+
 # begrenzing op max. 24 uur terug in de tijd
 ymdHM <- format(Sys.time() - as.difftime(1, unit="days"), "%y%m%d%H%M");
 # overrule e.g.
-ymdHM <- "1809161100"
+#ymdHM <- "1809161100"
 
+print(head(dfTmpWind))
+print(head(dfTmpWindY))
 total0 <- dfTmpWind
 total0Y <- dfTmpWindY
 
-#total <- subset(total0, format(total0$date, "%y%m%d%H%M") >= ymdHM) 
 total <- subset(total0, ( !is.na(total0$ws) & format(total0$date, "%y%m%d%H%M") >= ymdHM) )
 totalRain <- subset(total0, (!is.na(total0$rainfall) & format(total0$date, "%y%m%d%H%M") >= ymdHM))
 totalTemperature <- subset(total0,( !is.na(total0$temperature) &  format(total0$date, "%y%m%d%H%M") >= ymdHM))
@@ -180,49 +181,50 @@ lines(total$date,total$wforce,col="black", lwd=3)
 lines(totalRain$date,totalRain$rainfall,col="blue", lwd=3)
 axis(2, at=c(-30,-25,-20,-15,-10,-5,0,5,10,15,20,25,30),col = "black", col.axis = "black", las=1, lwd = 1,outer=FALSE, pos=scalePosX) #+scalePosXTick*4.20)
 
-print(head(totalTemperature))
-print(head(totalTemperatureY))
-par(new = T)
-minT=min(totalTemperature$temperature)
-maxT=max(totalTemperature$temperature)
-minTY=min(totalTemperatureY$temperature)
-maxTY=max(totalTemperatureY$temperature)
-minTAll=minT
-if (minTY<minTAll) minTAll <- minTY
-maxTAll=maxT
-if (maxTY>maxTAll) maxTAll <- maxTY
+if(nrow(totalTemperature)>0) {
+ par(new = T)
+ minT=min(totalTemperature$temperature)
+ maxT=max(totalTemperature$temperature)
+ minTY=min(totalTemperatureY$temperature)
+ maxTY=max(totalTemperatureY$temperature)
+ minTAll=minT
+ if (minTY<minTAll) minTAll <- minTY
+ maxTAll=maxT
+ if (maxTY>maxTAll) maxTAll <- maxTY
 
-print(minTAll)
-print(maxTAll)
-scalePosXTick=(max(totalRelativeHumidity$date)-min(totalRelativeHumidity$date))/100
-scalePosX=max(totalRelativeHumidity$date)+scalePosXTick*4
-plot(totalTemperature$date,totalTemperature$temperature,col="red", lwd=3, axes=F, xlab=NA, ylab=NA, type="l",ylim=c(minTAll,maxTAll))
-lines(totalTemperatureY$date,totalTemperatureY$temperature,col="red", lwd=1, lty=2, axis=F, xlab=NA, ylab=NA)
-abline(h=40.4,col="blue")
-axis(4, at=c(-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,40), col = "red", col.axis = "dark red", las=1, lwd = 1,outer=FALSE, pos=scalePosX+scalePosXTick*0.90)
+ scalePosXTick=(max(totalRelativeHumidity$date)-min(totalRelativeHumidity$date))/100
+ scalePosX=max(totalRelativeHumidity$date)+scalePosXTick*4
+ plot(totalTemperature$date,totalTemperature$temperature,col="red", lwd=3, axes=F, xlab=NA, ylab=NA, type="l",ylim=c(minTAll,maxTAll))
+ lines(totalTemperatureY$date,totalTemperatureY$temperature,col="red", lwd=1, lty=2, axis=F, xlab=NA, ylab=NA)
+ abline(h=40.4,col="blue")
+ axis(4, at=c(-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,40), col = "red", col.axis = "dark red", las=1, lwd = 1,outer=FALSE, pos=scalePosX+scalePosXTick*0.90)
 
-par(new = T)
-minT=min(totalRelativeHumidity$rHum)
-maxT=max(totalRelativeHumidity$rHum)
-minTY=min(totalRelativeHumidityY$rHum)
-maxTY=max(totalRelativeHumidityY$rHum)
-minTAll=minT
-if (minTY<minTAll) minTAll <- minTY
-maxTAll=maxT
-if (maxTY>maxTAll) maxTAll <- maxTY
+}
 
-plot(totalRelativeHumidity$date,totalRelativeHumidity$rHum,col="green", lwd=3, axes=F, xlab=NA, ylab=NA, type="l",ylim=c(minTAll,maxTAll))
-lines(totalRelativeHumidityY$date,totalRelativeHumidityY$rHum,col="green", lwd=1, lty=2, axis=F, xlab=NA, ylab=NA)
-axis(4, at=c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100),col = "green", col.axis = "dark green", las=1, lwd = 1,outer=FALSE, pos=scalePosX+scalePosXTick*4.80)
+if(nrow(totalRelativeHumidity)>0) {
+ par(new = T)
+ minT=min(totalRelativeHumidity$rHum)
+ maxT=max(totalRelativeHumidity$rHum)
+ minTY=min(totalRelativeHumidityY$rHum)
+ maxTY=max(totalRelativeHumidityY$rHum)
+ minTAll=minT
+ if (minTY<minTAll) minTAll <- minTY
+ maxTAll=maxT
+ if (maxTY>maxTAll) maxTAll <- maxTY
+
+ plot(totalRelativeHumidity$date,totalRelativeHumidity$rHum,col="green", lwd=3, axes=F, xlab=NA, ylab=NA, type="l",ylim=c(minTAll,maxTAll))
+ lines(totalRelativeHumidityY$date,totalRelativeHumidityY$rHum,col="green", lwd=1, lty=2, axis=F, xlab=NA, ylab=NA)
+ axis(4, at=c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100),col = "green", col.axis = "dark green", las=1, lwd = 1,outer=FALSE, pos=scalePosX+scalePosXTick*4.80)
+}
 
 if(nrow(totalSolar>0)) {
-par(new = T)
+ par(new = T)
 
-scalePosXTick=(max(totalSolar$date)-min(totalSolar$date))/100
-scalePosX=min(totalSolar$date)-scalePosXTick*8
-plot(totalSolar$date,totalSolar$solar,col="orange", lwd=3, axes=F, xlab=NA, ylab=NA, type="l")
-lines(totalSolarY$date,totalSolarY$solar,col="orange", lwd=1, lty=2, axis=F, xlab=NA, ylab=NA)
-axis(2, at=c(0,50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000),col = "orange", col.axis = "dark orange", las=1, lwd = 1,outer=FALSE, pos=scalePosX) #+scalePosXTick*4.20)
+ scalePosXTick=(max(totalSolar$date)-min(totalSolar$date))/100
+ scalePosX=min(totalSolar$date)-scalePosXTick*8
+ plot(totalSolar$date,totalSolar$solar,col="orange", lwd=3, axes=F, xlab=NA, ylab=NA, type="l")
+ lines(totalSolarY$date,totalSolarY$solar,col="orange", lwd=1, lty=2, axis=F, xlab=NA, ylab=NA)
+ axis(2, at=c(0,50,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000),col = "orange", col.axis = "dark orange", las=1, lwd = 1,outer=FALSE, pos=scalePosX) #+scalePosXTick*4.20)
 }
 
 legend("bottomleft", legend=c("wind", "regen","zonnestraling"),
