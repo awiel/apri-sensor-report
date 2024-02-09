@@ -325,62 +325,59 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL
 #### aggregate ? (cache is not aggregated!!)
   dfResult<-cacheFileNew
   
-  print(length(dfResult))
-  print(dfResult)
-  print(nrow(dfResult))
   if (length(dfResult)>0 && nrow(dfResult)>0) {
     if (!is.null(sensorIdAlias) && !is.na(sensorIdAlias)){
       dfResult$sensorId<-sensorIdAlias
     }
     
-    aggrTmp<-FALSE
-    print(aggregateInd)
-    if (is.null(aggregateInd)) {
-      print("test aggregateInd")
-    }
-    if (is.null(aggregateInd)) aggrTmp <- FALSE
-    if (!is.null(aggregateInd)) {
-      if (aggregateInd!="N")  aggrTmp <- TRUE
-    }
-    if (aggrTmp == TRUE) {
-      if (!is.null(aggregateInd)) {
-        if (aggregateInd == 'D') {
-          print("aggregate dfResult per day")
-          dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%d")
-          dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
-          dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
-        } else {
-         # print("aggregate dfResult per minute")
-        #  dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M")
-        #  dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
-        #  dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
-          if (aggregateInd == 'A') { # 10 minutes
-            print("aggregate dfResult per 10 minute")
-            dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M")
-            dfResult$minute <- sapply(format(dfResult$date, "%M"), as.numeric)
-            dfResult$date<-dfResult$date-(dfResult$minute%%10)*60
-            dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
-            dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
-          } else {
-            print("aggregate dfResult per minute")
-            dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M")
-            dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
-            dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
-          }
-        }
-      } else {
-        print("aggregate dfResult none")
-        #dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
-        #keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
-        #dfResult <- dfResult[keeps]
-      }
-    } else {
-      print("aggregate dfResult none 2")
-      #print("aggregate dfResult none plus keeps")
-      #dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
-      #keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
-      #dfResult <- dfResult[keeps]
-    }
+    # aggrTmp<-FALSE
+    # print(aggregateInd)
+    # if (is.null(aggregateInd)) {
+    #   print("test aggregateInd")
+    # }
+    # if (is.null(aggregateInd)) aggrTmp <- FALSE
+    # if (!is.null(aggregateInd)) {
+    #   if (aggregateInd!="N")  aggrTmp <- TRUE
+    # }
+    # if (aggrTmp == TRUE) {
+    #   if (!is.null(aggregateInd)) {
+    #     if (aggregateInd == 'D') {
+    #       print("aggregate dfResult per day")
+    #       dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%d")
+    #       dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
+    #       dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
+    #     } else {
+    #      # print("aggregate dfResult per minute")
+    #     #  dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M")
+    #     #  dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
+    #     #  dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
+    #       if (aggregateInd == 'A') { # 10 minutes
+    #         print("aggregate dfResult per 10 minute")
+    #         dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M")
+    #         dfResult$minute <- sapply(format(dfResult$date, "%M"), as.numeric)
+    #         dfResult$date<-dfResult$date-(dfResult$minute%%10)*60
+    #         dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
+    #         dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
+    #       } else {
+    #         print("aggregate dfResult per minute")
+    #         dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M")
+    #         dfResult <- aggregate(sensorValue~sensorId+sensorType+date, data=dfResult, mean, na.rm=TRUE)
+    #         dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved to averaged value
+    #       }
+    #     }
+    #   } else {
+    #     print("aggregate dfResult none")
+    #     #dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
+    #     #keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+    #     #dfResult <- dfResult[keeps]
+    #   }
+    # } else {
+    #   print("aggregate dfResult none 2")
+    #   #print("aggregate dfResult none plus keeps")
+    #   #dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
+    #   #keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+    #   #dfResult <- dfResult[keeps]
+    # }
 
     #if (!is.null(dfResult$sensorType[1]) && dfResult$sensorType[1]=='bme680_gasResistance') {
   #  print(dfResult$sensorType[1])

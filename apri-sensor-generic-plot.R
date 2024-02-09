@@ -148,12 +148,12 @@ for (i in 1:nrow(sensorIds)) {
                                       ,observationTypes=observationTypes
           )
         } else {
-          if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
-            aggregation<-sensorIds$aggregation[i]
-            #aggregation<-"minute"
-          } else {
+      #    if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
+      #      aggregation<-sensorIds$aggregation[i]
+      #      #aggregation<-"minute"
+      #    } else {
             aggregation<-"minute"
-          }
+      #    }
           
           if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
             sensorIdAlias<- sensorIds$sensorIdAlias[i]
@@ -171,20 +171,20 @@ for (i in 1:nrow(sensorIds)) {
           )
         }
         #print(head(dfTmpOne))
-      } else {
-        #t<-strsplit(observableProperties, ":")#[[1,1]]
-        dfTmpOne<-getFiwareData(dfIn=NULL
-                                ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
-                                ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
-                                ,cachePath=cachePath
-                                ,aggregateInd=aggregateInd
-                                ,source=sensorIds$source[i]
-                                ,sensorId=sensorIds$sensorId[i]
-                                ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
-                                ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
-                                ,periodSpan=periodSpan
-        )
-      }
+      } #else {
+      #   #t<-strsplit(observableProperties, ":")#[[1,1]]
+      #   dfTmpOne<-getFiwareData(dfIn=NULL
+      #                           ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
+      #                           ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
+      #                           ,cachePath=cachePath
+      #                           ,aggregateInd=aggregateInd
+      #                           ,source=sensorIds$source[i]
+      #                           ,sensorId=sensorIds$sensorId[i]
+      #                           ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
+      #                           ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
+      #                           ,periodSpan=periodSpan
+      #   )
+      # }
     } else { # hist
       print('hist')
       
@@ -192,12 +192,12 @@ for (i in 1:nrow(sensorIds)) {
         print("hist getApriSensorData")
         dbGroup<-sensorIds$dbGroup[i]
         observationTypes<-observableProperties
-        if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
-          aggregation<-sensorIds$aggregation[i]
-          #aggregation<-"minute"
-        } else {
+   #     if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
+  #        aggregation<-sensorIds$aggregation[i]
+  #        #aggregation<-"minute"
+  #      } else {
           aggregation<-"minute"
-        }
+  #      }
 
         if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
           sensorIdAlias<- sensorIds$sensorIdAlias[i]
@@ -214,27 +214,27 @@ for (i in 1:nrow(sensorIds)) {
               ,dateFrom=reportConfig$dateFrom
               ,dateTo=reportConfig$dateTo
               )
-      } else {
-        print("hist getFiwareData")
-        dfTmpOne<-getFiwareData(dfIn=NULL
-                                ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
-                                ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
-                                ,dateFrom=reportConfig$dateFrom
-                                ,dateTo=reportConfig$dateTo
-                                ,cachePath=cachePath
-                                ,aggregateInd=aggregateInd
-                                ,source=sensorIds$source[i]
-                                ,sensorId=sensorIds$sensorId[i]
-                                ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
-                                ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
-                                ,csvFileName=sensorIds$csvFileName[i]
-                                ,csvPath=sensorIds$csvPath[i]
-                                ,csvType=sensorIds$csvType[i]
-                                ,rdaFileName=sensorIds$rdaFileName[i]
-                                ,rdaPath=sensorIds$rdaPath[i]
-        )
-
-      }
+      } #else {
+      #   print("hist getFiwareData")
+      #   dfTmpOne<-getFiwareData(dfIn=NULL
+      #                           ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
+      #                           ,key=sensorIds$key[i],foi=sensorIds$sensorId[i],ops=observableProperties
+      #                           ,dateFrom=reportConfig$dateFrom
+      #                           ,dateTo=reportConfig$dateTo
+      #                           ,cachePath=cachePath
+      #                           ,aggregateInd=aggregateInd
+      #                           ,source=sensorIds$source[i]
+      #                           ,sensorId=sensorIds$sensorId[i]
+      #                           ,datastream=strsplit(observableProperties, ":")[[1]][[1]]
+      #                           ,sensorType=strsplit(observableProperties, ":")[[1]][[2]]
+      #                           ,csvFileName=sensorIds$csvFileName[i]
+      #                           ,csvPath=sensorIds$csvPath[i]
+      #                           ,csvType=sensorIds$csvType[i]
+      #                           ,rdaFileName=sensorIds$rdaFileName[i]
+      #                           ,rdaPath=sensorIds$rdaPath[i]
+      #   )
+      # 
+      # }
     }
     
 
@@ -395,15 +395,16 @@ dfTmp$foi <- dfTmp$sensorId
 
 if(nrow(dfTmp==0)) {
   print('no (new) records retrieved')
-} else {
-  if (meanMinutes==0) {
-    print('No mean calculation')
-    #  #dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
-  } else {
-    print(paste('xx mean calculation',dfTmp$minute,'%%',meanMinutes,' rows:',nrow(dfTmp)))
-    dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
-  }
 }
+# else {
+#   if (meanMinutes==0) {
+#     print('No mean calculation')
+#     #  #dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
+#   } else {
+#     print(paste('xx mean calculation',dfTmp$minute,'%%',meanMinutes,' rows:',nrow(dfTmp)))
+#     dfTmp$date <- dfTmp$date - ( dfTmp$minute %% meanMinutes)*60  # gemiddelde per x minutes
+#   }
+# }
 
 keeps <- c("date", "sensorValue","sensorType","sensorId")
 total <- dfTmp[keeps]
@@ -466,22 +467,22 @@ print(">ggplot")
 dateBreaks<-"1 hour"
 dateLabels<-"%H"
 aggregateTxt<-"gemiddeld per minuut"
-if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='dag') {
-  dateBreaks<-"2 days"
-  dateLabels<-"%d"
-  aggregateTxt<-"gemiddeld per dag"
-}
-if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='10 seconden') {
-  #dateBreaks<-"1 month"
-  #dateLabels<-"%m"
-  aggregateTxt<-"gemiddeld per 10 seconden"
-}
-if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==0) {
-  aggregateTxt<-"gemiddeld per 20 seconden"
-}
-if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==10) {
-  aggregateTxt<-"gemiddeld per 10 minuten"
-}
+#if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='dag') {
+#  dateBreaks<-"2 days"
+#  dateLabels<-"%d"
+#  aggregateTxt<-"gemiddeld per dag"
+#}
+#if (!is.null(reportConfig$mean$text) && reportConfig$mean$text=='10 seconden') {
+#  #dateBreaks<-"1 month"
+#  #dateLabels<-"%m"
+#  aggregateTxt<-"gemiddeld per 10 seconden"
+#}
+#if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==0) {
+#  aggregateTxt<-"gemiddeld per 20 seconden"
+#}
+#if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==10) {
+#  aggregateTxt<-"gemiddeld per 10 minuten"
+#}
 
 dateText<-'Datum';
 timeZone<-'Amsterdam';
