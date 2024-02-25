@@ -148,12 +148,12 @@ for (i in 1:nrow(sensorIds)) {
                                       ,observationTypes=observationTypes
           )
         } else {
-      #    if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
-      #      aggregation<-sensorIds$aggregation[i]
+          if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
+            aggregation<-sensorIds$aggregation[i]
       #      #aggregation<-"minute"
-      #    } else {
+          } else {
             aggregation<-"minute"
-      #    }
+          }
           
           if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
             sensorIdAlias<- sensorIds$sensorIdAlias[i]
@@ -192,12 +192,12 @@ for (i in 1:nrow(sensorIds)) {
         print("hist getApriSensorData")
         dbGroup<-sensorIds$dbGroup[i]
         observationTypes<-observableProperties
-   #     if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
-  #        aggregation<-sensorIds$aggregation[i]
-  #        #aggregation<-"minute"
-  #      } else {
+        if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
+          aggregation<-sensorIds$aggregation[i]
+          #aggregation<-"minute"
+        } else {
           aggregation<-"minute"
-  #      }
+        }
 
         if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
           sensorIdAlias<- sensorIds$sensorIdAlias[i]
