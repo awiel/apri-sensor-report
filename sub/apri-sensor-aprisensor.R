@@ -1,108 +1,178 @@
 #
 
 cmdArgs = commandArgs(trailingOnly = FALSE)
-print(paste('script','start Rscript: ', Sys.time(),cmdArgs[4]))
+print(paste('script', 'start Rscript: ', Sys.time(), cmdArgs[4]))
 
 
-pmTop<-5000
+pmTop <- 5000
 
-readCacheFile<-function(cachePath,fileName) {
+readCacheFile <- function(cachePath, fileName) {
   #cacheFilePath<-paste(fileLocation,fileName,sep='')
   #print(cacheFilePath)
-#  setwd(fileLocation)
-  readRDS(paste0(cachePath,fileName))
+  #  setwd(fileLocation)
+  readRDS(paste0(cachePath, fileName))
 }
-saveCacheFile<-function(cachePath,fileName,object) {
+saveCacheFile <- function(cachePath, fileName, object) {
   print("Save cachefile")
   print(fileName)
-#  setwd(fileLocation)
-  saveRDS(object, file = paste0(cachePath,fileName))
+  #  setwd(fileLocation)
+  saveRDS(object, file = paste0(cachePath, fileName))
 }
 
-getApriSensorData<-function(dfIn=NULL,dbGroup=NULL
-                  ,sensorId=NULL
-                  ,sensorIdAlias=NULL
-                  ,sensorType=NULL,observationTypes=NULL
-                  ,aggregation=NULL,dateFrom=NULL,dateTo=NULL,aggregateInd=NULL,cachePath=NULL
-                  ,source=NULL,datastream=NULL,periodSpan=NULL
-                  ,csvPath='./data/csv/',csvFileName=NULL,csvType='2'
-                  ,rdaPath='./data/Rda/',rdaFileName=NULL
-  ) {
-
-  useCache<-FALSE
+getApriSensorData <- function(dfIn = NULL,
+                              dbGroup = NULL
+                              ,
+                              sensorId = NULL
+                              ,
+                              sensorIdAlias = NULL
+                              ,
+                              sensorType = NULL,
+                              observationTypes = NULL
+                              ,
+                              aggregation = NULL,
+                              dateFrom = NULL,
+                              dateTo = NULL,
+                              aggregateInd = NULL,
+                              cachePath = NULL
+                              ,
+                              source = NULL,
+                              datastream = NULL,
+                              periodSpan = NULL
+                              ,
+                              csvPath = './data/csv/',
+                              csvFileName = NULL,
+                              csvType = '2'
+                              ,
+                              rdaPath = './data/Rda/',
+                              rdaFileName = NULL) {
+  useCache <- FALSE
   # eg curl "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/SCRP0000001234AB/pmsa003?aggregation=detail,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
   
   print('source')
   print(source)
-    #if (source == 'rda') {  # source == Rda dataset
-
+  #if (source == 'rda') {  # source == Rda dataset
+  
   #fileName<-paste(paste(fiwareService,str_replace_all(sensorType, '/', '_'),foi,ops,sep='#'),'.Rda',sep='')
   print('test')
   print(dbGroup)
-  if (is.null(dbGroup) || is.na(dbGroup)) fileName<-paste(paste('DB',sensorId,sensorType,observationTypes,aggregation,sep='#'),'.rds',sep='')
-  else fileName<-paste(paste('DB',sensorId,sensorType,dbGroup,observationTypes,aggregation,sep='#'),'.rds',sep='')
+  if (is.null(dbGroup) ||
+      is.na(dbGroup))
+    fileName <-
+    paste(
+      paste(
+        'DB',
+        sensorId,
+        sensorType,
+        observationTypes,
+        aggregation,
+        sep = '#'
+      ),
+      '.rds',
+      sep = ''
+    )
+  else
+    fileName <-
+    paste(
+      paste(
+        'DB',
+        sensorId,
+        sensorType,
+        dbGroup,
+        observationTypes,
+        aggregation,
+        sep = '#'
+      ),
+      '.rds',
+      sep = ''
+    )
   
   print('test2')
   
-  fileName<-gsub(":","_",fileName)
-
+  fileName <- gsub(":", "_", fileName)
+  
   print(periodSpan)
   if (is.null(periodSpan)) {
-    dateFromOldestInCache<-Sys.time()-(24*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
+    dateFromOldestInCache <-
+      Sys.time() - (24 * 60 * 60 - 60) - (as.numeric(format(Sys.time(), '%z')) /
+                                            100) * 60 * 60
   } else {
-      if (is.numeric(periodSpan)) {
-        dateFromOldestInCache<-Sys.time()-(periodSpan*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
-      } else {
-        dateFromOldestInCache<-Sys.time()-(24*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
-      }
+    if (is.numeric(periodSpan)) {
+      dateFromOldestInCache <-
+        Sys.time() - (periodSpan * 60 * 60 - 60) - (as.numeric(format(Sys.time(), '%z')) /
+                                                      100) * 60 * 60
+    } else {
+      dateFromOldestInCache <-
+        Sys.time() - (24 * 60 * 60 - 60) - (as.numeric(format(Sys.time(), '%z')) /
+                                              100) * 60 * 60
+    }
   }
   if (is.null(dateFrom)) {
-    useCache<-TRUE
+    useCache <- TRUE
     if (is.null(periodSpan)) {
-      dateFrom<-format(Sys.time()-(24*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
-                     ,"%Y-%m-%dT%H:%M:%S")
+      dateFrom <-
+        format(Sys.time() - (24 * 60 * 60 - 60) - (as.numeric(format(
+          Sys.time(), '%z'
+        )) / 100) * 60 * 60
+        ,
+        "%Y-%m-%dT%H:%M:%S")
     } else {
       if (is.numeric(periodSpan)) {
-        dateFrom<-format(Sys.time()-(periodSpan*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
-                     ,"%Y-%m-%dT%H:%M:%S")
+        dateFrom <-
+          format(
+            Sys.time() - (periodSpan * 60 * 60 - 60) - (as.numeric(format(
+              Sys.time(), '%z'
+            )) / 100) * 60 * 60
+            ,
+            "%Y-%m-%dT%H:%M:%S"
+          )
       } else {
-        dateFrom<-format(Sys.time()-(24*60*60-60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
-                     ,"%Y-%m-%dT%H:%M:%S")
+        dateFrom <-
+          format(Sys.time() - (24 * 60 * 60 - 60) - (as.numeric(format(
+            Sys.time(), '%z'
+          )) / 100) * 60 * 60
+          ,
+          "%Y-%m-%dT%H:%M:%S")
       }
     }
-    dateTo<-format(Sys.time() - (as.numeric(format(Sys.time(),'%z'))/100)*60*60
-                   ,"%Y-%m-%dT%H:%M:%S")
+    dateTo <-
+      format(Sys.time() - (as.numeric(format(
+        Sys.time(), '%z'
+      )) / 100) * 60 * 60
+      , "%Y-%m-%dT%H:%M:%S")
     print("Standaard periode:")
     print(dateFrom)
     print(dateTo)
   }
-
-  cached<-FALSE
-  if(useCache==TRUE) {
-    allCache<-FALSE
-    if (file.exists (paste0(cachePath,fileName))) {
+  
+  cached <- FALSE
+  if (useCache == TRUE) {
+    allCache <- FALSE
+    if (file.exists (paste0(cachePath, fileName))) {
       print("Load cache:")
-      cacheFile <-readCacheFile(cachePath,fileName)
+      cacheFile <- readCacheFile(cachePath, fileName)
       # volgende regel kan eruit als alle cache is omgezet en date bevat
       #    cacheFile$date<-as.POSIXct(cacheFile$dateObserved, format="%Y-%m-%dT%H:%M")
-      maxDateObservedCache<-max(cacheFile$date)
-      print(paste("Max from cache is:",maxDateObservedCache))
-
-      tmpDateObservedFrom<-as.POSIXct(dateFrom, format="%Y-%m-%dT%H:%M:%S")
-      tmpDateObservedTo<-as.POSIXct(dateTo, format="%Y-%m-%dT%H:%M:%S")
+      maxDateObservedCache <- max(cacheFile$date)
+      print(paste("Max from cache is:", maxDateObservedCache))
+      
+      tmpDateObservedFrom <-
+        as.POSIXct(dateFrom, format = "%Y-%m-%dT%H:%M:%S")
+      tmpDateObservedTo <-
+        as.POSIXct(dateTo, format = "%Y-%m-%dT%H:%M:%S")
       if (tmpDateObservedFrom < maxDateObservedCache) {
         if (tmpDateObservedTo > maxDateObservedCache) {
           print("Change retrieve date from into max cache date")
-          dateFrom<-format(maxDateObservedCache #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60
-                           ,"%Y-%m-%dT%H:%M:%S")
+          dateFrom <-
+            format(maxDateObservedCache #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60
+                   , "%Y-%m-%dT%H:%M:%S")
         }
         else {
           print("All data from cache")
-          dateFrom<-dateTo
-          allCache<-TRUE
+          dateFrom <- dateTo
+          allCache <- TRUE
         }
       }
-      cached<-TRUE
+      cached <- TRUE
       #    if (nrow(cacheFile)>0) {
       #      print("aggregate cache")
       #      cacheFile <- aggregate(sensorValue~sensorId+sensorType+date, data=cacheFile, mean, na.rm=TRUE)
@@ -111,59 +181,83 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL
       #    cacheFile$dateObserved<-format(cacheFile$date,"%Y-%m-%dT%H:%M:%S") # restore dateObserved for averaged value
     }
   }
-  paramDate<-paste("&dateFrom=",dateFrom,"&dateTo=",dateTo,sep='')
+  paramDate <- paste("&dateFrom=", dateFrom, "&dateTo=", dateTo, sep = '')
   
   print(observationTypes)
-  observationTypeArray<-strsplit(observationTypes,split=',')
-  observationTypesUrl<-''
+  observationTypeArray <- strsplit(observationTypes, split = ',')
+  observationTypesUrl <- ''
   for (observationTypeObject in observationTypeArray[[1]]) {
-    if (observationTypesUrl=='') {
-      observationTypesUrl<-paste0(observationTypesUrl,strsplit(observationTypeObject,split=':')[[1]][1])
+    if (observationTypesUrl == '') {
+      observationTypesUrl <-
+        paste0(observationTypesUrl,
+               strsplit(observationTypeObject, split = ':')[[1]][1])
     } else {
-      observationTypesUrl<-paste0(observationTypesUrl,',',strsplit(observationTypeObject,split=':')[[1]][1])
+      observationTypesUrl <-
+        paste0(observationTypesUrl,
+               ',',
+               strsplit(observationTypeObject, split = ':')[[1]][1])
     }
   }
   
-  recordsFound <-FALSE
+  recordsFound <- FALSE
   
   # start van deel voor alleen de aprisensor
   if (is.null(source) || is.na(source)) {
+    # eg curl "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/SCRP0000001234AB/pmsa003?aggregation=detail,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
+    url <-
+      paste(
+        "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/"
+        ,
+        sensorId,
+        '/',
+        sensorType
+        ,
+        "?observationTypes=",
+        observationTypesUrl
+        ,
+        "&aggregation=",
+        aggregation
+        ,
+        paramDate
+        ,
+        sep = ''
+      )
+    print(url)
     
-  
-  # eg curl "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/SCRP0000001234AB/pmsa003?aggregation=detail,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
-  url <- paste("https://aprisensor-api-v1.openiod.org/v1/observations/sensor/"
-               , sensorId,'/',sensorType
-               ,"?observationTypes=", observationTypesUrl
-               ,"&aggregation=", aggregation
-                 , paramDate
-                 ,sep='')
-  print(url)
-
-  myData <- fromJSON(url)
-  if (!is.null(myData$error)) {
-    print(paste('No data. Error: ',myData$error,myData$message) )
-    #dfResult<-fromJSON('{"observations":[]}')
-    dfResult<-fromJSON('{"sensor":{"name":"Purmerend purm","sensorIdShort":"B7A5","sensorKey":"64535fae984020a4a24dc9b3","sensorType":"sps30"},"observations":[]}')
-    #dfResult<-NULL
-    if (cached==FALSE) return (NULL)
-  } else {
-    dfResult<-myData$observations
-   # dfResult<-fromJSON('{"sensor":{"name":"Purmerend purm","sensorIdShort":"B7A5","sensorKey":"64535fae984020a4a24dc9b3","sensorType":"sps30"},"observations":[]}')
-    print(length(dfResult))
-    if (length(dfResult)==0) {
-      if (cached==FALSE) return (NULL)
-    }
-      
-      recordsFound <-TRUE
-      dfMerged<-NULL
-      for (observationTypeObject in observationTypeArray[[1]]) {
-        tmpObservationType <- strsplit(observationTypeObject,split=':')[[1]][1]
-        tmpObservationTypeAlias <- strsplit(observationTypeObject,split=':')[[1]][2]
+    myData <- fromJSON(url)
+    if (!is.null(myData$error)) {
+      print(paste('No data. Error: ', myData$error, myData$message))
+      #dfResult<-fromJSON('{"observations":[]}')
+      dfResult <-
+        fromJSON(
+          '{"sensor":{"name":"Purmerend purm","sensorIdShort":"B7A5","sensorKey":"64535fae984020a4a24dc9b3","sensorType":"sps30"},"observations":[]}'
+        )
+      #dfResult<-NULL
+      if (cached == FALSE)
+        return (NULL)
+    } else {
+      dfResult <- myData$observations
+      # dfResult<-fromJSON('{"sensor":{"name":"Purmerend purm","sensorIdShort":"B7A5","sensorKey":"64535fae984020a4a24dc9b3","sensorType":"sps30"},"observations":[]}')
+      print(length(dfResult))
+      if (length(dfResult) == 0) {
+        if (cached == FALSE)
+          return (NULL)
         
-        dfSubSet<- dfResult
+      }
+      
+      
+      recordsFound <- TRUE
+      dfMerged <- NULL
+      for (observationTypeObject in observationTypeArray[[1]]) {
+        tmpObservationType <-
+          strsplit(observationTypeObject, split = ':')[[1]][1]
+        tmpObservationTypeAlias <-
+          strsplit(observationTypeObject, split = ':')[[1]][2]
+        
+        dfSubSet <- dfResult
         #print(tmpObservationType)
         #print(head(length(dfSubSet)))
-        dfSubSet$sensorValue <- dfSubSet[c(tmpObservationType)][,1]
+        dfSubSet$sensorValue <- dfSubSet[c(tmpObservationType)][, 1]
         if (!is.na(tmpObservationTypeAlias)) {
           dfSubSet$sensorType <- tmpObservationTypeAlias
         } else {
@@ -171,163 +265,196 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL
         }
         
         if (is.null(dfMerged)) {
-          dfMerged<-dfSubSet
+          dfMerged <- dfSubSet
         } else {
-          dfMerged<-rbind(dfMerged,dfSubSet)
-        } 
+          dfMerged <- rbind(dfMerged, dfSubSet)
+        }
       }
-      dfResult<-dfMerged
+      dfResult <- dfMerged
     }
     
     
-  
-#  if (aggregation=='minute') {
-#    dfResult <-myData$observationsMinute
-#    dfResult$dateObserved<-dfResult$dateObservedDate
-#  } else if (aggregation=='detail') {
-#    dfResult <-myData$observationsDetail
-#    dfResult$dateObserved<-dfResult$dateObservedDate
-#    dfResult$sensorId <- myData$observations$sensorId[1]
-#  } else {
-    # dfResult <-myData$observations
-#    dfResult$sensorId <- myData$observations$sensorId
-#  }
-} # einde van source aprisensor  
     
+    #  if (aggregation=='minute') {
+    #    dfResult <-myData$observationsMinute
+    #    dfResult$dateObserved<-dfResult$dateObservedDate
+    #  } else if (aggregation=='detail') {
+    #    dfResult <-myData$observationsDetail
+    #    dfResult$dateObserved<-dfResult$dateObservedDate
+    #    dfResult$sensorId <- myData$observations$sensorId[1]
+    #  } else {
+    # dfResult <-myData$observations
+    #    dfResult$sensorId <- myData$observations$sensorId
+    #  }
+  } # einde van source aprisensor
+  
   if (!is.null(source) && !is.na(source)) {
-    if (source == 'csv') {  # source == csv dataset
+    if (source == 'csv') {
+      # source == csv dataset
       # /NBI_TN012/12-pm25
       print('test')
       print(dateFrom)
       print(dateTo)
       
-      csvFile<-paste0(csvPath,csvFileName)
-      print(paste('csv: (',getwd(),') ',csvFile,' csvType:',csvType))
-
-      if (is.null(csvType)) {
-        csvType='2'
-      }
-      if (csvType=='1') {
-        dfResult<-read.csv(csvFile)
-        if ("sensorType" %in% colnames(dfResult)==F) {
-          dfResult$sensorType<-'pm25'
-          dfResult$sensorValue<-dfResult$pm25mlr
-        } 
-      } else {
-        dfResult<-read.csv2(csvFile)
-      }
-      dfResult<-subset(dfResult,dfResult$dateObserved>=dateFrom)
-      dfResult<-subset(dfResult,dfResult$dateObserved<=dateTo)
-      dfResult$sensorId<-as.factor(dfResult$sensorId)
-      dfResult$sensorType<-as.factor(dfResult$sensorType)
-      dfResult$dateObserved<-as.factor(dfResult$dateObserved)
-    }
-  }
-
-  if (!is.null(source) && !is.na(source)) {
-    if (source == 'rda') {  # source == Rda dataset
-
-      rdaFile<-paste0(rdaPath,rdaFileName)
-      print(paste('rda: (',getwd(),') ',rdaFile))
-      dfResult<-readRDS(rdaFile)
-      if ("sensorType" %in% colnames(dfResult)==F) {
-        dfResult$sensorType<-'pm25'
-        dfResult$sensorValue<-dfResult$pm25mlr
-      } 
-      tmpDateObservedFrom<-as.POSIXct(dateFrom, format="%Y-%m-%dT%H:%M:%S")
-      tmpDateObservedTo<-as.POSIXct(dateTo, format="%Y-%m-%dT%H:%M:%S")
+      csvFile <- paste0(csvPath, csvFileName)
+      print(paste('csv: (', getwd(), ') ', csvFile, ' csvType:', csvType))
       
-      dfResult<-subset(dfResult,dfResult$date>=tmpDateObservedFrom)
-      dfResult<-subset(dfResult,dfResult$date<=tmpDateObservedTo)
-      dfResult$sensorId<-as.factor(dfResult$sensorId)
-      dfResult$sensorType<-as.factor(dfResult$sensorType)
-      # Project Castricum
-      if (sensorId=='SCRP000000009e652147' ||sensorId=='SCRP000000008b6eb7a5' || sensorId=='SCRP00000000c321df78') {
-        dfResult$dateObserved<-format(dfResult$date,"%Y-%m-%dT%H:%M:%S")
+      if (is.null(csvType)) {
+        csvType = '2'
       }
-      dfResult$dateObserved<-as.factor(dfResult$dateObserved)
+      if (csvType == '1') {
+        dfResult <- read.csv(csvFile)
+        if ("sensorType" %in% colnames(dfResult) == F) {
+          dfResult$sensorType <- 'pm25'
+          dfResult$sensorValue <- dfResult$pm25mlr
+        }
+      } else {
+        dfResult <- read.csv2(csvFile)
+      }
+      dfResult <- subset(dfResult, dfResult$dateObserved >= dateFrom)
+      dfResult <- subset(dfResult, dfResult$dateObserved <= dateTo)
+      dfResult$sensorId <- as.factor(dfResult$sensorId)
+      dfResult$sensorType <- as.factor(dfResult$sensorType)
+      dfResult$dateObserved <- as.factor(dfResult$dateObserved)
     }
   }
   
   if (!is.null(source) && !is.na(source)) {
-    if (source == 'samenmeten') {  # source == samenmeten api
+    if (source == 'rda') {
+      # source == Rda dataset
+      
+      rdaFile <- paste0(rdaPath, rdaFileName)
+      print(paste('rda: (', getwd(), ') ', rdaFile))
+      dfResult <- readRDS(rdaFile)
+      if ("sensorType" %in% colnames(dfResult) == F) {
+        dfResult$sensorType <- 'pm25'
+        dfResult$sensorValue <- dfResult$pm25mlr
+      }
+      tmpDateObservedFrom <-
+        as.POSIXct(dateFrom, format = "%Y-%m-%dT%H:%M:%S")
+      tmpDateObservedTo <-
+        as.POSIXct(dateTo, format = "%Y-%m-%dT%H:%M:%S")
+      
+      dfResult <- subset(dfResult, dfResult$date >= tmpDateObservedFrom)
+      dfResult <- subset(dfResult, dfResult$date <= tmpDateObservedTo)
+      dfResult$sensorId <- as.factor(dfResult$sensorId)
+      dfResult$sensorType <- as.factor(dfResult$sensorType)
+      # Project Castricum
+      if (sensorId == 'SCRP000000009e652147' ||
+          sensorId == 'SCRP000000008b6eb7a5' ||
+          sensorId == 'SCRP00000000c321df78') {
+        dfResult$dateObserved <- format(dfResult$date, "%Y-%m-%dT%H:%M:%S")
+      }
+      dfResult$dateObserved <- as.factor(dfResult$dateObserved)
+    }
+  }
+  
+  if (!is.null(source) && !is.na(source)) {
+    if (source == 'samenmeten') {
+      # source == samenmeten api
       # /NBI_TN012/12-pm25
       print('test')
-      splitTmp<-strsplit(observationTypes,split=':')[[1]]
-      observationTypes<-splitTmp[1]
-
-      url <- paste("https://samenmeten.openiod.org/api/v1/thing/"
-                   ,sensorId,"/"
-                   ,datastream
-                   ,'?sensorType=',sensorType
-                   ,paramDate
-                   ,sep='')
+      splitTmp <- strsplit(observationTypes, split = ':')[[1]]
+      observationTypes <- splitTmp[1]
+      
+      url <- paste(
+        "https://samenmeten.openiod.org/api/v1/thing/"
+        ,
+        sensorId,
+        "/"
+        ,
+        datastream
+        ,
+        '?sensorType=',
+        sensorType
+        ,
+        "?observationTypes=",
+        observationTypesUrl
+        ,
+        paramDate
+        ,
+        sep = ''
+      )
       print(url)
-      dfResult<-jsonlite::fromJSON(url,simplifyDataFrame = TRUE)
-      dfResult$sensorId<-as.factor(dfResult$sensorId)
-      dfResult$sensorType<-as.factor(dfResult$sensorType)
-      dfResult$dateObserved<-as.factor(dfResult$dateObserved)
+      dfResult <- jsonlite::fromJSON(url, simplifyDataFrame = TRUE)
+      dfResult$sensorId <- as.factor(dfResult$sensorId)
+      dfResult$sensorType <- as.factor(dfResult$sensorType)
+      dfResult$dateObserved <- as.factor(dfResult$dateObserved)
       
       
-
-      if (length(dfResult)>0) {
-        if (length(splitTmp)>1) {
-          dfResult$sensorType<-splitTmp[2]
+      
+      if (length(dfResult) > 0) {
+        if (length(splitTmp) > 1) {
+          dfResult$sensorType <- splitTmp[2]
         } else {
-          dfResult$sensorType<-dfResult$datastream
+          dfResult$sensorType <- dfResult$datastream
         }
       }
     }
   }
-
+  
   if (recordsFound) {
-    dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
+    dfResult$date <-
+      as.POSIXct(dfResult$dateObserved, format = "%Y-%m-%dT%H:%M:%S")
     
-    keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+    keeps <-
+      c("sensorId",
+        "sensorType",
+        "date",
+        "sensorValue",
+        "dateObserved")
     dfResult <- dfResult[keeps]
     
   }
-
-
-  if (observationTypes=='pm1,pm25,pm10') {
+  
+  
+  if (observationTypes == 'pm1,pm25,pm10') {
     dfResultMax <- subset(dfResult, dfResult$sensorValue >= pmTop)
-    if (as.numeric(nrow(dfResultMax)>=1)) {
+    if (as.numeric(nrow(dfResultMax) >= 1)) {
       dfResult1 <- subset(dfResult, dfResult$sensorValue < pmTop)
-      dfResultMax$sensorValue<-pmTop
-      dfResult<-rbind(dfResult1,dfResultMax)
+      dfResultMax$sensorValue <- pmTop
+      dfResult <- rbind(dfResult1, dfResultMax)
     }
   }
-
-  if (useCache==FALSE){
+  
+  if (useCache == FALSE) {
     cacheFileNew <- dfResult
   }
-  if (useCache==TRUE){
-    if (cached==FALSE) cacheFileNew <- dfResult
-    if (cached==TRUE) {
+  if (useCache == TRUE) {
+    if (cached == FALSE)
+      cacheFileNew <- dfResult
+    if (cached == TRUE) {
       print("Add retrieved records to cache")
-      print(paste("In cache was:",nrow(cacheFile)))
-      cacheFile <- subset(cacheFile, cacheFile$date > dateFromOldestInCache )
-      print(paste("drop hist in cache before ",dateFromOldestInCache,", reduced to:",nrow(cacheFile)))
-      cacheFile <- subset(cacheFile, cacheFile$date < maxDateObservedCache )
-      print(paste("In cache reduced to:",nrow(cacheFile)))
+      print(paste("In cache was:", nrow(cacheFile)))
+      cacheFile <-
+        subset(cacheFile, cacheFile$date > dateFromOldestInCache)
+      print(paste(
+        "drop hist in cache before ",
+        dateFromOldestInCache,
+        ", reduced to:",
+        nrow(cacheFile)
+      ))
+      cacheFile <-
+        subset(cacheFile, cacheFile$date < maxDateObservedCache)
+      print(paste("In cache reduced to:", nrow(cacheFile)))
       #cacheFile <- subset(cacheFile, select = -c(dateObservedDate) ) # drop temporary column
-      cacheFileNew <- rbind(cacheFile,dfResult)
+      cacheFileNew <- rbind(cacheFile, dfResult)
     }
-    print(paste("In cache is: ",nrow(cacheFileNew)))
-    if (!is.null(cacheFileNew) ) {
-      if (nrow(cacheFileNew)>0) {
-        saveCacheFile(cachePath,fileName,cacheFileNew)
+    print(paste("In cache is: ", nrow(cacheFileNew)))
+    if (!is.null(cacheFileNew)) {
+      if (nrow(cacheFileNew) > 0) {
+        saveCacheFile(cachePath, fileName, cacheFileNew)
         print("Cache saved to file")
       }
     }
   }
-
-#### aggregate ? (cache is not aggregated!!)
-  dfResult<-cacheFileNew
   
-  if (length(dfResult)>0 && nrow(dfResult)>0) {
-    if (!is.null(sensorIdAlias) && !is.na(sensorIdAlias)){
-      dfResult$sensorId<-sensorIdAlias
+  #### aggregate ? (cache is not aggregated!!)
+  dfResult <- cacheFileNew
+  
+  if (length(dfResult) > 0 && nrow(dfResult) > 0) {
+    if (!is.null(sensorIdAlias) && !is.na(sensorIdAlias)) {
+      dfResult$sensorId <- sensorIdAlias
     }
     
     # aggrTmp<-FALSE
@@ -378,17 +505,19 @@ getApriSensorData<-function(dfIn=NULL,dbGroup=NULL
     #   #keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
     #   #dfResult <- dfResult[keeps]
     # }
-
+    
     #if (!is.null(dfResult$sensorType[1]) && dfResult$sensorType[1]=='bme680_gasResistance') {
-  #  print(dfResult$sensorType[1])
-   # if(!is.na(dfResult$sensorType[1])) {
-      if (dfResult$sensorType[1] == 'bme680_gasResistance') {
-        #dfTmpGas<-fiwareGetSensorSelectRecords(NULL,'aprisensor_in','/bme680','sensorId','SCRP00000000504b9dd5','gasResistance:bme680_gasResistance')
-        dfResult$sensorValue<-(1000000 - dfResult$sensorValue)/1000
-      }
+    #  print(dfResult$sensorType[1])
+    # if(!is.na(dfResult$sensorType[1])) {
+    if (dfResult$sensorType[1] == 'bme680_gasResistance') {
+      #dfTmpGas<-fiwareGetSensorSelectRecords(NULL,'aprisensor_in','/bme680','sensorId','SCRP00000000504b9dd5','gasResistance:bme680_gasResistance')
+      dfResult$sensorValue <- (1000000 - dfResult$sensorValue) / 1000
+    }
     #}
   }
-
-  if (is.null(dfIn)) return(dfResult)
-  else return(rbind(dfIn,dfResult) )
+  
+  if (is.null(dfIn))
+    return(dfResult)
+  else
+    return(rbind(dfIn, dfResult))
 }

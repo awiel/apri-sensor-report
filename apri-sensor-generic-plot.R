@@ -136,7 +136,7 @@ for (i in 1:nrow(sensorIds)) {
       if (!is.null(sensorIds$serviceDB[i]) && !is.na(sensorIds$serviceDB[i])) {
         dbGroup<-sensorIds$dbGroup[i]
         observationTypes<-observableProperties
-        if (sensorIds$sensorType[i]=='lmn') {
+        if (sensorIds$sensorType[i]=='lml') {
 
           if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
             sensorIdAlias<- sensorIds$sensorIdAlias[i]
@@ -194,7 +194,7 @@ for (i in 1:nrow(sensorIds)) {
         observationTypes<-observableProperties
         if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
           aggregation<-sensorIds$aggregation[i]
-          #aggregation<-"minute"
+          aggregation<-"minute"
         } else {
           aggregation<-"minute"
         }

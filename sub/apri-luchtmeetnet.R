@@ -70,7 +70,7 @@ getLuchtmeetnetData<-function(dfIn=NULL
   
   
   url <- paste("https://aprisensor-api-v1.openiod.org/v1/luchtmeetnet/",sensorId
-               ,"?observationTypes=", observationTypes
+               ,"?observationTypes=", observationTypesUrl
                , paramDate
                  ,sep='')
   print(url)
