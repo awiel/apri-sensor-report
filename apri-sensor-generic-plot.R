@@ -194,7 +194,6 @@ for (i in 1:nrow(sensorIds)) {
         observationTypes<-observableProperties
         if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
           aggregation<-sensorIds$aggregation[i]
-          aggregation<-"minute"
         } else {
           aggregation<-"minute"
         }
