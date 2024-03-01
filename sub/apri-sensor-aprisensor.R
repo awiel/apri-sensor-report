@@ -153,8 +153,13 @@ getApriSensorData <- function(dfIn = NULL,
       # volgende regel kan eruit als alle cache is omgezet en date bevat
       #    cacheFile$date<-as.POSIXct(cacheFile$dateObserved, format="%Y-%m-%dT%H:%M")
       maxDateObservedCache <- max(cacheFile$date)
-      print(paste("Max from cache is:", maxDateObservedCache))
       
+      # ivm maandovergang extra minuut om naar nieuwe maand over te gaan ( dateFrom determines database month)
+      if (month(dateFrom)==month(maxDateObservedCache) & month(dateTo)>month(dateFrom) & hour(maxDateObservedCache)==23 &  minute(maxDateObservedCache)==59) {
+        print('skip to next mont (next month database)')
+        maxDateObservedCache<-maxDateObservedCache+60 -second(maxDateObservedCache)  # + 60 seconds - rest minutes
+      }
+
       tmpDateObservedFrom <-
         as.POSIXct(dateFrom, format = "%Y-%m-%dT%H:%M:%S")
       tmpDateObservedTo <-
