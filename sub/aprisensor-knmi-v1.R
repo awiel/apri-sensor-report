@@ -29,7 +29,47 @@ writeDataFiles<-function(fileName) {
   save(count, age, circumference, file = "mydata.rda") 
 }
 
-getStationSelectRecordsKnmi<-function(dfIn=NULL,station=station,dateFrom=NULL,dateTo=NULL) {  
+getStationSelectRecordsKnmi<-function(dfIn=NULL,station=station,dateFrom=NULL,dateTo=NULL,periodSpan=NULL) {  
+
+  if (is.null(dateFrom)) {
+    #useCache <- TRUE
+    if (is.null(periodSpan)) {
+      dateFrom <-
+        format(Sys.time() - (24 * 60 * 60 - 60) - (as.numeric(format(
+          Sys.time(), '%z'
+        )) / 100) * 60 * 60
+        ,
+        "%Y-%m-%dT%H:%M:%S")
+    } else {
+      if (is.numeric(periodSpan)) {
+        dateFrom <-
+          format(
+            Sys.time() - (periodSpan * 60 * 60 - 60) - (as.numeric(format(
+              Sys.time(), '%z'
+            )) / 100) * 60 * 60
+            ,
+            "%Y-%m-%dT%H:%M:%S"
+          )
+      } else {
+        dateFrom <-
+          format(Sys.time() - (24 * 60 * 60 - 60) - (as.numeric(format(
+            Sys.time(), '%z'
+          )) / 100) * 60 * 60
+          ,
+          "%Y-%m-%dT%H:%M:%S")
+      }
+    }
+    dateTo <-
+      format(Sys.time() - (as.numeric(format(
+        Sys.time(), '%z'
+      )) / 100) * 60 * 60
+      , "%Y-%m-%dT%H:%M:%S")
+    print("Standaard periode:")
+    print(dateFrom)
+    print(dateTo)
+  }
+  
+  
   if (is.null(dateFrom)) {
     paramDate<-''
     dateFrom<-format(Sys.time()-(24*60*60) - (as.numeric(format(Sys.time(),'%z'))/100)*60*60

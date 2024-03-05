@@ -143,12 +143,21 @@ for (i in 1:nrow(sensorIds)) {
             sensorIdAlias<- sensorIds$sensorIdAlias[i]
           } else sensorIdAlias<-NULL
           
-          dfTmpOne<-getLuchtmeetnetData(dfIn=NULL
-                                        ,sensorId=sensorIds$sensorId[i]
-                                        ,sensorIdAlias=sensorIdAlias
-                                        ,observationTypes=observationTypes
+          dfTmpOne<-getStationSelectRecordsKnmi(dfIn=NULL
+                                        ,station=sensorIds$sensorId[i]
+                                        ,dateFrom=NULL
+                                        ,dateTo=NULL
                                         ,periodSpan=periodSpan
+                                       # ,sensorIdAlias=sensorIdAlias
+                                      #  ,observationTypes=observationTypes
           )
+          dfTmpOne$sensorId<-dfTmpOne$station
+          dfTmpOne$sensorValue<-dfTmpOne$solar
+          dfTmpOne$sensorType<-'knmi'
+          dfTmpOne$date <- as.POSIXct(dfTmpOne$dateObserved, format = "%Y-%m-%dT%H:%M:%S")
+          keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+          dfTmpOne <- dfTmpOne[keeps]
+          
         } else {
           if (sensorIds$sensorType[i]=='lml') {
 
