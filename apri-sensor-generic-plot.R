@@ -153,7 +153,7 @@ for (i in 1:nrow(sensorIds)) {
           )
           dfTmpOne$sensorId<-dfTmpOne$station
           dfTmpOne$sensorValue<-dfTmpOne$solar
-          dfTmpOne$sensorType<-'knmi'
+          dfTmpOne$sensorType<-'irradiance'
           dfTmpOne$date <- as.POSIXct(dfTmpOne$dateObserved, format = "%Y-%m-%dT%H:%M:%S")
           keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
           dfTmpOne <- dfTmpOne[keeps]
