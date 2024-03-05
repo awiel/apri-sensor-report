@@ -37,8 +37,7 @@ getApriSensorData <- function(dfIn = NULL,
                               ,
                               source = NULL,
                               datastream = NULL,
-                              periodSpan = NULL
-                              ,
+                              periodSpan = NULL,
                               csvPath = './data/csv/',
                               csvFileName = NULL,
                               csvType = '2'

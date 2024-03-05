@@ -8,7 +8,9 @@ getLuchtmeetnetData<-function(dfIn=NULL
                               ,sensorId=NULL
                               ,sensorIdAlias=NULL
                               ,observationTypes=NULL
-                        ,dateFrom=NULL,dateTo=NULL
+                              ,dateFrom=NULL,dateTo=NULL
+                              ,periodSpan = NULL
+                        
   ) {
 
   # eg curl "https://aprisensor-api-v1.openiod.org/v1/luchtmeetnet/LUCHTMEETNETNL01496?,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
