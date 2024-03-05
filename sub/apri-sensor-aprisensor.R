@@ -90,7 +90,6 @@ getApriSensorData <- function(dfIn = NULL,
   
   fileName <- gsub(":", "_", fileName)
   
-  print(periodSpan)
   if (is.null(periodSpan)) {
     dateFromOldestInCache <-
       Sys.time() - (24 * 60 * 60 - 60) - (as.numeric(format(Sys.time(), '%z')) /

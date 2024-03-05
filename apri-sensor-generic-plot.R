@@ -146,6 +146,7 @@ for (i in 1:nrow(sensorIds)) {
                                       ,sensorId=sensorIds$sensorId[i]
                                       ,sensorIdAlias=sensorIdAlias
                                       ,observationTypes=observationTypes
+                                      ,periodSpan=periodSpan
           )
         } else {
           if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
@@ -168,6 +169,7 @@ for (i in 1:nrow(sensorIds)) {
                                       ,sensorType=sensorIds$sensorType[i]
                                       ,observationTypes=observationTypes
                                       ,cachePath=cachePath
+                                      ,periodSpan=periodSpan
           )
         }
         #print(head(dfTmpOne))
