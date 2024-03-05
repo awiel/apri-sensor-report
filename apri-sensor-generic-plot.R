@@ -160,7 +160,7 @@ for (i in 1:nrow(sensorIds)) {
                                       ,sensorId=sensorIds$sensorId[i]
                                       ,sensorIdAlias=sensorIdAlias
                                       ,observationTypes=observationTypes
-                                      ,periodSpan=periodSpan
+                                      #,periodSpan=periodSpan
           )
         } else {
           if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
