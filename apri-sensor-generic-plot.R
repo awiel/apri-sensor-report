@@ -56,6 +56,7 @@ library(jsonlite)
 source(paste0(subPath,"apri-sensor-fiware.R"))
 source(paste0(subPath,"apri-sensor-aprisensor.R"))
 source(paste0(subPath,"apri-luchtmeetnet.R"))
+source(paste0(subPath,"aprisensor-knmi-v1.R"))
 source(paste0(subPath,"apri-sensor-plot.R"))
 
 sensorTypes<-json_data<-fromJSON(paste0(configPath,"apri-sensor-sensorTypes.json"))
@@ -136,7 +137,20 @@ for (i in 1:nrow(sensorIds)) {
       if (!is.null(sensorIds$serviceDB[i]) && !is.na(sensorIds$serviceDB[i])) {
         dbGroup<-sensorIds$dbGroup[i]
         observationTypes<-observableProperties
-        if (sensorIds$sensorType[i]=='lml') {
+        if (sensorIds$sensorType[i]=='knmi') {
+          
+          if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+            sensorIdAlias<- sensorIds$sensorIdAlias[i]
+          } else sensorIdAlias<-NULL
+          
+          dfTmpOne<-getLuchtmeetnetData(dfIn=NULL
+                                        ,sensorId=sensorIds$sensorId[i]
+                                        ,sensorIdAlias=sensorIdAlias
+                                        ,observationTypes=observationTypes
+                                       # ,periodSpan=periodSpan
+          )
+        } else {
+          if (sensorIds$sensorType[i]=='lml') {
 
           if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
             sensorIdAlias<- sensorIds$sensorIdAlias[i]
@@ -171,6 +185,7 @@ for (i in 1:nrow(sensorIds)) {
                                       ,cachePath=cachePath
                                       ,periodSpan=periodSpan
           )
+        }
         }
         #print(head(dfTmpOne))
       } #else {
