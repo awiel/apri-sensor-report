@@ -257,20 +257,22 @@ getApriSensorData <- function(dfIn = NULL,
         tmpObservationTypeAlias <-
           strsplit(observationTypeObject, split = ':')[[1]][2]
         
-        dfSubSet <- dfResult
-        #print(tmpObservationType)
-        #print(head(length(dfSubSet)))
-        dfSubSet$sensorValue <- dfSubSet[c(tmpObservationType)][, 1]
-        if (!is.na(tmpObservationTypeAlias)) {
-          dfSubSet$sensorType <- tmpObservationTypeAlias
-        } else {
-          dfSubSet$sensorType <- tmpObservationType
-        }
+        if (length(dfResult)> 0 ) {
+          dfSubSet <- dfResult
+          #print(tmpObservationType)
+          #print(head(length(dfSubSet)))
+          dfSubSet$sensorValue <- dfSubSet[c(tmpObservationType)][, 1]
+          if (!is.na(tmpObservationTypeAlias)) {
+            dfSubSet$sensorType <- tmpObservationTypeAlias
+          } else {
+            dfSubSet$sensorType <- tmpObservationType
+          }
         
-        if (is.null(dfMerged)) {
-          dfMerged <- dfSubSet
-        } else {
-          dfMerged <- rbind(dfMerged, dfSubSet)
+          if (is.null(dfMerged)) {
+            dfMerged <- dfSubSet
+          } else {
+            dfMerged <- rbind(dfMerged, dfSubSet)
+          }
         }
       }
       dfResult <- dfMerged
