@@ -515,9 +515,9 @@ aggregateTxt<-"gemiddeld per minuut"
 #if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==0) {
 #  aggregateTxt<-"gemiddeld per 20 seconden"
 #}
-#if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==10) {
-#  aggregateTxt<-"gemiddeld per 10 minuten"
-#}
+if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==10) {
+  aggregateTxt<-"gemiddeld per 10 minuten"
+}
 
 dateText<-'Datum';
 timeZone<-'Amsterdam';
