@@ -30,6 +30,7 @@ getApriSensorData <- function(dfIn = NULL,
                               observationTypes = NULL
                               ,
                               aggregation = NULL,
+                              minuteMod = NULL,
                               dateFrom = NULL,
                               dateTo = NULL,
                               aggregateInd = NULL,
@@ -221,6 +222,9 @@ getApriSensorData <- function(dfIn = NULL,
         "&aggregation=",
         aggregation
         ,
+        "&minuteMod=",
+        minuteMod
+        ,
         paramDate
         ,
         sep = ''
@@ -269,6 +273,7 @@ getApriSensorData <- function(dfIn = NULL,
           }
         
           if (is.null(dfMerged)) {
+            
             dfMerged <- dfSubSet
           } else {
             dfMerged <- rbind(dfMerged, dfSubSet)
@@ -277,6 +282,7 @@ getApriSensorData <- function(dfIn = NULL,
       }
       dfResult <- dfMerged
     }
+    
     
     
     

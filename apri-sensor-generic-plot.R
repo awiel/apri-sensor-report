@@ -172,8 +172,12 @@ for (i in 1:nrow(sensorIds)) {
                                       ,periodSpan=periodSpan
           )
         } else {
+          minuteMod<- 1 # for minute aggregation only (1 is default)
           if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
             aggregation<-sensorIds$aggregation[i]
+            if (!is.null(sensorIds$minuteMod[i]) && !is.na(sensorIds$minuteMod[i])){  # modulus for minute aggregation
+              minuteMod <-sensorIds$minuteMod[i]
+            }  
       #      #aggregation<-"minute"
           } else {
             aggregation<-"minute"
@@ -193,6 +197,7 @@ for (i in 1:nrow(sensorIds)) {
                                       ,observationTypes=observationTypes
                                       ,cachePath=cachePath
                                       ,periodSpan=periodSpan
+                                      ,minuteMod=minuteMod
           )
         }
         }
@@ -218,8 +223,12 @@ for (i in 1:nrow(sensorIds)) {
         print("hist getApriSensorData")
         dbGroup<-sensorIds$dbGroup[i]
         observationTypes<-observableProperties
+        minuteMod<- 1 # for minute aggregation only (1 is default)
         if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
           aggregation<-sensorIds$aggregation[i]
+          if (!is.null(sensorIds$minuteMod[i]) && !is.na(sensorIds$minuteMod[i])){  # modulus for minute aggregation
+            minuteMod <-sensorIds$minuteMod[i]
+          }  
         } else {
           aggregation<-"minute"
         }
@@ -238,6 +247,7 @@ for (i in 1:nrow(sensorIds)) {
                   #                  ,cachePath=cachePath
               ,dateFrom=reportConfig$dateFrom
               ,dateTo=reportConfig$dateTo
+              ,minuteMod=minuteMod
               )
       } #else {
       #   print("hist getFiwareData")
