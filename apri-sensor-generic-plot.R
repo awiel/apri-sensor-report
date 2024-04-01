@@ -220,7 +220,31 @@ for (i in 1:nrow(sensorIds)) {
       print('hist')
       
       if (!is.null(sensorIds$serviceDB[i]) && !is.na(sensorIds$serviceDB[i])) {
+        if (sensorIds$sensorType[i]=='knmi') {
+          print("hist getStationSelectRecordsKnmi")
+          
+          if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+            sensorIdAlias<- sensorIds$sensorIdAlias[i]
+          } else sensorIdAlias<-NULL
+          
+          dfTmpOne<-getStationSelectRecordsKnmi(dfIn=NULL
+                                                ,station=sensorIds$sensorId[i]
+                                                ,dateFrom=NULL
+                                                ,dateTo=NULL
+                                                ,periodSpan=periodSpan
+                                                # ,sensorIdAlias=sensorIdAlias
+                                                #  ,observationTypes=observationTypes
+          )
+          dfTmpOne$sensorId<-dfTmpOne$station
+          dfTmpOne$sensorValue<-dfTmpOne$solar
+          dfTmpOne$sensorType<-'irradiance'
+          dfTmpOne$date <- as.POSIXct(dfTmpOne$dateObserved, format = "%Y-%m-%dT%H:%M:%S")
+          keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+          dfTmpOne <- dfTmpOne[keeps]
+          
+        } else {
         print("hist getApriSensorData")
+        
         dbGroup<-sensorIds$dbGroup[i]
         observationTypes<-observableProperties
         minuteMod<- 1 # for minute aggregation only (1 is default)
@@ -249,7 +273,9 @@ for (i in 1:nrow(sensorIds)) {
               ,dateTo=reportConfig$dateTo
               ,minuteMod=minuteMod
               )
-      } #else {
+      }
+        }
+      #else {
       #   print("hist getFiwareData")
       #   dfTmpOne<-getFiwareData(dfIn=NULL
       #                           ,fiwareService=sensorIds$fiwareService[i],fiwareServicePath=sensorIds$fiwareServicePath[i]
