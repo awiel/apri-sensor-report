@@ -4,7 +4,7 @@ library('jsonlite')
 cmdArgs = commandArgs(trailingOnly = FALSE)
 print(paste('script sub/apri-sensor-cams.R','start Rscript: ', Sys.time(),cmdArgs[4]))
 
-getCamsData<-function(dfIn=NULL,lat=NULL,lon=NULL,observationTypes=NULL
+getCamsData<-function(dfIn=NULL,lat=NULL,lon=NULL,observationType=NULL,observationTypes=NULL
                         ,aggregation=NULL,dateFrom=NULL,dateTo=NULL,cachePath=NULL
   ) {
 
@@ -24,7 +24,8 @@ getCamsData<-function(dfIn=NULL,lat=NULL,lon=NULL,observationTypes=NULL
   
   # eg curl "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/SCRP0000001234AB/pmsa003?aggregation=detail,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
   url <- paste("https://aprisensor-api-v1.openiod.org/v1/cams/analysis"
-               ,"?observationTypes=", observationTypes
+               ,"?observationType=", observationType
+               ,"&observationTypes=", observationTypes
                ,"&aggregation=", aggregation
                ,"&lat=", lat
                ,"&lon=", lon
