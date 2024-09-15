@@ -108,7 +108,7 @@ for (i in 1:nrow(sensorIds)) {
   if (sensorIds$active[i]!="FALSE") {
     observableProperties<-NULL
     #print(reportSensorTypes)
-#    print(sensorIds[i])
+    #    print(sensorIds[i])
     for (j in 1:nrow(reportSensorTypes)) {
       #  if (reportSensorTypes$active[j]=="TRUE") {
       if (is.null(observableProperties)) {
@@ -144,12 +144,12 @@ for (i in 1:nrow(sensorIds)) {
           } else sensorIdAlias<-NULL
           
           dfTmpOne<-getStationSelectRecordsKnmi(dfIn=NULL
-                                        ,station=sensorIds$sensorId[i]
-                                        ,dateFrom=NULL
-                                        ,dateTo=NULL
-                                        ,periodSpan=periodSpan
-                                       # ,sensorIdAlias=sensorIdAlias
-                                      #  ,observationTypes=observationTypes
+                                                ,station=sensorIds$sensorId[i]
+                                                ,dateFrom=NULL
+                                                ,dateTo=NULL
+                                                ,periodSpan=periodSpan
+                                                # ,sensorIdAlias=sensorIdAlias
+                                                #  ,observationTypes=observationTypes
           )
           dfTmpOne$sensorId<-dfTmpOne$station
           dfTmpOne$sensorValue<-dfTmpOne$solar
@@ -160,46 +160,46 @@ for (i in 1:nrow(sensorIds)) {
           
         } else {
           if (sensorIds$sensorType[i]=='lml') {
-
-          if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
-            sensorIdAlias<- sensorIds$sensorIdAlias[i]
-          } else sensorIdAlias<-NULL
-          
-          dfTmpOne<-getLuchtmeetnetData(dfIn=NULL
-                                      ,sensorId=sensorIds$sensorId[i]
-                                      ,sensorIdAlias=sensorIdAlias
-                                      ,observationTypes=observationTypes
-                                      ,periodSpan=periodSpan
-          )
-        } else {
-          minuteMod<- 1 # for minute aggregation only (1 is default)
-          if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
-            aggregation<-sensorIds$aggregation[i]
-            if (!is.null(sensorIds$minuteMod[i]) && !is.na(sensorIds$minuteMod[i])){  # modulus for minute aggregation
-              minuteMod <-sensorIds$minuteMod[i]
-            }  
-      #      #aggregation<-"minute"
+            
+            if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+              sensorIdAlias<- sensorIds$sensorIdAlias[i]
+            } else sensorIdAlias<-NULL
+            
+            dfTmpOne<-getLuchtmeetnetData(dfIn=NULL
+                                          ,sensorId=sensorIds$sensorId[i]
+                                          ,sensorIdAlias=sensorIdAlias
+                                          ,observationTypes=observationTypes
+                                          ,periodSpan=periodSpan
+            )
           } else {
-            aggregation<-"minute"
+            minuteMod<- 1 # for minute aggregation only (1 is default)
+            if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
+              aggregation<-sensorIds$aggregation[i]
+              if (!is.null(sensorIds$minuteMod[i]) && !is.na(sensorIds$minuteMod[i])){  # modulus for minute aggregation
+                minuteMod <-sensorIds$minuteMod[i]
+              }  
+              #      #aggregation<-"minute"
+            } else {
+              aggregation<-"minute"
+            }
+            
+            if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+              sensorIdAlias<- sensorIds$sensorIdAlias[i]
+            } else sensorIdAlias<-NULL
+            
+            dfTmpOne<-getApriSensorData(dfIn=NULL
+                                        ,aggregation=aggregation
+                                        ,dbGroup=dbGroup
+                                        ,source=sensorIds$source[i]
+                                        ,sensorId=sensorIds$sensorId[i]
+                                        ,sensorIdAlias=sensorIdAlias
+                                        ,sensorType=sensorIds$sensorType[i]
+                                        ,observationTypes=observationTypes
+                                        ,cachePath=cachePath
+                                        ,periodSpan=periodSpan
+                                        ,minuteMod=minuteMod
+            )
           }
-          
-          if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
-            sensorIdAlias<- sensorIds$sensorIdAlias[i]
-          } else sensorIdAlias<-NULL
-          
-          dfTmpOne<-getApriSensorData(dfIn=NULL
-                                      ,aggregation=aggregation
-                                      ,dbGroup=dbGroup
-                                      ,source=sensorIds$source[i]
-                                      ,sensorId=sensorIds$sensorId[i]
-                                      ,sensorIdAlias=sensorIdAlias
-                                      ,sensorType=sensorIds$sensorType[i]
-                                      ,observationTypes=observationTypes
-                                      ,cachePath=cachePath
-                                      ,periodSpan=periodSpan
-                                      ,minuteMod=minuteMod
-          )
-        }
         }
         #print(head(dfTmpOne))
       } #else {
@@ -243,38 +243,40 @@ for (i in 1:nrow(sensorIds)) {
           dfTmpOne <- dfTmpOne[keeps]
           
         } else {
-        print("hist getApriSensorData")
-        
-        dbGroup<-sensorIds$dbGroup[i]
-        observationTypes<-observableProperties
-        minuteMod<- 1 # for minute aggregation only (1 is default)
-        if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
-          aggregation<-sensorIds$aggregation[i]
-          if (!is.null(sensorIds$minuteMod[i]) && !is.na(sensorIds$minuteMod[i])){  # modulus for minute aggregation
-            minuteMod <-sensorIds$minuteMod[i]
-          }  
-        } else {
-          aggregation<-"minute"
+          print("hist getApriSensorData")
+          
+          dbGroup<-sensorIds$dbGroup[i]
+          observationTypes<-observableProperties
+          minuteMod<- 1 # for minute aggregation only (1 is default)
+          if (!is.null(sensorIds$aggregation[i]) && !is.na(sensorIds$aggregation[i])){
+            aggregation<-sensorIds$aggregation[i]
+            if (!is.null(sensorIds$minuteMod[i]) && !is.na(sensorIds$minuteMod[i])){  # modulus for minute aggregation
+              minuteMod <-sensorIds$minuteMod[i]
+            }  
+          } else {
+            aggregation<-"minute"
+          }
+          
+          if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+            sensorIdAlias<- sensorIds$sensorIdAlias[i]
+          } else sensorIdAlias<-NULL
+          
+          dfTmpOne<-getApriSensorData(dfIn=NULL
+                                      ,aggregation=aggregation
+                                      ,dbGroup=dbGroup
+                                      ,sensorId=sensorIds$sensorId[i]
+                                      ,sensorIdAlias=sensorIdAlias
+                                      ,sensorType=sensorIds$sensorType[i]
+                                      ,observationTypes=observationTypes
+                                      #                  ,cachePath=cachePath
+                                      ,dateFrom=reportConfig$dateFrom
+                                      ,dateTo=reportConfig$dateTo
+                                      ,minuteMod=minuteMod
+          )
         }
-
-        if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
-          sensorIdAlias<- sensorIds$sensorIdAlias[i]
-        } else sensorIdAlias<-NULL
+        #     print(str(dfTmpOne))
         
-        dfTmpOne<-getApriSensorData(dfIn=NULL
-                                    ,aggregation=aggregation
-                                    ,dbGroup=dbGroup
-                                    ,sensorId=sensorIds$sensorId[i]
-                                    ,sensorIdAlias=sensorIdAlias
-                                    ,sensorType=sensorIds$sensorType[i]
-                                    ,observationTypes=observationTypes
-                  #                  ,cachePath=cachePath
-              ,dateFrom=reportConfig$dateFrom
-              ,dateTo=reportConfig$dateTo
-              ,minuteMod=minuteMod
-              )
       }
-        }
       #else {
       #   print("hist getFiwareData")
       #   dfTmpOne<-getFiwareData(dfIn=NULL
@@ -298,7 +300,7 @@ for (i in 1:nrow(sensorIds)) {
       # }
     }
     
-
+    
     #    calib<-FALSE
     if (is.null(sensorIds$pmCoarseBase[i])==FALSE && is.na(sensorIds$pmCoarseBase[i])==FALSE) {
       if (sensorIds$pmCoarseBase[i]=="TRUE") {
@@ -319,9 +321,11 @@ for (i in 1:nrow(sensorIds)) {
         dfTmpOne<-dfMerged[keeps]
       }
     }
-
+    
     if (is.null(sensorIds$calibrateFaseOne[i])==FALSE && is.na(sensorIds$calibrateFaseOne[i])==FALSE) {
       if (sensorIds$calibrateFaseOne[i]=="TRUE") {
+        # print(str(dfTmpOne))
+        
         dfTmpCal1<-dfTmpOne %>% left_join(dfCalibrations, by = c("sensorType" = "sensorType","sensorId"="sensorId"))
         dfTmpCal1$sensorId<-as.factor(paste0(dfTmpCal1$sensorId,'-c1'))
         dfTmpCal1$sensorType<-as.factor(dfTmpCal1$sensorType)
@@ -337,7 +341,9 @@ for (i in 1:nrow(sensorIds)) {
         }
         #        calib<-TRUE
       }
+      # data for the T and rHum parameters
       if (sensorIds$calibrateFaseOne[i]=="MLR") {
+        dfTmpMlr1<-NULL
         dfRHum<- subset(dfTmpOne, dfTmpOne$sensorType=='rHum')
         dfRHum$rHum<-dfRHum$sensorValue
         dfTemperature<- subset(dfTmpOne, dfTmpOne$sensorType=='temperature')
@@ -352,54 +358,269 @@ for (i in 1:nrow(sensorIds)) {
       if (nrow(dfTmpOne)!=0) {
         if (sensorIds$calibrateFaseTwo[i]=="MLR") {
           if(is.null(dfTmpMlr1)==FALSE) {
+            #   print(str(dfTmpOne))
+            
+            if (sensorIds$mlrType[i]=="PN") {
+              if (sensorIds$sensorType[i]=="pmsa003") {
+                dfTmpData<-NULL
+                dfRaw0_3<- subset(dfTmpOne, dfTmpOne$sensorType=='raw0_3')
+                dfRaw0_3$raw0_3<-dfRaw0_3$sensorValue
+                dfRaw0_5<- subset(dfTmpOne, dfTmpOne$sensorType=='raw0_5')
+                dfRaw0_5$raw0_5<-dfRaw0_5$sensorValue
+                dfRaw1_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw1_0')
+                dfRaw1_0$raw1_0<-dfRaw1_0$sensorValue
+                dfRaw2_5<- subset(dfTmpOne, dfTmpOne$sensorType=='raw2_5')
+                dfRaw2_5$raw2_5<-dfRaw2_5$sensorValue
+                dfRaw5_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw5_0')
+                dfRaw5_0$raw5_0<-dfRaw5_0$sensorValue
+                dfRaw10_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw10_0')
+                dfRaw10_0$raw10_0<-dfRaw10_0$sensorValue
+                #              keepsMlr2 <- c("date", "raw0_3","raw0_5", "raw1_0", "raw2_5", "raw5_0", "raw10_0")
+                dfRaw0_3 <- dfRaw0_3[c("date", "raw0_3","dateObserved","sensorId","sensorType")]
+                dfRaw0_5 <- dfRaw0_5[c("date", "raw0_5")]
+                dfRaw1_0 <- dfRaw1_0[c("date", "raw1_0")]
+                dfRaw2_5 <- dfRaw2_5[c("date", "raw2_5")]
+                dfRaw5_0 <- dfRaw5_0[c("date", "raw5_0")]
+                dfRaw10_0 <- dfRaw10_0[c("date", "raw10_0")]
+                
+                dfTmpData<-dfRaw0_3 %>% left_join(dfRaw0_5, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw1_0, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw2_5, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw5_0, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw10_0, by = c("date" = "date"))
+                #              dfTmpData$sensorId<-dfTmpOne$sensorId[1]
+                #              dfTmpData$sensorType<-dfTmpOne$sensorType[1]
+                #              dfTmpData$dateObserved<-dfTmpOne$dateObserved
+                dfTmpOne<- dfTmpData
+                #              dfTmpOne<-dfTmpOne %>% left_join(dfTmpData, by = c("date" = "date"))
+              }
+            }
             dfTmpMlr2<-dfTmpOne %>% left_join(dfTmpMlr1, by = c("date" = "date"))
-            if (dfTmpMlr2$sensorType[1]=="pm25" || dfTmpMlr2$sensorType[1]=="pm25_pm25") {
-              print("Calculate MLR for PM2.5")
-
-              dfTmpMlr2$sensorValueTmp<-dfTmpMlr2$sensorValue
-              dfTmpMlr2<-dfTmpMlr2 %>%
-                mutate(sensorValue = 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature) ) %>%
-                mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
-                                                                   sensorValueTmp
-                                                                   , sensorValue))
-
-              #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
-              #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
-              #              ,dfTmpMlr2$sensorValue)
-              dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
-              keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
-              dfTmpMlr2 <- dfTmpMlr2[keeps]
-            }
-            if (dfTmpMlr2$sensorType[1]=='pm10' || dfTmpMlr2$sensorType[1]=='pm10_pm10') {
-              print('Calculate MLR for PM10')
-
-              dfTmpMlr2$sensorValueTmp<-dfTmpMlr2$sensorValue
-              dfTmpMlr2<-dfTmpMlr2 %>%
-                mutate(sensorValue = 14.7 + (0.3151*sensorValue) + (-0.0948*rHum) + (0.2445*temperature) ) %>%
-                mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
-                                            sensorValueTmp
-                                            , sensorValue))
+            #   print(str(dfTmpMlr2))
+            
+            if (is.null(sensorIds$mlrType[i])==FALSE && is.na(sensorIds$mlrType[i])==FALSE) {
               
-#              #dfTmpMlr2$sensorValue1<-dfTmpMlr2$sensorValue
-#              dfTmpMlr2<-dfTmpMlr2 %>% mutate(sensorValue = ifelse(sensorValue>=5,
-#                14.7 + (0.3151*sensorValue) + (-0.0948*rHum) + (0.2445*temperature)
-#                , sensorValue))
-
-            #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
-            #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
-            #              ,dfTmpMlr2$sensorValue)
-              dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
-              keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
-              dfTmpMlr2 <- dfTmpMlr2[keeps]
+              if (sensorIds$mlrType[i]=="PM") {
+                if (dfTmpMlr2$sensorType[1]=="pm25" || dfTmpMlr2$sensorType[1]=="pm25_pm25") {
+                  print("Calculate MLR for PM2.5")
+                  
+                  dfTmpMlr2$sensorValueTmp<-dfTmpMlr2$sensorValue
+                  
+                  print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+                  # print(sensorIds$mlrFactorsPM[i,])
+                  #            print(sensorIds$mlrType[i])
+                  #            print(sensorIds[i,])
+                  
+                  if (sensorIds$sensorType[i]=="pmsa003") {
+                    if (sensorIds$mlrVersion[i]=="visibilis1") {
+                      sensorMlrFactorsPM <- data.frame(type='PM',
+                                                       b0= 14.8,
+                                                       pm25= 0.3834,
+                                                       temperature= -0.1905,
+                                                       rHum= -0.1498
+                      )
+                    }
+                    if (sensorIds$mlrVersion[i]=="visibilis2") {
+                      sensorMlrFactorsPM <- data.frame(type='PM',
+                                                       b0= 18.4,
+                                                       pm25= 0.3853438,
+                                                       temperature= 0.0053451,
+                                                       rHum= -0.1781074
+                      )
+                    }
+                  }
+                  if (sensorIds$sensorType[i]=="ips7100") {
+                    if (sensorIds$mlrVersion[i]=="visibilis2") {
+                      sensorMlrFactorsPM <- data.frame(type='PM',
+                                                       b0= 20.1,
+                                                       pm25= 0.33859960,
+                                                       temperature= 0.05404910,
+                                                       rHum= -0.18073580
+                      )
+                    }
+                  }
+                  if (sensorIds$sensorType[i]=="nextpm") {
+                    if (sensorIds$mlrVersion[i]=="visibilis2") {
+                      sensorMlrFactorsPM <- data.frame(type='PM',
+                                                       b0= 27.7,
+                                                       pm25= 0.80096440,
+                                                       temperature= -0.12838190,
+                                                       rHum= -0.31309600
+                      )
+                    }
+                  }
+                  if (sensorIds$sensorType[i]=="sps30") {
+                    if (sensorIds$mlrVersion[i]=="visibilis2") {
+                      sensorMlrFactorsPM <- data.frame(type='PM',
+                                                       b0= 14.0,
+                                                       pm25= 1.05446529,
+                                                       temperature= 0.08208380,
+                                                       rHum= -0.15686450
+                      )
+                    }
+                  }
+                  
+                  #sensorMlrFactorsPM <- data.frame(type='PM', bo = sensorIds$mlrFactorsPM$b0[i], pm25 = sensorIds$mlrFactorsPM$pm25[i], temperature = sensorIds$mlrFactorsPM$temperature[i], rHum = sensorIds$mlrFactorsPM$rHum[i])
+                  
+                  # Visibilis1 factors (default)
+                  #                  mlrB0<-14.8
+                  #                  mlrPm25<-0.3834
+                  #                  mlrTemperature<- -0.1905
+                  #                  mlrRHum<- -0.1498
+                  #                  if (length(sensorIds$mlrFactorsPM$b0[i])!=0) {
+                  #                    mlrB0<-sensorIds$mlrFactorsPM$b0[i]
+                  #                    mlrPm25<-sensorIds$mlrFactorsPM$pm25[i]
+                  #                    mlrTemperature<- sensorIds$mlrFactorsPM$temperature[i]
+                  #                    mlrRHum<- sensorIds$mlrFactorsPM$rHum[i]
+                  #                    print('wel mlr object')
+                  #                  } else {
+                  #                    print('geen mlr object')
+                  #                  }
+                  print(sensorMlrFactorsPM)
+                  
+                  dfTmpMlr2<-dfTmpMlr2 %>%
+                    #mutate(sensorValue = 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature) ) %>%
+                    mutate(sensorValue = sensorMlrFactorsPM$b0 + (sensorMlrFactorsPM$pm25*sensorValue) + (sensorMlrFactorsPM$rHum*rHum) + (sensorMlrFactorsPM$temperature*temperature) ) %>%
+                    mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
+                                                sensorValueTmp
+                                                , sensorValue))
+                  
+                  #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
+                  #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
+                  #              ,dfTmpMlr2$sensorValue)
+                  dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
+                  keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+                  dfTmpMlr2 <- dfTmpMlr2[keeps]
+                }
+                if (dfTmpMlr2$sensorType[1]=='pm10' || dfTmpMlr2$sensorType[1]=='pm10_pm10') {
+                  print('Calculate MLR for PM10')
+                  
+                  dfTmpMlr2$sensorValueTmp<-dfTmpMlr2$sensorValue
+                  dfTmpMlr2<-dfTmpMlr2 %>%
+                    mutate(sensorValue = 14.7 + (0.3151*sensorValue) + (-0.0948*rHum) + (0.2445*temperature) ) %>%
+                    mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
+                                                sensorValueTmp
+                                                , sensorValue))
+                  
+                  #              #dfTmpMlr2$sensorValue1<-dfTmpMlr2$sensorValue
+                  #              dfTmpMlr2<-dfTmpMlr2 %>% mutate(sensorValue = ifelse(sensorValue>=5,
+                  #                14.7 + (0.3151*sensorValue) + (-0.0948*rHum) + (0.2445*temperature)
+                  #                , sensorValue))
+                  
+                  #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
+                  #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
+                  #              ,dfTmpMlr2$sensorValue)
+                  dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
+                  keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+                  dfTmpMlr2 <- dfTmpMlr2[keeps]
+                }
+                
+                dfTmpOne<-dfTmpMlr2
+              } # end of mlrType PM
+              if (sensorIds$mlrType[i]=="PN") {
+                #if (dfTmpMlr2$sensorType[1]=="pm25" || dfTmpMlr2$sensorType[1]=="pm25_pm25") {
+                if (sensorIds$sensorType[i]=="pmsa003") {
+                  print("Calculate MLR for pmsa003 PN")
+                  
+                  #dfTmpMlr2$sensorValueTmp<-dfTmpMlr2$sensorValue
+                  
+                  if (sensorIds$sensorType[i]=="pmsa003") {
+                    if (sensorIds$mlrVersion[i]=="visibilis2") {
+                      sensorMlrFactorsPN <- data.frame(type='PN',
+                                                       b0= 15.9,
+                                                       pn0_3= -0.0398651000,
+                                                       pn0_5= 0.1542776000,
+                                                       pn1_0= -0.0640661000,
+                                                       pn2_5= 0.1228056000,
+                                                       pn5_0= 4.1869030000,
+                                                       pn10_0= -2.6055440000,
+                                                       temperature= -0.0083817000,
+                                                       rHum= -0.1808905000
+                      )
+                    }
+                  }
+                  
+                  print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+                  #                  sensorMlrFactorsPN <- data.frame(type='PN', bo = sensorIds$mlrFactorsPN$b0[i], 
+                  #                                                   pn0_3 = sensorIds$mlrFactorsPN$pn0_3[i],
+                  #                                                   pn0_5 = sensorIds$mlrFactorsPN$pn0_5[i],
+                  #                                                   pn1_0 = sensorIds$mlrFactorsPN$pn1_0[i],
+                  #                                                   pn2_5 = sensorIds$mlrFactorsPN$pn2_5[i],
+                  #                                                   pn5_0 = sensorIds$mlrFactorsPN$pn5_0[i],
+                  #                                                   pn10_0 = sensorIds$mlrFactorsPN$pn10_0[i],
+                  #                                                   temperature = sensorIds$mlrFactorsPN$temperature[i], 
+                  #                                                   rHum = sensorIds$mlrFactorsPN$rHum[i]);
+                  
+                  # Visibilis1 factors (default)
+                  #                  mlrB0<-0
+                  #                  mlrPn0_3<-0
+                  #                  mlrPn0_5<-0
+                  #                  mlrPn1_0<-0
+                  #                  mlrPn2_5<-0
+                  #                  mlrPn5_0<-0
+                  #                  mlrPn10_0<-0
+                  #                  mlrTemperature<- 0
+                  #                  mlrRHum<- 0
+                  #                  if (length(sensorIds$mlrFactorsPN$b0[i])!=0) {
+                  #                    mlrB0<-sensorIds$mlrFactorsPN$b0[i]
+                  #                    mlrPn0_3<-sensorIds$mlrFactorsPN$pn0_3[i]
+                  #                    mlrPn0_5<-sensorIds$mlrFactorsPN$pn0_5[i]
+                  #                    mlrPn1_0<-sensorIds$mlrFactorsPN$pn1_0[i]
+                  #                    mlrPn2_5<-sensorIds$mlrFactorsPN$pn2_5[i]
+                  #                    mlrPn5_0<-sensorIds$mlrFactorsPN$pn5_0[i]
+                  #                    mlrPn10_0<-sensorIds$mlrFactorsPN$pn10_0[i]
+                  #                    mlrTemperature<- sensorIds$mlrFactorsPN$temperature[i]
+                  #                    mlrRHum<- sensorIds$mlrFactorsPN$rHum[i]
+                  #                    print('wel mlr PN object')
+                  #                  } else {
+                  #                    print('geen mlr PN object')
+                  #                  }
+                  print(sensorMlrFactorsPN)
+                  
+                  #       print(str(dfTmpMlr2))
+                  
+                  dfTmpMlr2<-dfTmpMlr2 %>%
+                    #mutate(sensorValue = 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature) ) %>%
+                    mutate(sensorValue = sensorMlrFactorsPN$b0 + 
+                             (sensorMlrFactorsPN$pn0_3*raw0_3) + 
+                             (sensorMlrFactorsPN$pn0_5*raw0_5) + 
+                             (sensorMlrFactorsPN$pn1_0*raw1_0) + 
+                             (sensorMlrFactorsPN$pn2_5*raw2_5) + 
+                             (sensorMlrFactorsPN$pn5_0*raw5_0) + 
+                             (sensorMlrFactorsPN$pn10_0*raw10_0) + 
+                             (sensorMlrFactorsPN$rHum*rHum) + 
+                             (sensorMlrFactorsPN$temperature*temperature) ) # %>%
+                  #mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
+                  #                            sensorValueTmp
+                  #                            , sensorValue))
+                  
+                  #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
+                  #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
+                  #              ,dfTmpMlr2$sensorValue)
+                  dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
+                  
+                  #       print(str(dfTmpMlr2))
+                  #keeps <- c("sensorId",
+                  #           "sensorType",
+                  #           "date", "raw0_3", "raw0_5", "raw1_0", "raw2_5", "raw5_0", "raw10_0"
+                  #           ,"dateObserved"
+                  #           )
+                  keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+                  
+                  dfTmpMlr2 <- dfTmpMlr2[keeps]
+                }
+                
+                #}
+                
+                dfTmpOne<-dfTmpMlr2
+                dfTmpOne$sensorType <- 'pm25_pm25'
+              } # end of mlrType PN
             }
-
-            dfTmpOne<-dfTmpMlr2
-          }
-          dfTmpMlr1<-NULL
+          } 
         }
       }
     }
-
+    
     #    if (calib==FALSE) {
     if (is.null(dfTmpOne)==FALSE) {
       dfTmpStack<-dfTmpOne
@@ -421,6 +642,7 @@ for (i in 1:nrow(sensorIds)) {
   }
 }
 
+###########################################################
 
 #dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
 #dfTmp$minute <- sapply(format(dfTmp$date, "%M"), as.numeric)
@@ -446,9 +668,9 @@ if(is.null(dfTmp)) {
 #    dfTmp$date <- with_tz(dfTmp$date, tz="Asia/Tokyo")
 #  } 
 #} else {
-  dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M:%S")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
+dfTmp$date <- as.POSIXct(dfTmp$dateObserved, format="%Y-%m-%dT%H:%M:%S")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
 #}
-  
+
 
 dfTmp$minute <- sapply(format(dfTmp$date, "%M"), as.numeric)
 dfTmp$hour <- sapply(format(dfTmp$date, "%H"), as.numeric)
@@ -563,11 +785,11 @@ if (!is.null(reportLocal)&&!is.na(reportLocal)) {
 
 print("start apriSensorPlotSingle")
 gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle
-  ,ylim,treshold=reportTreshold
-  ,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels
-  ,aggregateTxt=aggregateTxt,yzoom=yZoom,
-  incident=incident
-  ,reportLocal=reportLocal)
+                             ,ylim,treshold=reportTreshold
+                             ,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels
+                             ,aggregateTxt=aggregateTxt,yzoom=yZoom,
+                             incident=incident
+                             ,reportLocal=reportLocal)
 
 
 print("make imagefile")
@@ -606,7 +828,7 @@ if(is.null(reportConfig$correlPlots)==FALSE) {
         print("plot correlPlot")
         #total <- subset(total, total$sensorType == 'pm25')
         dfX<- subset(total, (total$sensorId == reportCorrelPlots$xSensorId[i] & total$sensorType==reportCorrelPlots$xSensorType[i]))
-     #   print(paste(total$sensorId,reportCorrelPlots$xSensorId[i]))
+        #   print(paste(total$sensorId,reportCorrelPlots$xSensorId[i]))
         dfXMin<-min(dfX$sensorValue)
         dfXMax<-max(dfX$sensorValue)
         dfX$mDate<-strftime(dfX$date, format = "%Y%m%d%H%M" )

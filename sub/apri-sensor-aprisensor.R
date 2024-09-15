@@ -281,6 +281,12 @@ getApriSensorData <- function(dfIn = NULL,
         }
       }
       dfResult <- dfMerged
+#      print(head(dfResult))
+#      if (dfResult$sensorType[1]=='pm25') {
+#        print('xxxxxxxxxxxxxxxxx')
+#        dfResult<-subset(dfResult,dfResult$sensorValue<=1000)
+#        print(head(dfResult))
+#      }
     }
     
     
