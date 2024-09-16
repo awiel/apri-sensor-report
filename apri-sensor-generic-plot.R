@@ -477,15 +477,18 @@ for (i in 1:nrow(sensorIds)) {
                   #                    print('geen mlr object')
                   #                  }
                   print(sensorMlrFactorsPM)
+                  print(head(dfTmpMlr2))
                   
                   dfTmpMlr2<-dfTmpMlr2 %>%
                     #mutate(sensorValue = 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature) ) %>%
-                    mutate(sensorValue = sensorMlrFactorsPM$b0 + (sensorMlrFactorsPM$pm25*sensorValue) + (sensorMlrFactorsPM$rHum*rHum) + (sensorMlrFactorsPM$temperature*temperature) ) %>%
-                    mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
-                                                sensorValueTmp
-                                                , sensorValue))
+                    mutate(sensorValue = sensorMlrFactorsPM$b0 + (sensorMlrFactorsPM$pm25*sensorValue) + (sensorMlrFactorsPM$rHum*rHum) + (sensorMlrFactorsPM$temperature*temperature) ) # %>%
+            #        mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
+            #                                    sensorValueTmp
+            #                                    , sensorValue))
                   
-                  #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
+                  print(head(dfTmpMlr2))
+
+                                    #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
                   #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
                   #              ,dfTmpMlr2$sensorValue)
                   dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
