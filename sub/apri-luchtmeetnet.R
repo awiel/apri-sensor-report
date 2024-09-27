@@ -114,6 +114,9 @@ getLuchtmeetnetData<-function(dfIn=NULL
   #keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
   #dfResult <- dfResult[keeps]
 
+  if (is.null(nrow(dfResult))) {
+    return(dfIn)
+  }
   if (is.null(dfIn)) return(dfResult)
   else return(rbind(dfIn,dfResult) )
 }
