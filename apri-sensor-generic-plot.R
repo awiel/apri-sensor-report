@@ -394,9 +394,100 @@ for (i in 1:nrow(sensorIds)) {
                 dfTmpOne<- dfTmpData
                 #              dfTmpOne<-dfTmpOne %>% left_join(dfTmpData, by = c("date" = "date"))
               }
+              if (sensorIds$sensorType[i]=="sps30") {
+                print('### merge raw data sps30')
+                dfTmpData<-NULL
+                dfRaw0_5<- subset(dfTmpOne, dfTmpOne$sensorType=='raw0_5')
+                dfRaw0_5$raw0_5<-dfRaw0_5$sensorValue
+                dfRaw1_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw1_0')
+                dfRaw1_0$raw1_0<-dfRaw1_0$sensorValue
+                dfRaw2_5<- subset(dfTmpOne, dfTmpOne$sensorType=='raw2_5')
+                dfRaw2_5$raw2_5<-dfRaw2_5$sensorValue
+                dfRaw4_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw4_0')
+                dfRaw4_0$raw4_0<-dfRaw4_0$sensorValue
+                dfRaw10_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw10_0')
+                dfRaw10_0$raw10_0<-dfRaw10_0$sensorValue
+                #              keepsMlr2 <- c("date", "raw0_3","raw0_5", "raw1_0", "raw2_5", "raw5_0", "raw10_0")
+                dfRaw0_5 <- dfRaw0_5[c("date", "raw0_5","dateObserved","sensorId","sensorType")]
+                dfRaw1_0 <- dfRaw1_0[c("date", "raw1_0")]
+                dfRaw2_5 <- dfRaw2_5[c("date", "raw2_5")]
+                dfRaw4_0 <- dfRaw4_0[c("date", "raw4_0")]
+                dfRaw10_0 <- dfRaw10_0[c("date", "raw10_0")]
+                
+                dfTmpData<-dfRaw0_5 %>% left_join(dfRaw1_0, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw2_5, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw4_0, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw10_0, by = c("date" = "date"))
+                #              dfTmpData$sensorId<-dfTmpOne$sensorId[1]
+                #              dfTmpData$sensorType<-dfTmpOne$sensorType[1]
+                #              dfTmpData$dateObserved<-dfTmpOne$dateObserved
+                dfTmpOne<- dfTmpData
+                #              dfTmpOne<-dfTmpOne %>% left_join(dfTmpData, by = c("date" = "date"))
+                #print(str(dfTmpOne))
+              }
+              if (sensorIds$sensorType[i]=="nextpm") {
+                print('### merge raw data nextpm')
+                dfTmpData<-NULL
+                dfRaw1_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw1_0')
+                dfRaw1_0$raw1_0<-dfRaw1_0$sensorValue
+                dfRaw2_5<- subset(dfTmpOne, dfTmpOne$sensorType=='raw2_5')
+                dfRaw2_5$raw2_5<-dfRaw2_5$sensorValue
+                dfRaw10_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw10_0')
+                dfRaw10_0$raw10_0<-dfRaw10_0$sensorValue
+                #              keepsMlr2 <- c("date", "raw0_3","raw0_5", "raw1_0", "raw2_5", "raw5_0", "raw10_0")
+                dfRaw1_0 <- dfRaw1_0[c("date", "raw1_0","dateObserved","sensorId","sensorType")]
+                dfRaw2_5 <- dfRaw2_5[c("date", "raw2_5")]
+                dfRaw10_0 <- dfRaw10_0[c("date", "raw10_0")]
+                
+                dfTmpData<-dfRaw1_0 %>% left_join(dfRaw2_5, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw10_0, by = c("date" = "date"))
+                #              dfTmpData$sensorId<-dfTmpOne$sensorId[1]
+                #              dfTmpData$sensorType<-dfTmpOne$sensorType[1]
+                #              dfTmpData$dateObserved<-dfTmpOne$dateObserved
+                dfTmpOne<- dfTmpData
+                #              dfTmpOne<-dfTmpOne %>% left_join(dfTmpData, by = c("date" = "date"))
+                #print(str(dfTmpOne))
+              }
+              if (sensorIds$sensorType[i]=="ips7100") {
+                dfTmpData<-NULL
+                dfRaw0_1<- subset(dfTmpOne, dfTmpOne$sensorType=='raw0_1')
+                dfRaw0_1$raw0_1<-dfRaw0_1$sensorValue
+                dfRaw0_3<- subset(dfTmpOne, dfTmpOne$sensorType=='raw0_3')
+                dfRaw0_3$raw0_3<-dfRaw0_3$sensorValue
+                dfRaw0_5<- subset(dfTmpOne, dfTmpOne$sensorType=='raw0_5')
+                dfRaw0_5$raw0_5<-dfRaw0_5$sensorValue
+                dfRaw1_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw1_0')
+                dfRaw1_0$raw1_0<-dfRaw1_0$sensorValue
+                dfRaw2_5<- subset(dfTmpOne, dfTmpOne$sensorType=='raw2_5')
+                dfRaw2_5$raw2_5<-dfRaw2_5$sensorValue
+                dfRaw5_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw5_0')
+                dfRaw5_0$raw5_0<-dfRaw5_0$sensorValue
+                dfRaw10_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw10_0')
+                dfRaw10_0$raw10_0<-dfRaw10_0$sensorValue
+                #              keepsMlr2 <- c("date", "raw0_1", "raw0_3","raw0_5", "raw1_0", "raw2_5", "raw5_0", "raw10_0")
+                dfRaw0_1 <- dfRaw0_1[c("date", "raw0_1","dateObserved","sensorId","sensorType")]
+                dfRaw0_3 <- dfRaw0_3[c("date", "raw0_3")]
+                dfRaw0_5 <- dfRaw0_5[c("date", "raw0_5")]
+                dfRaw1_0 <- dfRaw1_0[c("date", "raw1_0")]
+                dfRaw2_5 <- dfRaw2_5[c("date", "raw2_5")]
+                dfRaw5_0 <- dfRaw5_0[c("date", "raw5_0")]
+                dfRaw10_0 <- dfRaw10_0[c("date", "raw10_0")]
+                
+                dfTmpData<-dfRaw0_1 %>% left_join(dfRaw0_3, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw0_5, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw1_0, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw2_5, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw5_0, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfRaw10_0, by = c("date" = "date"))
+                #              dfTmpData$sensorId<-dfTmpOne$sensorId[1]
+                #              dfTmpData$sensorType<-dfTmpOne$sensorType[1]
+                #              dfTmpData$dateObserved<-dfTmpOne$dateObserved
+                dfTmpOne<- dfTmpData
+                #              dfTmpOne<-dfTmpOne %>% left_join(dfTmpData, by = c("date" = "date"))
+              }
             }
             dfTmpMlr2<-dfTmpOne %>% left_join(dfTmpMlr1, by = c("date" = "date"))
-            #   print(str(dfTmpMlr2))
+            #print(str(dfTmpMlr2))
             
             if (is.null(sensorIds$mlrType[i])==FALSE && is.na(sensorIds$mlrType[i])==FALSE) {
               
@@ -520,15 +611,18 @@ for (i in 1:nrow(sensorIds)) {
                 
                 dfTmpOne<-dfTmpMlr2
               } # end of mlrType PM
+              
+              
+              
               if (sensorIds$mlrType[i]=="PN") {
                 #if (dfTmpMlr2$sensorType[1]=="pm25" || dfTmpMlr2$sensorType[1]=="pm25_pm25") {
-                if (sensorIds$sensorType[i]=="pmsa003") {
-                  print("Calculate MLR for pmsa003 PN")
+               # if (sensorIds$sensorType[i]=="pmsa003") {
                   
                   #dfTmpMlr2$sensorValueTmp<-dfTmpMlr2$sensorValue
                   
                   if (sensorIds$sensorType[i]=="pmsa003") {
                     if (sensorIds$mlrVersion[i]=="visibilis2") {
+                      # print("Calculate MLR for pmsa003 PN Visibilis2")
                       sensorMlrFactorsPN <- data.frame(type='PN',
                                                        b0= 15.9,
                                                        pn0_3= -0.0398651000,
@@ -542,7 +636,55 @@ for (i in 1:nrow(sensorIds)) {
                       )
                     }
                   }
-                  
+
+                  if (sensorIds$sensorType[i]=="sps30") {
+                    if (sensorIds$mlrVersion[i]=="visibilis2") {
+                      #print("Calculate MLR for sps30 PN Visibilis2")
+                      sensorMlrFactorsPN <- data.frame(type='PN',
+                                                       b0= 14.6,
+                                                       pn0_5= -1.5049130000,
+                                                       pn1_0= 8.6868410000,
+                                                       pn2_5= -13.5178600000,
+                                                       pn4_0= -11.2471800000,
+                                                       pn10_0= 14.3540250000,
+                                                       temperature= 0.1227285000,
+                                                       rHum= -0.1590476000
+                      )
+                    }
+                  }
+                if (sensorIds$sensorType[i]=="nextpm") {
+                  if (sensorIds$mlrVersion[i]=="visibilis2") {
+                    #print("Calculate MLR for nextpm PN Visibilis2")
+                    sensorMlrFactorsPN <- data.frame(type='PN',
+                                                     b0= 6.8,
+                                                     pn1_0= 0.3354533000,
+                                                     pn2_5= -1.1564390000,
+                                                     pn10_0= 0.8224360000,
+                                                     temperature= 0.4153694000,
+                                                     rHum= -0.1185348000
+                    )
+                  }
+                }
+
+                if (sensorIds$sensorType[i]=="ips7100") {
+                  if (sensorIds$mlrVersion[i]=="visibilis2") {
+                    # print("Calculate MLR for pmsa003 PN Visibilis2")
+                    sensorMlrFactorsPN <- data.frame(type='PN',
+                                                     b0= 16.2,
+                                                     pn0_1= 0.0002542000,
+                                                     pn0_3= -0.0004870200,
+                                                     pn0_5=0.0000109130,
+                                                     pn1_0= 0.0028714000,
+                                                     pn2_5= -0.0177061000,
+                                                     pn5_0= 3.1346226000,
+                                                     pn10_0= -46.7696700000,
+                                                     temperature= 0.0251139000,
+                                                     rHum= -0.1436989000
+                    )
+                  }
+                }
+                
+                                
                   print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
                   #                  sensorMlrFactorsPN <- data.frame(type='PN', bo = sensorIds$mlrFactorsPN$b0[i], 
                   #                                                   pn0_3 = sensorIds$mlrFactorsPN$pn0_3[i],
@@ -582,6 +724,9 @@ for (i in 1:nrow(sensorIds)) {
                   
                   #       print(str(dfTmpMlr2))
                   
+                  if (sensorIds$sensorType[i]=="pmsa003") {
+                    print("Calculate MLR for pmsa003 PN Visibilis2")
+                    
                   dfTmpMlr2<-dfTmpMlr2 %>%
                     #mutate(sensorValue = 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature) ) %>%
                     mutate(sensorValue = sensorMlrFactorsPN$b0 + 
@@ -600,9 +745,79 @@ for (i in 1:nrow(sensorIds)) {
                   #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
                   #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
                   #              ,dfTmpMlr2$sensorValue)
-                  dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
+                  }
                   
-                  #       print(str(dfTmpMlr2))
+                  if (sensorIds$sensorType[i]=="sps30") {
+                    print("Calculate MLR for sps30 PN Visibilis2")
+                    
+                    dfTmpMlr2<-dfTmpMlr2 %>%
+                      #mutate(sensorValue = 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature) ) %>%
+                      mutate(sensorValue = sensorMlrFactorsPN$b0 + 
+                               (sensorMlrFactorsPN$pn0_5*raw0_5) + 
+                               (sensorMlrFactorsPN$pn1_0*raw1_0) + 
+                               (sensorMlrFactorsPN$pn2_5*raw2_5) + 
+                               (sensorMlrFactorsPN$pn4_0*raw4_0) + 
+                               (sensorMlrFactorsPN$pn10_0*raw10_0) + 
+                               (sensorMlrFactorsPN$rHum*rHum) + 
+                               (sensorMlrFactorsPN$temperature*temperature) ) # %>%
+                    #mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
+                    #                            sensorValueTmp
+                    #                            , sensorValue))
+                    
+                    #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
+                    #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
+                    #              ,dfTmpMlr2$sensorValue)
+                  }
+
+                  if (sensorIds$sensorType[i]=="nextpm") {
+                    print("Calculate MLR for nextpm PN Visibilis2")
+                    
+                    dfTmpMlr2<-dfTmpMlr2 %>%
+                      #mutate(sensorValue = 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature) ) %>%
+                      mutate(sensorValue = sensorMlrFactorsPN$b0 + 
+                               (sensorMlrFactorsPN$pn1_0*raw1_0) + 
+                               (sensorMlrFactorsPN$pn2_5*raw2_5) + 
+                               (sensorMlrFactorsPN$pn10_0*raw10_0) + 
+                               (sensorMlrFactorsPN$rHum*rHum) + 
+                               (sensorMlrFactorsPN$temperature*temperature) ) # %>%
+                    #mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
+                    #                            sensorValueTmp
+                    #                            , sensorValue))
+                    
+                    #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
+                    #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
+                    #              ,dfTmpMlr2$sensorValue)
+                  }
+
+                  if (sensorIds$sensorType[i]=="ips7100") {
+                    print("Calculate MLR for pmsa003 PN Visibilis2")
+                    
+                    dfTmpMlr2<-dfTmpMlr2 %>%
+                      #mutate(sensorValue = 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature) ) %>%
+                      mutate(sensorValue = sensorMlrFactorsPN$b0 + 
+                               (sensorMlrFactorsPN$pn0_1*raw0_1) + 
+                               (sensorMlrFactorsPN$pn0_3*raw0_3) + 
+                               (sensorMlrFactorsPN$pn0_5*raw0_5) + 
+                               (sensorMlrFactorsPN$pn1_0*raw1_0) + 
+                               (sensorMlrFactorsPN$pn2_5*raw2_5) + 
+                               (sensorMlrFactorsPN$pn5_0*raw5_0) + 
+                               (sensorMlrFactorsPN$pn10_0*raw10_0) + 
+                               (sensorMlrFactorsPN$rHum*rHum) + 
+                               (sensorMlrFactorsPN$temperature*temperature) ) # %>%
+                    #mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
+                    #                            sensorValueTmp
+                    #                            , sensorValue))
+                    
+                    #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
+                    #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
+                    #              ,dfTmpMlr2$sensorValue)
+                  }
+                  
+                                    
+                  dfTmpMlr2$sensorId<-paste0(dfTmpMlr2$sensorId,'_mlr')
+                  dfTmpMlr2$sensorType <- 'pm25_pm25'  # pm25 on for pn_mlr 
+                  
+                  print(str(dfTmpMlr2))
                   #keeps <- c("sensorId",
                   #           "sensorType",
                   #           "date", "raw0_3", "raw0_5", "raw1_0", "raw2_5", "raw5_0", "raw10_0"
@@ -611,12 +826,11 @@ for (i in 1:nrow(sensorIds)) {
                   keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
                   
                   dfTmpMlr2 <- dfTmpMlr2[keeps]
-                }
+                
                 
                 #}
                 
                 dfTmpOne<-dfTmpMlr2
-                dfTmpOne$sensorType <- 'pm25_pm25'
               } # end of mlrType PN
             }
           } 

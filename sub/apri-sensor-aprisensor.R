@@ -141,6 +141,7 @@ getApriSensorData <- function(dfIn = NULL,
     print("Standaard periode:")
     print(dateFrom)
     print(dateTo)
+    print(periodSpan)
   }
   
   cached <- FALSE
