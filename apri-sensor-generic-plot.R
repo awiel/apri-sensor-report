@@ -83,6 +83,7 @@ reportWidth <- reportConfig$width
 reportTreshold <- reportConfig$treshold
 reportTresholdLabel <- reportConfig$tresholdLabel
 reportLocal <- reportConfig$local
+reportStats <- reportConfig$stats
 
 periodType<-reportConfig$periodType
 periodSpan<-reportConfig$periodSpan
@@ -984,12 +985,6 @@ if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==10) {
   aggregateTxt<-"gemiddeld per 10 minuten"
 }
 
-dateText<-'Datum';
-timeZone<-'Amsterdam';
-periodeLabel<-'Periode';
-xAxisText<-'Ruwe / niet gekalibreerde meetwaarde';
-yAxisText<-'Gemeten waarde';
-
 if (!is.null(reportLocal)&&!is.na(reportLocal)) {
   if(reportLocal=='JA') {
     if (aggregateTxt=='gemiddeld per minuut') aggregateTxt<-'1分あたりの平均'
@@ -1006,7 +1001,7 @@ gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSub
                              ,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels
                              ,aggregateTxt=aggregateTxt,yzoom=yZoom,
                              incident=incident
-                             ,reportLocal=reportLocal)
+                             ,reportLocal=reportLocal,reportStats=reportStats)
 
 
 print("make imagefile")

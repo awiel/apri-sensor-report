@@ -9,7 +9,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     treshold=NULL,tresholdLabel=NULL,
     dateBreaks="1 hour",dateLabels="%H",aggregateTxt='gemiddeld per minuut',
     yzoom=NULL,
-    incident=F,reportLocal=NULL) {
+    incident=F,reportLocal=NULL,reportStats="TRUE") {
   
   #plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
   plotDateTime<- as.POSIXct(format(Sys.time(),'%Y-%m-%d %H:%M:%S'), format="%Y-%m-%d %H:%M:%S")
@@ -34,11 +34,18 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
       xAxisText<-'Ruwe / niet gekalibreerde meetwaarde';
       yAxisText<-'Gemeten waarde';
     }
-    if(reportLocal=='US') {
+    if(reportLocal=='EN') {
       dateText<-'Date';
       periodeLabel<-'Period';
       xAxisText<-'Raw / uncalibrated measurements';
       yAxisText<-'Measured value';
+    }
+    if(reportLocal=='EN-mlr') {
+      dateText<-'Date';
+      periodeLabel<-'Period';
+      xAxisText<-'';
+      yAxisText<-'Calibrated value';
+      aggregateTxt<-'';
     }
   }
   #captionText<-paste0(dateText,': ',format(plotDateTime,"%d-%m-%Y %H:%M"))
@@ -350,11 +357,14 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
 
   if (incident==F) {
   if(is.null(ylim)!=TRUE) {
-    gTotal<-gTotal +
-      annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
-      annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
-      annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0)
-  }
+    if (reportStats=="TRUE") {
+      gTotal<-gTotal +
+        annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
+        annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
+        annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0)
+    }
+    
+    }
   }
 
   if(is.null(treshold)!=TRUE) {
