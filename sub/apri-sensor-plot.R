@@ -357,13 +357,14 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
 
   if (incident==F) {
   if(is.null(ylim)!=TRUE) {
-    if (reportStats=="TRUE") {
+    if(is.null(reportStats)!=TRUE) {
+      if (reportStats!="FALSE") {
       gTotal<-gTotal +
         annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
         annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
         annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0)
     }
-    
+    }
     }
   }
 
