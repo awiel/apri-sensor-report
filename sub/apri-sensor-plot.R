@@ -355,17 +355,24 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     )
   #print('annotation')
 
+  print('reportStats')
+  print('xxxxxxxxxxxxxxxxxxxxxx')
+  print(reportStats)
+  printStats<-F
   if (incident==F) {
-  if(is.null(ylim)!=TRUE) {
-    if(is.null(reportStats)!=TRUE) {
-      if (reportStats!="FALSE") {
+    if(is.null(reportStats)==TRUE) {
+      printStats<-T
+    } else {
+      if (reportStats=="TRUE") {
+        printStats<-T
+      }
+    }
+
+  if(is.null(ylim)!=TRUE && printStats == T) {
       gTotal<-gTotal +
-        annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
-        annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
-        annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0)
-    }
-    }
-    }
+          annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
+          annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
+          annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0)
   }
 
   if(is.null(treshold)!=TRUE) {
@@ -377,7 +384,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
         #annotate("text", x = statsPosX, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
         #annotate("text", x = statsPosX+statsXResolution*7, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0,color='darkgreen') +
         annotate("text", x = statsPosX+statsXResolution*15, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0,color='darkgreen')
-    #}
+    }
   }
 
   if (incident==T) {
