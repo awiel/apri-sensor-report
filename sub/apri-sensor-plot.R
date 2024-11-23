@@ -356,8 +356,6 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   #print('annotation')
 
   print('reportStats')
-  print('xxxxxxxxxxxxxxxxxxxxxx')
-  print(reportStats)
   printStats<-F
   if (incident==F) {
     if(is.null(reportStats)==TRUE) {

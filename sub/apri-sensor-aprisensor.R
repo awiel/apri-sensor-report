@@ -48,13 +48,9 @@ getApriSensorData <- function(dfIn = NULL,
   useCache <- FALSE
   # eg curl "https://aprisensor-api-v1.openiod.org/v1/observations/sensor/SCRP0000001234AB/pmsa003?aggregation=detail,dateFrom=2023-11-21T13:30:00"&dateTo=2023-11-22T13:30:00"
   
-  print('source')
-  print(source)
   #if (source == 'rda') {  # source == Rda dataset
   
   #fileName<-paste(paste(fiwareService,str_replace_all(sensorType, '/', '_'),foi,ops,sep='#'),'.Rda',sep='')
-  print('test')
-  print(dbGroup)
   if (is.null(dbGroup) ||
       is.na(dbGroup))
     fileName <-
@@ -85,8 +81,6 @@ getApriSensorData <- function(dfIn = NULL,
       '.rds',
       sep = ''
     )
-  
-  print('test2')
   
   fileName <- gsub(":", "_", fileName)
   
@@ -188,7 +182,6 @@ getApriSensorData <- function(dfIn = NULL,
   }
   paramDate <- paste("&dateFrom=", dateFrom, "&dateTo=", dateTo, sep = '')
   
-  print(observationTypes)
   observationTypeArray <- strsplit(observationTypes, split = ',')
   observationTypesUrl <- ''
   for (observationTypeObject in observationTypeArray[[1]]) {
@@ -310,10 +303,7 @@ getApriSensorData <- function(dfIn = NULL,
     if (source == 'csv') {
       # source == csv dataset
       # /NBI_TN012/12-pm25
-      print('test')
-      print(dateFrom)
-      print(dateTo)
-      
+
       csvFile <- paste0(csvPath, csvFileName)
       print(paste('csv: (', getwd(), ') ', csvFile, ' csvType:', csvType))
       
@@ -371,7 +361,6 @@ getApriSensorData <- function(dfIn = NULL,
     if (source == 'samenmeten') {
       # source == samenmeten api
       # /NBI_TN012/12-pm25
-      print('test')
       splitTmp <- strsplit(observationTypes, split = ':')[[1]]
       observationTypes <- splitTmp[1]
       

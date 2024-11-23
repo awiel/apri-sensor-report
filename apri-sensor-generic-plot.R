@@ -134,10 +134,10 @@ for (i in 1:nrow(sensorIds)) {
     }
     if (periodType == "actual") {
       print('actual')
-      
       if (!is.null(sensorIds$serviceDB[i]) && !is.na(sensorIds$serviceDB[i])) {
         dbGroup<-sensorIds$dbGroup[i]
         observationTypes<-observableProperties
+
         if (sensorIds$sensorType[i]=='knmi') {
           
           if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
@@ -160,7 +160,7 @@ for (i in 1:nrow(sensorIds)) {
           dfTmpOne <- dfTmpOne[keeps]
           
         } else {
-          if (sensorIds$sensorType[i]=='lml') {
+          if (sensorIds$sensorType[i]=='lml' || sensorIds$sensorType[i]=='lml_m' || sensorIds$sensorType[i]=='lml_lki') {
             
             if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
               sensorIdAlias<- sensorIds$sensorIdAlias[i]

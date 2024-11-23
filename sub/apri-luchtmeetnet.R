@@ -78,10 +78,8 @@ getLuchtmeetnetData<-function(dfIn=NULL
   print(url)
 
   myData <- fromJSON(url)
-  #print(head(myData))
   dfResult<-myData$observations
-  
-  
+
   recordsFound <-TRUE
   dfMerged<-NULL
   for (observationTypeObject in observationTypeArray[[1]]) {
@@ -114,7 +112,7 @@ getLuchtmeetnetData<-function(dfIn=NULL
   #keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
   #dfResult <- dfResult[keeps]
 
-  if (is.null(nrow(dfResult))) {
+    if (is.null(nrow(dfResult))) {
     return(dfIn)
   }
   if (is.null(dfIn)) return(dfResult)
