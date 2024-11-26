@@ -921,6 +921,9 @@ if (is.null(reportYLim)) {
   if(reportYLim=="ZERO"){
     ylim <- c(0, max(total$sensorValue))
   }
+  if(reportYLim=="ZERO15"){
+    ylim <- c(0, 15)
+  }
   if(reportYLim=="ZERO60"){
     ylim <- c(0, 60)
   }
