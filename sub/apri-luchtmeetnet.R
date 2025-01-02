@@ -86,18 +86,30 @@ getLuchtmeetnetData<-function(dfIn=NULL
     tmpObservationType <- strsplit(observationTypeObject,split=':')[[1]][1]
     tmpObservationTypeAlias <- strsplit(observationTypeObject,split=':')[[1]][2]
     
-    dfSubSet<- dfResult
-    dfSubSet$sensorValue <- dfSubSet[c(tmpObservationType)][,1]
-    if (!is.na(tmpObservationTypeAlias)) {
-      dfSubSet$sensorType <- tmpObservationTypeAlias
-    } else {
-      dfSubSet$sensorType <- tmpObservationType
-    }
+    print(nrow(dfResult))
+    print(str(dfResult))
+    print(dfResult)
+    print(tmpObservationType)
+#    print(dfResult[c(tmpObservationType)][,1])
     
-    if (is.null(dfMerged)) {
-      dfMerged<-dfSubSet
-    } else {
-      dfMerged<-rbind(dfMerged,dfSubSet)
+    if("pm25" %in% colnames(dfResult))
+    {
+      if (nrow(dfResult)>0) {
+        dfSubSet<- dfResult
+        
+        dfSubSet$sensorValue <- dfSubSet[c(tmpObservationType)][,1]
+        if (!is.na(tmpObservationTypeAlias)) {
+          dfSubSet$sensorType <- tmpObservationTypeAlias
+        } else {
+          dfSubSet$sensorType <- tmpObservationType
+        }
+        
+        if (is.null(dfMerged)) {
+          dfMerged<-dfSubSet
+        } else {
+          dfMerged<-rbind(dfMerged,dfSubSet)
+        } 
+      }
     } 
   }
   dfResult<-dfMerged
