@@ -86,13 +86,14 @@ getLuchtmeetnetData<-function(dfIn=NULL
     tmpObservationType <- strsplit(observationTypeObject,split=':')[[1]][1]
     tmpObservationTypeAlias <- strsplit(observationTypeObject,split=':')[[1]][2]
     
-    print(nrow(dfResult))
-    print(str(dfResult))
-    print(dfResult)
-    print(tmpObservationType)
+#    print(nrow(dfResult))
+#    print(str(dfResult))
+#    print(dfResult)
+#    print(tmpObservationType)
 #    print(dfResult[c(tmpObservationType)][,1])
     
-    if("pm25" %in% colnames(dfResult))
+    #if("pm25" %in% colnames(dfResult))
+    if(tmpObservationType %in% colnames(dfResult))
     {
       if (nrow(dfResult)>0) {
         dfSubSet<- dfResult
