@@ -520,6 +520,22 @@ for (i in 1:nrow(sensorIds)) {
                                                        rHum= -0.1781074
                       )
                     }
+                    if (sensorIds$mlrVersion[i]=="visibilis2regel3") {
+                      sensorMlrFactorsPM <- data.frame(type='PM',
+                                                       b0= 18.2,
+                                                       pm25= 0.38591650,
+                                                       temperature= -0.15387010,
+                                                       rHum= -0.16499600
+                      )
+                    }
+                    if (sensorIds$mlrVersion[i]=="visibilis2regel4") {
+                      sensorMlrFactorsPM <- data.frame(type='PM',
+                                                       b0= 18.4,
+                                                       pm25= 0.45055050,
+                                                       temperature= -0.05564480,
+                                                       rHum= -0.30222530
+                      )
+                    }
                   }
                   if (sensorIds$sensorType[i]=="ips7100") {
                     if (sensorIds$mlrVersion[i]=="visibilis2") {
