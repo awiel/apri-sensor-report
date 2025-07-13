@@ -639,7 +639,7 @@ for (i in 1:nrow(sensorIds)) {
                   
                   if (sensorIds$sensorType[i]=="pmsa003") {
                     if (sensorIds$mlrVersion[i]=="visibilis2") {
-                      # print("Calculate MLR for pmsa003 PN Visibilis2")
+                      # print("Calculate MLR for pmsa003 PN Visibilis2 A")
                       sensorMlrFactorsPN <- data.frame(type='PN',
                                                        b0= 15.9,
                                                        pn0_3= -0.0398651000,
@@ -650,6 +650,34 @@ for (i in 1:nrow(sensorIds)) {
                                                        pn10_0= -2.6055440000,
                                                        temperature= -0.0083817000,
                                                        rHum= -0.1808905000
+                      )
+                    }
+                    if (sensorIds$mlrVersion[i]=="visibilis2regel3") {
+                      # print("Calculate MLR for pmsa003 PN Visibilis2 B")
+                      sensorMlrFactorsPN <- data.frame(type='PN',
+                                                       b0= 15.10,
+                                                       pn0_3= -0.0757818,
+                                                       pn0_5= 0.2792005,
+                                                       pn1_0= -0.1072021,
+                                                       pn2_5= 0.3029881,
+                                                       pn5_0= 1.3001051,
+                                                       pn10_0= 0.5304403,
+                                                       temperature= -0.0641135,
+                                                       rHum= -0.1728792
+                      )
+                    }
+                    if (sensorIds$mlrVersion[i]=="visibilis2regel4") {
+                      # print("Calculate MLR for pmsa003 PN Visibilis2 B")
+                      sensorMlrFactorsPN <- data.frame(type='PN',
+                                                       b0= 11.0,
+                                                       pn0_3= -0.1375197,
+                                                       pn0_5= 0.474207,
+                                                       pn1_0= -0.1055953,
+                                                       pn2_5= 0.1715291,
+                                                       pn5_0= 3.502532,
+                                                       pn10_0= -2.904245,
+                                                       temperature= 0.0312201,
+                                                       rHum= -0.1375378
                       )
                     }
                   }
