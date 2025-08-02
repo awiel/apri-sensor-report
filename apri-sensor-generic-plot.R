@@ -546,6 +546,14 @@ for (i in 1:nrow(sensorIds)) {
                                                        rHum= -0.18073580
                       )
                     }
+                    if (sensorIds$mlrVersion[i]=="visibilis2B") {
+                      sensorMlrFactorsPM <- data.frame(type='PM',
+                                                       b0= 23.8,
+                                                       pm25= 0.2381699,
+                                                       temperature= -0.0182353,
+                                                       rHum= -0.3337437
+                      )
+                    }
                   }
                   if (sensorIds$sensorType[i]=="nextpm") {
                     if (sensorIds$mlrVersion[i]=="visibilis2") {
@@ -556,6 +564,14 @@ for (i in 1:nrow(sensorIds)) {
                                                        rHum= -0.31309600
                       )
                     }
+                    if (sensorIds$mlrVersion[i]=="visibilis2B") {
+                      sensorMlrFactorsPM <- data.frame(type='PM',
+                                                       b0= 24.9,
+                                                       pm25= 0.8806398,
+                                                       temperature= -0.1857225,
+                                                       rHum= -0.3337736
+                      )
+                    }
                   }
                   if (sensorIds$sensorType[i]=="sps30") {
                     if (sensorIds$mlrVersion[i]=="visibilis2") {
@@ -564,6 +580,14 @@ for (i in 1:nrow(sensorIds)) {
                                                        pm25= 1.05446529,
                                                        temperature= 0.08208380,
                                                        rHum= -0.15686450
+                      )
+                    }
+                    if (sensorIds$mlrVersion[i]=="visibilis2B") {
+                      sensorMlrFactorsPM <- data.frame(type='PM',
+                                                       b0= 21.2,
+                                                       pm25= 0.9978563,
+                                                       temperature= -0.1255003,
+                                                       rHum= -0.3121716
                       )
                     }
                   }
@@ -696,6 +720,19 @@ for (i in 1:nrow(sensorIds)) {
                                                        rHum= -0.1590476000
                       )
                     }
+                    if (sensorIds$mlrVersion[i]=="visibilis2B") {
+                      #print("Calculate MLR for sps30 PN Visibilis2")
+                      sensorMlrFactorsPN <- data.frame(type='PN',
+                                                       b0= 20.6,
+                                                       pn0_5= 1.004932,
+                                                       pn1_0= -5.807172,
+                                                       pn2_5= 8.5187483,
+                                                       pn4_0= 4.0393887,
+                                                       pn10_0= 31.656368,
+                                                       temperature= -0.1172317,
+                                                       rHum= -0.3089134
+                      )
+                    }
                   }
                 if (sensorIds$sensorType[i]=="nextpm") {
                   if (sensorIds$mlrVersion[i]=="visibilis2") {
@@ -707,6 +744,19 @@ for (i in 1:nrow(sensorIds)) {
                                                      pn10_0= 0.8224360000,
                                                      temperature= 0.4153694000,
                                                      rHum= -0.1185348000
+                    )
+                  }
+                  if (sensorIds$mlrVersion[i]=="visibilis2B") {
+                    #print("Calculate MLR for nextpm PN Visibilis2")
+                    sensorMlrFactorsPN <- data.frame(type='PN',
+                                                     b0= 21.3,
+                                                     pn0_5= 0.0020498,
+                                                     pn1_0= -0.0187594,
+                                                     pn2_5= -0.073801,
+                                                     pn5_0= 0.9140044,
+                                                     pn10_0= -0.5849119,
+                                                     temperature= -0.3126088,
+                                                     rHum= -0.2509179
                     )
                   }
                 }
@@ -725,6 +775,21 @@ for (i in 1:nrow(sensorIds)) {
                                                      pn10_0= -46.7696700000,
                                                      temperature= 0.0251139000,
                                                      rHum= -0.1436989000
+                    )
+                  }
+                  if (sensorIds$mlrVersion[i]=="visibilis2B") {
+                    # print("Calculate MLR for pmsa003 PN Visibilis2")
+                    sensorMlrFactorsPN <- data.frame(type='PN',
+                                                     b0= 22.3,
+                                                     pn0_1= 0.00023613,
+                                                     pn0_3= -0.00034519,
+                                                     pn0_5=-0.00012424,
+                                                     pn1_0= 0.0010241,
+                                                     pn2_5= 0.0028082,
+                                                     pn5_0= -0.3400202,
+                                                     pn10_0= 10.643739,
+                                                     temperature= -0.1078622,
+                                                     rHum= -0.3414054
                     )
                   }
                 }
