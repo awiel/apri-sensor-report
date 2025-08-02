@@ -883,20 +883,20 @@ for (i in 1:nrow(sensorIds)) {
                     print("Calculate MLR for nextpm PN Visibilis2")
                     
                     dfTmpMlr2<-dfTmpMlr2 %>%
-                      #mutate(sensorValue = 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature) ) %>%
-                      mutate(sensorValue = sensorMlrFactorsPN$b0 + 
-                               (sensorMlrFactorsPN$pn1_0*raw1_0) + 
-                               (sensorMlrFactorsPN$pn2_5*raw2_5) + 
-                               (sensorMlrFactorsPN$pn10_0*raw10_0) + 
+                  #    mutate(sensorValue = sensorMlrFactorsPN$b0 + 
+                  #             (sensorMlrFactorsPN$pn1_0*raw1_0) + 
+                  #             (sensorMlrFactorsPN$pn2_5*raw2_5) + 
+                  #             (sensorMlrFactorsPN$pn10_0*raw10_0) + 
+                  #             (sensorMlrFactorsPN$rHum*rHum) + 
+                  #             (sensorMlrFactorsPN$temperature*temperature) ) # %>%
+                       mutate(sensorValue = sensorMlrFactorsPN$b0 + 
+                             (sensorMlrFactorsPN$pn02pn05*pn02pn05) + 
+                             (sensorMlrFactorsPN$pn05pn1*pn05pn1) + 
+                             (sensorMlrFactorsPN$pn1pn25*pn1pn25) + 
+                               (sensorMlrFactorsPN$pn25pn5*pn25pn5) + 
+                               (sensorMlrFactorsPN$pn5pn10*pn5pn10) + 
                                (sensorMlrFactorsPN$rHum*rHum) + 
-                               (sensorMlrFactorsPN$temperature*temperature) ) # %>%
-                    #mutate(sensorValue = ifelse(sensorValue>sensorValueTmp,
-                    #                            sensorValueTmp
-                    #                            , sensorValue))
-                    
-                    #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
-                    #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
-                    #              ,dfTmpMlr2$sensorValue)
+                             (sensorMlrFactorsPN$temperature*temperature) ) # %>%
                   }
 
                   if (sensorIds$sensorType[i]=="ips7100") {
