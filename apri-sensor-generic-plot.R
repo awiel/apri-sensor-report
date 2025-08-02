@@ -429,25 +429,46 @@ for (i in 1:nrow(sensorIds)) {
               if (sensorIds$sensorType[i]=="nextpm") {
                 print('### merge raw data nextpm')
                 dfTmpData<-NULL
-                dfRaw1_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw1_0')
-                dfRaw1_0$raw1_0<-dfRaw1_0$sensorValue
-                dfRaw2_5<- subset(dfTmpOne, dfTmpOne$sensorType=='raw2_5')
-                dfRaw2_5$raw2_5<-dfRaw2_5$sensorValue
-                dfRaw10_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw10_0')
-                dfRaw10_0$raw10_0<-dfRaw10_0$sensorValue
-                #              keepsMlr2 <- c("date", "raw0_3","raw0_5", "raw1_0", "raw2_5", "raw5_0", "raw10_0")
-                dfRaw1_0 <- dfRaw1_0[c("date", "raw1_0","dateObserved","sensorId","sensorType")]
-                dfRaw2_5 <- dfRaw2_5[c("date", "raw2_5")]
-                dfRaw10_0 <- dfRaw10_0[c("date", "raw10_0")]
+
                 
-                dfTmpData<-dfRaw1_0 %>% left_join(dfRaw2_5, by = c("date" = "date"))
-                dfTmpData<-dfTmpData %>% left_join(dfRaw10_0, by = c("date" = "date"))
-                #              dfTmpData$sensorId<-dfTmpOne$sensorId[1]
-                #              dfTmpData$sensorType<-dfTmpOne$sensorType[1]
-                #              dfTmpData$dateObserved<-dfTmpOne$dateObserved
+                
+                
+                
+                
+                
+                dfpn02pn05<- subset(dfTmpOne, dfTmpOne$sensorType=='pn02pn05')
+                dfpn02pn05$pn02pn05<-dfpn02pn05$sensorValue
+                dfpn05pn1<- subset(dfTmpOne, dfTmpOne$sensorType=='pn05pn1')
+                dfpn05pn1$pn05pn1<-dfpn05pn1$sensorValue
+                dfpn1pn25<- subset(dfTmpOne, dfTmpOne$sensorType=='pn1pn25')
+                dfpn1pn25$pn1pn25<-dfpn1pn25$sensorValue
+                dfpn25pn5<- subset(dfTmpOne, dfTmpOne$sensorType=='pn25pn5')
+                dfpn25pn5$pn25pn5<-dfpn25pn5$sensorValue
+                dfpn5pn10<- subset(dfTmpOne, dfTmpOne$sensorType=='pn5pn10')
+                dfpn5pn10$pn5pn10<-dfpn5pn10$sensorValue
+                dfpn02pn05 <- dfpn02pn05[c("date", "pn02pn05","dateObserved","sensorId","sensorType")]
+                dfpn05pn1 <- dfpn05pn1[c("date", "pn05pn1")]
+                dfpn1pn25 <- dfpn1pn25[c("date", "pn1pn25")]
+                dfpn25pn5 <- dfpn25pn5[c("date", "pn25pn5")]
+                dfpn5pn10 <- dfpn5pn10[c("date", "pn5pn10")]
+                
+                dfTmpData<-dfpn02pn05 %>% left_join(dfpn05pn1, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfpn1pn25, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfpn25pn5, by = c("date" = "date"))
+                dfTmpData<-dfTmpData %>% left_join(dfpn5pn10, by = c("date" = "date"))
+                
+#                dfRaw1_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw1_0')
+#                dfRaw1_0$raw1_0<-dfRaw1_0$sensorValue
+#                dfRaw2_5<- subset(dfTmpOne, dfTmpOne$sensorType=='raw2_5')
+#                dfRaw2_5$raw2_5<-dfRaw2_5$sensorValue
+#                dfRaw10_0<- subset(dfTmpOne, dfTmpOne$sensorType=='raw10_0')
+#                dfRaw10_0$raw10_0<-dfRaw10_0$sensorValue
+#                dfRaw1_0 <- dfRaw1_0[c("date", "raw1_0","dateObserved","sensorId","sensorType")]
+#                dfRaw2_5 <- dfRaw2_5[c("date", "raw2_5")]
+#                dfRaw10_0 <- dfRaw10_0[c("date", "raw10_0")]
+#                dfTmpData<-dfRaw1_0 %>% left_join(dfRaw2_5, by = c("date" = "date"))
+#                dfTmpData<-dfTmpData %>% left_join(dfRaw10_0, by = c("date" = "date"))
                 dfTmpOne<- dfTmpData
-                #              dfTmpOne<-dfTmpOne %>% left_join(dfTmpData, by = c("date" = "date"))
-                #print(str(dfTmpOne))
               }
               if (sensorIds$sensorType[i]=="ips7100") {
                 dfTmpData<-NULL
