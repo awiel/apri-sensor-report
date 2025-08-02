@@ -750,11 +750,11 @@ for (i in 1:nrow(sensorIds)) {
                     #print("Calculate MLR for nextpm PN Visibilis2")
                     sensorMlrFactorsPN <- data.frame(type='PN',
                                                      b0= 21.3,
-                                                     pn0_5= 0.0020498,
-                                                     pn1_0= -0.0187594,
-                                                     pn2_5= -0.073801,
-                                                     pn5_0= 0.9140044,
-                                                     pn10_0= -0.5849119,
+                                                     pn02pn05= 0.0020498,
+                                                     pn05pn1= -0.0187594,
+                                                     pn1pn25= -0.073801,
+                                                     pn25pn5= 0.9140044,
+                                                     pn5pn10= -0.5849119,
                                                      temperature= -0.3126088,
                                                      rHum= -0.2509179
                     )
