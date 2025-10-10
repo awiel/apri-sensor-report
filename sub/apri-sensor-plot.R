@@ -216,7 +216,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   theme_bw(base_family = "DejaVu Sans", base_size = 12) +
   theme(
 #    plot.title = element_text(size = 48, face = "bold", hjust = 0.5,margin(20,20,20,20)),
-    plot.title = element_text(face="bold",size = rel(9), hjust =0,margin=margin(0,0,0,0)), # 0.5)  #lineheight=rel(1),
+    plot.title = element_text(face="bold",size = rel(8), hjust =0,margin=margin(0,0,0,0)), # 0.5)  #lineheight=rel(1),
     plot.subtitle=element_text(size = rel(6), hjust =0,margin=margin(3,0,8,0)), # 0.5), #,face="bold")
     plot.caption=element_text(size = rel(6),hjust=0,color = "black", face="italic"),
     
@@ -225,9 +225,11 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     axis.text = element_text(size = 10),
 #    legend.title = element_text(size = 14,margin = margin(t = 3, b=1, l=0, r=0)),
     legend.text = element_text(size = 12),
-    legend.spacing.x = unit(0.01, "cm"),   # afstand marker ↔ tekst
-    legend.key.height=rel(0) , #unit(0.25,"cm"),
-    legend.key.width=rel(0.3), #unit(0.25,"cm"),
+
+#    legend.key = element_rect(fill = "yellow", color = "black", linewidth=0.1), 
+#    legend.spacing.x = unit(0.01, "cm"),   # afstand marker ↔ tekst
+    legend.key.height=rel(0.25) , #unit(0.25,"cm"),
+    legend.key.width=rel(0.2), #unit(0.25,"cm"),
     #legend.key.size = unit(0.2, "cm"),    # grootte van het marker-vakje
     legend.position="top",
     legend.justification="right",
@@ -363,7 +365,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
       , aes(group=interaction(sensorId,sensorType,type)),linewidth=0.15)+ #group=foi))+#
    # guides(color = guide_legend(override.aes = list(size = 1.0) ) ) +
   #  labs(,x=paste(xAxisText,' ',aggregateTxt,'\n',periodeLabel,': ',periodetext1,' - ',periodetext2,sep=''),
-     labs(,x=paste(xAxisText,' ',aggregateTxt,'\n',periodetext1,' - ',periodetext2,sep=''),
+     labs(x=paste(xAxisText,' ',aggregateTxt,'\n',periodetext1,' - ',periodetext2,sep=''),
          y=yAxisText,title=paste("ApriSensor ",foiLabel), subtitle=foiText, caption=captionText) +
     facet_grid( sensorType ~ . , labeller=labeller(sensorType = unlist(sensorTypes[dfTotal$sensorType],use.names=T)), scales = "free") +
     #annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
