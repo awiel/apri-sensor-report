@@ -597,7 +597,7 @@ for (i in 1:nrow(sensorIds)) {
                   if (sensorIds$sensorType[i]=="sps30") {
                     if (sensorIds$mlrVersion[i]=="visibilis2") {
                       sensorMlrFactorsPM <- data.frame(type='PM',
-                                                       b0= 14.0,
+                                                       b0= 14.8,
                                                        pm25= 1.05446529,
                                                        temperature= 0.08208380,
                                                        rHum= -0.15686450

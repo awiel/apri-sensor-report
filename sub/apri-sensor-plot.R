@@ -2,6 +2,8 @@
 library(scales)
 library(tidyr)
 library(cowplot)
+library('ggplot2')
+theme_set(theme_minimal(base_family = "DejaVu Sans"))
 
 # Rscript apri-sensor-generic-plot.R AFF4-pm25-csv-locatie-2
 
@@ -462,14 +464,14 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
           ))
 }
 
-apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL,width=3.8,height=2.28,dpi="print",units='in',subFolder='') {
+apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL,width=3.8,height=2.28,dpi=300,units='in',subFolder='') {
   #sprintf("%s is best", "1")
   if (!is.null(fileSuffix)) fileSuffix<-paste0('-',fileSuffix)
   if (!is.null(fileDate)) fileDate<-paste0('-',fileDate)
   fileName <- paste('aprisensor','_',fileLabel,fileSuffix,'.png',sep='')
   
 
-  ggsave(fileName, path=plotPath, width=width, height=height, plot = apriSensorPlot,units=units)
+  ggsave(fileName, path=plotPath, width=width, height=height, plot = apriSensorPlot,units=units,dpi=dpi)
   #ggsave(fileName, path=plotPath, width=3.8, height=height, plot = apriSensorPlot,dpi=dpi,units=units)
 
 

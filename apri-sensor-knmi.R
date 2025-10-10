@@ -64,17 +64,23 @@ if (is.na(argDateFrom) || is.na(argDateTo) ) {
   yesterdayStart<-format(Sys.time()-((24+2+24+hours)*60*60+(60*20)),"%Y-%m-%dT%H:%M:%S") # twee meer terug als start plus 20 minuten extra
   yesterdayEnd<-format(Sys.time()-((2+24+hours)*60*60),"%Y-%m-%dT%H:%M:%S")
   
-  fiwarePeriodStart<-format(Sys.time()-((12+hours)*60*60),"%Y-%m-%dT%H:%M:%S")
-  fiwarePeriodEnd<-format(Sys.time()-((hours)*60*60),"%Y-%m-%dT%H:%M:%S")
+  # fiwarePeriodStart<-format(Sys.time()-((12+hours)*60*60),"%Y-%m-%dT%H:%M:%S")
+  # fiwarePeriodEnd<-format(Sys.time()-((hours)*60*60),"%Y-%m-%dT%H:%M:%S")
 } else {
   actualGraph<-FALSE
-  fiwareStart<-as.POSIXct(argDateFrom, format="%Y-%m-%dT%H:%M")
-  fiwareEnd<-as.POSIXct(argDateTo, format="%Y-%m-%dT%H:%M")
+  #fiwareStart<-as.POSIXct(argDateFrom, format="%Y-%m-%dT%H:%M")
+  #fiwareEnd<-as.POSIXct(argDateTo, format="%Y-%m-%dT%H:%M")
+  fiwareStart<-argDateFrom
+  fiwareEnd<-argDateTo
   #yesterdayStart<-format(Sys.time()-((24+2+24+hours)*60*60+(60*20)),"%Y-%m-%dT%H:%M:%S") # twee meer terug als start plus 20 minuten extra
   #yesterdayEnd<-format(Sys.time()-((2+24+hours)*60*60),"%Y-%m-%dT%H:%M:%S")
   
-  fiwarePeriodStart<-format(fiwareStart,"%Y-%m-%dT%H:%M:%S")
+  # fiwarePeriodStart<-format(fiwareStart,"%Y-%m-%dT%H:%M:%S")
   # fiwarePeriodEnd<-format(fiwareEnd,"%Y-%m-%dT%H:%M:%S")
+  
+  print("test")
+  print(fiwareStart)
+  print(fiwareEnd)
 }
 
 #fiwareStart='2022-02-27T00:00:00'
@@ -147,8 +153,12 @@ labels <- c('windDirection' = "Windrichting",
 foitext <- paste('Data van het KNMI https://data.knmi.nl/ (KNMI)',sep="");
 
 fileprefix <- paste(plotPath,'/knmi','_',foilabel,sep='')
-filedate = ''
-filename <- paste(fileprefix, filedate,'.png',sep='');
+if (actualGraph==TRUE) {
+  filedate = ''
+} else {
+  filedate = paste0('_',fiwareStart,'_',fiwareEnd)
+}  
+filename <- paste0(fileprefix, filedate,'.png');
 png(filename=filename,width = 1000, height = 600 )
 par(mar = c(0,0,0,0)+5)
 par(new = T)
