@@ -25,7 +25,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   if (!is.null(reportLocal)&&!is.na(reportLocal)) {
     if(reportLocal=='JA') {
       dateText<-'日付';
-      periodeLabel<-'期間';
+      # periodeLabel<-'期間';
       xAxisText<-'生の/未校正の測定値';
       yAxisText<-'測定値'
       localTimezone<-'Japan'
