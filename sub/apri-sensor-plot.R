@@ -5,7 +5,6 @@ library(scales)
 library(tidyr)
 library(cowplot)
 library('ggplot2')
-theme_set(theme_minimal(base_family = "DejaVu Sans"))
 
 # Rscript apri-sensor-generic-plot.R AFF4-pm25-csv-locatie-2
 
@@ -212,12 +211,12 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   
   gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation,timezone=localTimezone)
                   ,col = brewer.pal(n = 8, name = "RdYlBu")) +
-#    theme_minimal(base_family = "DejaVu Sans", base_size = 14) +
   theme_bw(base_family = "DejaVu Sans", base_size = 12) +
   theme(
 #    plot.title = element_text(size = 48, face = "bold", hjust = 0.5,margin(20,20,20,20)),
-    plot.title = element_text(face="bold",size = rel(8), hjust =0,margin=margin(0,0,0,0)), # 0.5)  #lineheight=rel(1),
-    plot.subtitle=element_text(size = rel(6), hjust =0,margin=margin(3,0,8,0)), # 0.5), #,face="bold")
+#    plot.title = element_text(face="bold",size = rel(8), hjust =0,margin=margin(0,0,0,0,'pt')), # 0.5)  #lineheight=rel(1),
+    plot.title = element_text(size = rel(12), hjust =0,margin=margin(5,0,0,0,'pt')), # 0.5)  #lineheight=rel(1),
+    plot.subtitle=element_text(size = rel(6), hjust =0,margin=margin(3,0,8,0,'pt')), # 0.5), #,face="bold")
     plot.caption=element_text(size = rel(6),hjust=0,color = "black", face="italic"),
     
     axis.title.x = element_text(size = 14,lineheight = 0.4, vjust=0.5,hjust=0.5, margin = margin(t = 5,b=2)),
@@ -366,7 +365,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
    # guides(color = guide_legend(override.aes = list(size = 1.0) ) ) +
   #  labs(,x=paste(xAxisText,' ',aggregateTxt,'\n',periodeLabel,': ',periodetext1,' - ',periodetext2,sep=''),
      labs(x=paste(xAxisText,' ',aggregateTxt,'\n',periodetext1,' - ',periodetext2,sep=''),
-         y=yAxisText,title=paste("ApriSensor ",foiLabel), subtitle=foiText, caption=captionText) +
+         y=yAxisText,title=paste(foiLabel), subtitle=foiText, caption=captionText) +
     facet_grid( sensorType ~ . , labeller=labeller(sensorType = unlist(sensorTypes[dfTotal$sensorType],use.names=T)), scales = "free") +
     #annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
     #annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
