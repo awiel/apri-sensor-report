@@ -210,10 +210,13 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   }
   
   
+  
   gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation,timezone=localTimezone)
                   ,col = brewer.pal(n = 8, name = "RdYlBu")) +
+    guides(color = guide_legend(keywidth = 0.2, override.aes = list(size = 2))) +
   theme_bw(base_family = "DejaVu Sans", base_size = 12) +
   theme(
+    
 #    plot.title = element_text(size = 48, face = "bold", hjust = 0.5,margin(20,20,20,20)),
 #    plot.title = element_text(face="bold",size = rel(8), hjust =0,margin=margin(0,0,0,0,'pt')), # 0.5)  #lineheight=rel(1),
     plot.title = element_text(size = 28, # rel(11), 
@@ -225,17 +228,16 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     axis.title.y = element_text(size = 12, lineheight = 1.1, vjust=2.5,hjust=0.5),
     axis.text = element_text(size = 10),
 #    legend.title = element_text(size = 14,margin = margin(t = 3, b=1, l=0, r=0)),
-    legend.text = element_text(size = 12),
-
 #    legend.key = element_rect(fill = "yellow", color = "black", linewidth=0.1), 
-#    legend.spacing.x = unit(0.01, "cm"),   # afstand marker ↔ tekst
+    legend.spacing.x = unit(0.01, "cm"),   # afstand marker ↔ tekst
     legend.key.height=rel(0.25) , #unit(0.25,"cm"),
     legend.key.width=rel(0.2), #unit(0.25,"cm"),
     #legend.key.size = unit(0.2, "cm"),    # grootte van het marker-vakje
     legend.position="top",
     legend.justification="right",
-    legend.margin=margin(4,0,0,0),
-    legend.box.margin=margin(-10,-20,-10,-1), # t r b l
+    legend.text=element_text(size = 12, margin=margin(l=1, b=0)),
+    legend.box.margin=margin(-15,-20,-2.8,-1), # t r b l
+    legend.box.spacing = unit(0.1, "cm"),
     panel.border = element_rect(colour = "black", fill=NA, linewidth=0.2),
     strip.text = element_text(size = 4, lineheight = 0.4),  # facet labels
     panel.grid = element_line(linewidth = 0.15),
