@@ -1,3 +1,5 @@
+library(showtext)
+showtext_auto()  # activeert font rendering in alle devices
 
 library(scales)
 library(tidyr)
@@ -210,7 +212,34 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   
   gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation,timezone=localTimezone)
                   ,col = brewer.pal(n = 8, name = "RdYlBu")) +
-    theme_bw();
+#    theme_minimal(base_family = "DejaVu Sans", base_size = 14) +
+  theme_bw(base_family = "DejaVu Sans", base_size = 12) +
+  theme(
+#    plot.title = element_text(size = 48, face = "bold", hjust = 0.5,margin(20,20,20,20)),
+    plot.title = element_text(face="bold",size = rel(9), hjust =0,margin=margin(0,0,0,0)), # 0.5)  #lineheight=rel(1),
+    plot.subtitle=element_text(size = rel(6), hjust =0,margin=margin(3,0,8,0)), # 0.5), #,face="bold")
+    plot.caption=element_text(size = rel(6),hjust=0,color = "black", face="italic"),
+    
+    axis.title.x = element_text(size = 14,lineheight = 0.4, vjust=0.5,hjust=0.5, margin = margin(t = 5,b=2)),
+    axis.title.y = element_text(size = 12, lineheight = 1.1, vjust=2.5,hjust=0.5),
+    axis.text = element_text(size = 10),
+#    legend.title = element_text(size = 14,margin = margin(t = 3, b=1, l=0, r=0)),
+    legend.text = element_text(size = 12),
+    legend.spacing.x = unit(0.01, "cm"),   # afstand marker ↔ tekst
+    legend.key.height=rel(0) , #unit(0.25,"cm"),
+    legend.key.width=rel(0.3), #unit(0.25,"cm"),
+    #legend.key.size = unit(0.2, "cm"),    # grootte van het marker-vakje
+    legend.position="top",
+    legend.justification="right",
+    legend.margin=margin(4,0,0,0),
+    legend.box.margin=margin(-10,-20,-10,-1), # t r b l
+    panel.border = element_rect(colour = "black", fill=NA, linewidth=0.2),
+    strip.text = element_text(size = 4, lineheight = 0.4),  # facet labels
+    panel.grid = element_line(linewidth = 0.15),
+    panel.grid.major = element_line(linewidth = 0.2),
+    axis.ticks = element_line(linewidth = 0.1),      # dikte van ticks
+    axis.ticks.length = unit(2, "pt")           # lengte van ticks
+  );
 
   #    stat_summary(fun.y = mean, geom="line", size=0.5,color='grey') +
   #    stat_smooth(method="loess",span=0.2,size=0.1,se = FALSE,show.legend=FALSE) + #, linetype = "dashed") +
@@ -292,25 +321,13 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   
   gTotal<-gTotal+
 #  gTotal<-gTotal+  scale_x_datetime(date_breaks = dateBreaks, date_labels=dateLabels ,timezone=localTimezone,breaks=waiver()) +
-    theme(text = element_text(size = rel(2.0))
+    theme(text = element_text(size = rel(2))
           , element_line(colour = 'green', linewidth = 0.2)
-          , plot.title = element_text(face="bold",size = rel(3.2), hjust =0,margin=margin(0,0,0,0)) # 0.5)  #lineheight=rel(1),
-          , plot.subtitle=element_text(size = rel(2.2), hjust =0,margin=margin(3,0,8,0)) # 0.5) #,face="bold")
-          , plot.caption=element_text(size = rel(1.5),hjust=0,color = "black", face="italic")
           #        , plot.caption.position =  "plot"
-          , axis.text=element_text(size = rel(0.9))
-          , axis.text.y.right=element_text(size = rel(0.9))
-          , legend.text=element_text(size = rel(1.9))
-          , legend.title=element_text(size = rel(2.0)) #,face="bold")
-          , legend.position="top"
-          , legend.justification="right"
-          , legend.margin=margin(0,0,0,0)
-          , legend.box.margin=margin(-10,-10,-10,-10) # t r b l
-          , panel.border = element_rect(colour = "black", fill=NA, linewidth=0.2)
-        , legend.key.height=unit(0.00175,"cm")
-          , legend.key = element_rect(color = "white", fill = "white")
-    #      , legend.key = element_rect(color = NA, fill = NA)
-          , legend.key.width=unit(0.105,"cm")
+#          , axis.text=element_text(size = rel(1))
+#          , axis.text.y.right=element_text(size = rel(1))
+#          , legend.text=element_text(size = rel(3))
+#          , legend.title=element_text(size = rel(2.0)) #,face="bold")
     )  +
    # guides(guide_legend(foiLocation="xxx") ) +
   
@@ -345,15 +362,16 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
       )
       , aes(group=interaction(sensorId,sensorType,type)),linewidth=0.15)+ #group=foi))+#
    # guides(color = guide_legend(override.aes = list(size = 1.0) ) ) +
-    labs(x=paste(xAxisText,' ',aggregateTxt,'\n',periodeLabel,': ',periodetext1,' - ',periodetext2,sep=''),
+  #  labs(,x=paste(xAxisText,' ',aggregateTxt,'\n',periodeLabel,': ',periodetext1,' - ',periodetext2,sep=''),
+     labs(,x=paste(xAxisText,' ',aggregateTxt,'\n',periodetext1,' - ',periodetext2,sep=''),
          y=yAxisText,title=paste("ApriSensor ",foiLabel), subtitle=foiText, caption=captionText) +
     facet_grid( sensorType ~ . , labeller=labeller(sensorType = unlist(sensorTypes[dfTotal$sensorType],use.names=T)), scales = "free") +
     #annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
     #annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
     #annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0) +
     theme(
-      strip.text.y = element_text(size = rel(2.6)),
-      strip.background = element_rect(colour="black", fill="grey", linewidth=0.3)
+      strip.text.y = element_text(size = rel(3.0)),
+      strip.background = element_rect(colour="black", fill="grey", linewidth=0.1)
     )
   #print('annotation')
 
@@ -370,9 +388,9 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
 
   if(is.null(ylim)!=TRUE && printStats == T) {
       gTotal<-gTotal +
-          annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
-          annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
-          annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0)
+          annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=4,hjust=0) +
+          annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=4,hjust=0) +
+          annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=4,hjust=0)
   }
 
   if(is.null(treshold)!=TRUE) {
@@ -383,7 +401,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
         geom_hline(yintercept = treshold,linewidth=0.10,color='darkgreen') +
         #annotate("text", x = statsPosX, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0) +
         #annotate("text", x = statsPosX+statsXResolution*7, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0,color='darkgreen') +
-        annotate("text", x = statsPosX+statsXResolution*15, y = treshold-statsResolution*0.5, label = tresholdLabel,size=1.1,hjust=0,color='darkgreen')
+        annotate("text", x = statsPosX+statsXResolution*15, y = treshold-statsResolution*0.5, label = tresholdLabel,size=4,hjust=0,color='darkgreen')
     }
   }
 
@@ -411,12 +429,12 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=graphStart+statsXResolution,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=day+statsXResolution*4,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+statsXResolution,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
-    gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+60*60*17,y=statsMax-statsResolution*2,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
+    gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+60*60*17,y=statsMax-statsResolution*2,label=paste0(count)),colour='black' ,size=3,hjust=0,vjust=0)
     #gTotal<-gTotal + geom_text(data=dfIncidentStats,aes(x=date+60*60*14,y=statsMax-statsResolution*2.5,label=paste0(count)),colour='black' ,size=1.4,hjust=0,vjust=0)
     
     gTotal<-gTotal +
      #annotate("text", x = statsPosX+60*60*14, y = statsMax-statsResolution*1, label = paste0("Incident index: "),size=1.4,hjust=0)
-     annotate("text", x = statsPosX+60*60*14, y = statsMax-statsResolution*1, label = paste0("Incident index: "),size=1.4,hjust=0)
+     annotate("text", x = statsPosX+60*60*14, y = statsMax-statsResolution*1, label = paste0("Incident index: "),size=3,hjust=0)
     #    if (nrow(dfIncidentStats) >=1) {
 #      gTotal<-gTotal +      annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("  ",dfIncidentStats$day[[1]],': ',dfIncidentStats$count[[1]],'x'),size=1.2,hjust=0)
 #    }

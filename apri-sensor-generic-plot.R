@@ -1095,8 +1095,8 @@ if (!is.null(reportLocal) && !is.na(reportLocal)) {
   }
 }
 
-periodetext1 <- with_tz(period[1],localTimeZone) # strftime(with_tz(period[1],'Asia/Tokyo'), format = "%Y-%m-%d %H:%M uur %z" ,tz='JST')
-periodetext2 <- with_tz(period[2],localTimeZone)  # strftime(period[2], format = "%Y-%m-%d %H:%M uur %z",tz='JST',usetz=TRUE)
+periodetext1 <- with_tz(period[1],localTimeZone)|>format("%Y-%m-%d %H:%Mu")   # alleen jaar-maand-dag uur # strftime(with_tz(period[1],'Asia/Tokyo'), format = "%Y-%m-%d %H:%M uur %z" ,tz='JST')
+periodetext2 <- with_tz(period[2],localTimeZone)|>format("%Y-%m-%d %H:%Mu")  # strftime(period[2], format = "%Y-%m-%d %H:%M uur %z",tz='JST',usetz=TRUE)
 print(">ggplot")
 dateBreaks<-"1 hour"
 dateLabels<-"%H"
