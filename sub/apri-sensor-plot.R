@@ -5,6 +5,7 @@ library(scales)
 library(tidyr)
 library(cowplot)
 library('ggplot2')
+#library('ragg')
 
 # Rscript apri-sensor-generic-plot.R AFF4-pm25-csv-locatie-2
 
@@ -215,7 +216,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   theme(
 #    plot.title = element_text(size = 48, face = "bold", hjust = 0.5,margin(20,20,20,20)),
 #    plot.title = element_text(face="bold",size = rel(8), hjust =0,margin=margin(0,0,0,0,'pt')), # 0.5)  #lineheight=rel(1),
-    plot.title = element_text(size = rel(12), hjust =0,margin=margin(5,0,0,0,'pt')), # 0.5)  #lineheight=rel(1),
+    plot.title = element_text(size = rel(11), hjust =0,margin=margin(5,0,0,0,'pt')), # 0.5)  #lineheight=rel(1),
     plot.subtitle=element_text(size = rel(6), hjust =0,margin=margin(3,0,8,0,'pt')), # 0.5), #,face="bold")
     plot.caption=element_text(size = rel(6),hjust=0,color = "black", face="italic"),
     
@@ -491,6 +492,7 @@ apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL
   
 
   ggsave(fileName, path=plotPath, width=width, height=height, plot = apriSensorPlot,units=units,dpi=dpi)
+  
   #ggsave(fileName, path=plotPath, width=3.8, height=height, plot = apriSensorPlot,dpi=dpi,units=units)
 
 
