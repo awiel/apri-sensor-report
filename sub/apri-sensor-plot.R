@@ -209,8 +209,11 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
  #   print(dfIncidentStats)
   }
   
-  
-  
+  if (length(unique(dfTotal$foiLocation))<4) {
+    legendRows<-1
+  } else {
+    legendRows<-2
+  }  
   gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation,timezone=localTimezone)
                   ,col = brewer.pal(n = 8, name = "RdYlBu")) +
     guides(color = guide_legend(keywidth = 0.2, override.aes = list(size = 2))) +
@@ -219,32 +222,51 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     
 #    plot.title = element_text(size = 48, face = "bold", hjust = 0.5,margin(20,20,20,20)),
 #    plot.title = element_text(face="bold",size = rel(8), hjust =0,margin=margin(0,0,0,0,'pt')), # 0.5)  #lineheight=rel(1),
-    plot.title = element_text(size = 28, # rel(11), 
+    plot.title = element_text(size = rel(12), 
                               hjust =0,margin=margin(5,0,0,0,'pt')), # 0.5)  #lineheight=rel(1),
-    plot.subtitle=element_text(size = rel(6), hjust =0,margin=margin(3,0,8,0,'pt')), # 0.5), #,face="bold")
+    plot.subtitle=element_text(size = rel(6), hjust =0,margin=margin(3,0,5,0,'pt')), # 0.5), #,face="bold")
     plot.caption=element_text(size = rel(6),hjust=0,color = "black", face="italic"),
     
     axis.title.x = element_text(size = 14,lineheight = 0.4, vjust=0.5,hjust=0.5, margin = margin(t = 5,b=2)),
     axis.title.y = element_text(size = 12, lineheight = 1.1, vjust=2.5,hjust=0.5),
     axis.text = element_text(size = 10),
-#    legend.title = element_text(size = 14,margin = margin(t = 3, b=1, l=0, r=0)),
-#    legend.key = element_rect(fill = "yellow", color = "black", linewidth=0.1), 
-    legend.spacing.x = unit(0.01, "cm"),   # afstand marker ↔ tekst
-    legend.key.height=rel(0.25) , #unit(0.25,"cm"),
-    legend.key.width=rel(0.2), #unit(0.25,"cm"),
-    #legend.key.size = unit(0.2, "cm"),    # grootte van het marker-vakje
-    legend.position="top",
-    legend.justification="right",
-    legend.text=element_text(size = 12, margin=margin(l=1, b=0)),
-    legend.box.margin=margin(-15,-20,-2.8,-1), # t r b l
-    legend.box.spacing = unit(0.1, "cm"),
+    
+
+
+
+# onderstaande voor legend niet in guide_legend/theme
+legend.box.spacing = unit(0.1, "mm"),  # afstand legend tot grafiek
+legend.box.margin=margin(0,0,0,0), # t r b l
+legend.position="top",
+legend.justification="center", # center is default
+#legend.background = element_blank(),
+#legend.box.background = element_rect(colour = "black"),
+
     panel.border = element_rect(colour = "black", fill=NA, linewidth=0.2),
     strip.text = element_text(size = 4, lineheight = 0.4),  # facet labels
     panel.grid = element_line(linewidth = 0.15),
     panel.grid.major = element_line(linewidth = 0.2),
     axis.ticks = element_line(linewidth = 0.1),      # dikte van ticks
     axis.ticks.length = unit(2, "pt")           # lengte van ticks
-  );
+  ) +
+    guides(
+      colour = guide_legend(
+      #  title = "Another long title",
+        nrow=legendRows,
+        theme = theme(
+          #          legend.title = element_text(hjust = 0.5)
+        #  legend.spacing.x = unit(0.5, "mm"),   # afstand marker ↔ tekst
+        #  legend.spacing.y = unit(0.5, "mm"),
+          legend.text=element_text(size = 12, margin=margin(l=1, b=0)),
+          legend.margin=margin(1,0,1,0), # t r b l
+          legend.key.spacing.x = unit(2, "mm"), # afstand tussen twee legend items
+          legend.key.spacing.y = unit(0.03, "mm"), # afstand tussen twee legend regels
+          legend.key.height=unit(0.2,"cm"),
+          legend.key.width=unit(0.2,"cm"),
+          #legend.key.size = unit(0.5, "cm"),    # grootte van het marker-vakje
+        )
+      )
+    )
 
   #    stat_summary(fun.y = mean, geom="line", size=0.5,color='grey') +
   #    stat_smooth(method="loess",span=0.2,size=0.1,se = FALSE,show.legend=FALSE) + #, linetype = "dashed") +
