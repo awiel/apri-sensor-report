@@ -222,7 +222,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     
 #    plot.title = element_text(size = 48, face = "bold", hjust = 0.5,margin(20,20,20,20)),
 #    plot.title = element_text(face="bold",size = rel(8), hjust =0,margin=margin(0,0,0,0,'pt')), # 0.5)  #lineheight=rel(1),
-    plot.title = element_text(size = rel(12), 
+    plot.title = element_text(size = rel(10), 
                               hjust =0,margin=margin(5,0,0,0,'pt')), # 0.5)  #lineheight=rel(1),
     plot.subtitle=element_text(size = rel(6), hjust =0,margin=margin(3,0,5,0,'pt')), # 0.5), #,face="bold")
     plot.caption=element_text(size = rel(6),hjust=0,color = "black", face="italic"),
