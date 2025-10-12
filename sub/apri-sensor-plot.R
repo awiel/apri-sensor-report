@@ -209,7 +209,7 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
  #   print(dfIncidentStats)
   }
   
-  legendRows <- ceiling(length(unique(dfTotal$foiLocation))/4)
+  legendRows <- ceiling(length(unique(dfTotal$foiLocation))/3)
   gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation,timezone=localTimezone)
                   ,col = brewer.pal(n = 8, name = "RdYlBu")) +
     guides(color = guide_legend(keywidth = 0.2, override.aes = list(size = 2))) +
