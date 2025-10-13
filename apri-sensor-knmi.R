@@ -153,7 +153,7 @@ period <- range(total$date);
 localTimeZone<-'CET'
 periodetext1 <- with_tz(period[1],localTimeZone)|>format("%Y-%m-%d %H:%Mu")   # alleen jaar-maand-dag uur # strftime(with_tz(period[1],'Asia/Tokyo'), format = "%Y-%m-%d %H:%M uur %z" ,tz='JST')
 periodetext2 <- with_tz(period[2],localTimeZone)|>format("%Y-%m-%d %H:%Mu")  # strftime(period[2], format = "%Y-%m-%d %H:%M uur %z",tz='JST',usetz=TRUE)
-
+periodetext3 <- localTimeZone
 
 labels <- c('windDirection' = "Windrichting",
             'windSpeed' = "Windkracht"
@@ -251,4 +251,4 @@ if (actualGraph==TRUE) {
 
 mtext(side = 2, line=5, 'Wind (m/s), regen (mm) en zonnestraling (W/m2)')
 mtext(side = 4, line=5, 'temperatuur C en relatieve luchtvochtigheid %')
-mtext(side = 1, line=3, paste('Periode:',periodetext1,'-',periodetext2))
+mtext(side = 1, line=3, paste('Periode:',periodetext1,'-',periodetext2, periodetext3 ))
