@@ -150,14 +150,13 @@ period <- range(total$date);
 periodetext1 <- strftime(period[1], format = "%Y-%m-%d %H:%M" )
 periodetext2 <- strftime(period[2], format = "%Y-%m-%d %H:%M")
 
-foilabel = paste(parmStation,'_wind',sep='');
 labels <- c('windDirection' = "Windrichting",
             'windSpeed' = "Windkracht"
 );
 
 foitext <- paste('Data van het KNMI https://data.knmi.nl/ (KNMI)',sep="");
 
-fileprefix <- paste(plotPath,'/knmi','_',foilabel,sep='')
+fileprefix <- paste0(plotPath,'/knmi','_',parmStation)
 if (actualGraph==TRUE) {
   filedate = ''
 } else {
