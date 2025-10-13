@@ -55,6 +55,11 @@ argDateTo <- args[4]
 keeps <- c("sensorId","dateObserved","sensorValue")
 actualGraph<-TRUE
 
+stationUrl <- paste0('https://aprisensor-api-v1.openiod.org/v2/sensors?apiFunction=getSensorId&sensorSystem=knmi&sensorId=',parmStation)
+station <- rjson::fromJSON(file = paste(stationUrl))
+#print(station[[1]]$name)
+stationName<-station[[1]]$name
+
 print(argDateFrom)
 print(argDateTo)
 if (is.na(argDateFrom) || is.na(argDateTo) ) {
@@ -170,7 +175,7 @@ plotSticks(total$date,rep(0,3),total$wforce*cos(total$angle),
           ,mar=c(5.5,7.3,5,7.3)
           ,ylim=c(-10, 10)
           ,yaxt="n"
-          ,main=paste('KNMI station',parmStation,parmStationName)
+          ,main=paste('KNMI station',parmStation,stationName)
           ,ylab=""
            )
 lines(total$date,total$wforce,col="black", lwd=3)
