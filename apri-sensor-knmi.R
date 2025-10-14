@@ -36,8 +36,6 @@ suppressWarnings(library(oce))
 ##
 ##
 # include modules
-#source("/opt/SCAPE604/R/aprisensor-fiware/aprisensor-knmi-fiware-global.R")
-#source(paste0(subPath,"aprisensor-fiware-global-knmi-v1.R"))
 source(paste0(subPath,"aprisensor-knmi-v1.R"))
 
 
@@ -65,8 +63,8 @@ print(argDateFrom)
 print(argDateTo)
 if (is.na(argDateFrom) || is.na(argDateTo) ) {
   actualGraph<-TRUE
-  fiwareStart<-format(Sys.time()-((2+24+hours)*60*60+(60*20)),"%Y-%m-%dT%H:%M:%S") # twee meer terug als start plus 20 minuten extra
-  fiwareEnd<-format(Sys.time()-((hours)*60*60),"%Y-%m-%dT%H:%M:%S")
+  selectionStart<-format(Sys.time()-((2+24+hours)*60*60+(60*20)),"%Y-%m-%dT%H:%M:%S") # twee meer terug als start plus 20 minuten extra
+  selectionEnd<-format(Sys.time()-((hours)*60*60),"%Y-%m-%dT%H:%M:%S")
   yesterdayStart<-format(Sys.time()-((24+2+24+hours)*60*60+(60*20)),"%Y-%m-%dT%H:%M:%S") # twee meer terug als start plus 20 minuten extra
   yesterdayEnd<-format(Sys.time()-((2+24+hours)*60*60),"%Y-%m-%dT%H:%M:%S")
   
@@ -74,27 +72,27 @@ if (is.na(argDateFrom) || is.na(argDateTo) ) {
   # fiwarePeriodEnd<-format(Sys.time()-((hours)*60*60),"%Y-%m-%dT%H:%M:%S")
 } else {
   actualGraph<-FALSE
-  #fiwareStart<-as.POSIXct(argDateFrom, format="%Y-%m-%dT%H:%M")
-  #fiwareEnd<-as.POSIXct(argDateTo, format="%Y-%m-%dT%H:%M")
-  fiwareStart<-argDateFrom
-  fiwareEnd<-argDateTo
+  #selectionStart<-as.POSIXct(argDateFrom, format="%Y-%m-%dT%H:%M")
+  #selectionEnd<-as.POSIXct(argDateTo, format="%Y-%m-%dT%H:%M")
+  selectionStart<-argDateFrom
+  selectionEnd<-argDateTo
   #yesterdayStart<-format(Sys.time()-((24+2+24+hours)*60*60+(60*20)),"%Y-%m-%dT%H:%M:%S") # twee meer terug als start plus 20 minuten extra
   #yesterdayEnd<-format(Sys.time()-((2+24+hours)*60*60),"%Y-%m-%dT%H:%M:%S")
   
-  # fiwarePeriodStart<-format(fiwareStart,"%Y-%m-%dT%H:%M:%S")
-  # fiwarePeriodEnd<-format(fiwareEnd,"%Y-%m-%dT%H:%M:%S")
+  # fiwarePeriodStart<-format(selectionStart,"%Y-%m-%dT%H:%M:%S")
+  # fiwarePeriodEnd<-format(selectionEnd,"%Y-%m-%dT%H:%M:%S")
   
   print("test")
-  print(fiwareStart)
-  print(fiwareEnd)
+  print(selectionStart)
+  print(selectionEnd)
 }
 
-#fiwareStart='2022-02-27T00:00:00'
-#fiwareEnd='2022-02-27T22:00:00'
+#selectionStart='2022-02-27T00:00:00'
+#selectionEnd='2022-02-27T22:00:00'
 #yesterdayStart='2022-02-26T00:00:00'
 #yesterdayEnd='2022-02-26T22:00:00'
-#dfTmpWind<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station',parmStation,'windSpeed,windDirection',opPerRow='false',dateFrom=fiwareStart,dateTo=fiwareEnd)
-dfTmpWind<-getStationSelectRecordsKnmi(NULL,parmStation,dateFrom=fiwareStart,dateTo=fiwareEnd)
+#dfTmpWind<-fiwareGetSensorSelectRecordsKnmi(NULL,'knmi','/knmi','station',parmStation,'windSpeed,windDirection',opPerRow='false',dateFrom=selectionStart,dateTo=selectionEnd)
+dfTmpWind<-getStationSelectRecordsKnmi(NULL,parmStation,dateFrom=selectionStart,dateTo=selectionEnd)
 dfTmpWind$date <- as.POSIXct(dfTmpWind$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
 if (actualGraph==TRUE) {
   dfTmpWindY<-getStationSelectRecordsKnmi(NULL,parmStation,dateFrom=yesterdayStart,dateTo=yesterdayEnd)
@@ -104,7 +102,7 @@ if (actualGraph==TRUE) {
 if (parmStation=="06225") { # merge two stations
   keeps<-c('station','dateObserved','date','name','wd','ws')
   keeps_06257<-c('date','rainfall','pressure','rainDuration','temperature','rHum', 'solar')
-  dfTmpWind_06257<-getStationSelectRecordsKnmi(NULL,'06257',dateFrom=fiwareStart,dateTo=fiwareEnd)
+  dfTmpWind_06257<-getStationSelectRecordsKnmi(NULL,'06257',dateFrom=selectionStart,dateTo=selectionEnd)
   dfTmpWind_06257$date <- as.POSIXct(dfTmpWind_06257$dateObserved, format="%Y-%m-%dT%H:%M")+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
   dfTmpWind_06257<-dfTmpWind_06257[keeps_06257]
   dfTmpWind<-dfTmpWind[keeps]
@@ -155,6 +153,11 @@ periodetext1 <- with_tz(period[1],localTimeZone)|>format("%Y-%m-%d %H:%Mu")   # 
 periodetext2 <- with_tz(period[2],localTimeZone)|>format("%Y-%m-%d %H:%Mu")  # strftime(period[2], format = "%Y-%m-%d %H:%M uur %z",tz='JST',usetz=TRUE)
 periodetext3 <- localTimeZone
 
+#print(head(dfTmpWind))
+#print(period)
+#print(periodetext1)
+#print(periodetext2)
+
 labels <- c('windDirection' = "Windrichting",
             'windSpeed' = "Windkracht"
 );
@@ -165,7 +168,7 @@ fileprefix <- paste0(plotPath,'/knmi','_',parmStation)
 if (actualGraph==TRUE) {
   filedate = ''
 } else {
-  filedate = paste0('_',fiwareStart,'_',fiwareEnd)
+  filedate = paste0('_',selectionStart,'_',selectionEnd)
 }  
 filename <- paste0(fileprefix, filedate,'.png');
 png(filename=filename,width = 1000, height = 600 )
