@@ -5,22 +5,36 @@ library(scales)
 library(tidyr)
 library(cowplot)
 library('ggplot2')
+library(RColorBrewer)
 #library('ragg')
 
 # Rscript apri-sensor-generic-plot.R AFF4-pm25-csv-locatie-2
 
-apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
+group_palettes <- list(
+#  A = RColorBrewer::brewer.pal(8,"Set1"),
+#  B = RColorBrewer::brewer.pal(12,"Accent"),
+  A = RColorBrewer::brewer.pal(8,"Dark2"),  # Dark2 & Paired, best for color blind people
+  B = RColorBrewer::brewer.pal(12,"Paired"),
+  C = "grey70",
+#  Z = RColorBrewer::brewer.pal(8,"RdYlBu")
+#  Z = RColorBrewer::brewer.pal(n = 8, name = "Paired")
+  Z = RColorBrewer::brewer.pal(8, "Set2")
+)
+
+apriSensorPlotSingle<-function(dfTotal,dfSensorIds,sensorTypes,foiLabel,foiText,ylim,
     treshold=NULL,tresholdLabel=NULL,
     dateBreaks="1 hour",dateLabels="%H",aggregateTxt='gemiddeld per minuut',
     yzoom=NULL,
-    incident=F,reportLocal=NULL,reportStats="TRUE") {
+    incident=F,reportLocal=NULL,reportStats="TRUE"
+    ,reportColors=NULL) {
   
   #plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
   plotDateTime<- as.POSIXct(format(Sys.time(),'%Y-%m-%d %H:%M:%S'), format="%Y-%m-%d %H:%M:%S")
   
   dateText<-'Datum';
   periodeLabel<-'Periode';
-  xAxisText<-'Ruwe / niet gekalibreerde meetwaarde';
+  captionInfoText<-'Afkorting MLR in label staat voor gekalibreerd.';
+  xAxisText<-''
   yAxisText<-'Gemeten waarde';
   localTimezone<-'CET'
   
@@ -28,33 +42,71 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
     if(reportLocal=='JA') {
       dateText<-'日付';
       # periodeLabel<-'期間';
-      xAxisText<-'生の/未校正の測定値';
+      #xAxisText<-'生の/未校正の測定値';
+      captionInfoText<-'ラベル上の略語 MLR は、較正済みを意味します。';
+      xAxisText<-'';
       yAxisText<-'測定値'
       localTimezone<-'Japan'
     }
     if(reportLocal=='NL') {
       dateText<-'Datum';
       periodeLabel<-'Periode';
-      xAxisText<-'Ruwe / niet gekalibreerde meetwaarde';
+      captionInfoText<-'Afkorting MLR in label staat voor gekalibreerd.';
+      xAxisText<-'';
       yAxisText<-'Gemeten waarde';
     }
     if(reportLocal=='EN') {
       dateText<-'Date';
       periodeLabel<-'Period';
-      xAxisText<-'Raw / uncalibrated measurements';
+      captionInfoText<-'The abbreviation MLR on the label stands for calibrated.';
+      xAxisText<-'';
       yAxisText<-'Measured value';
     }
     if(reportLocal=='EN-mlr') {
       dateText<-'Date';
       periodeLabel<-'Period';
+      captionInfoText<-'The abbreviation MLR on the label stands for calibrated.';
       xAxisText<-'';
-      yAxisText<-'Calibrated value';
+      yAxisText<-'Measured value';
       aggregateTxt<-'';
     }
   }
   #captionText<-paste0(dateText,': ',format(plotDateTime,"%d-%m-%Y %H:%M"))
   #captionText<-paste0(dateText,': ',with_tz(plotDateTime,localTimeZone))
-  captionText<-paste0(dateText,': ',format(with_tz(plotDateTime,localTimeZone)) )
+  captionText<-paste0(dateText,': ',format(with_tz(plotDateTime,localTimeZone)), ' -- ', captionInfoText)
+  
+  coloring <- 'new'
+  if (!is.null(reportColors) && nrow(reportColors) != 0) {
+    dfTotal <- dfTotal %>%
+      left_join(reportColors, by = c("sensorId", "sensorType")) %>%
+      mutate(
+        group = case_when(
+          !is.na(color) ~ "fixed",
+          !is.na(group) ~ group,
+          TRUE          ~ "C"
+        )
+      )
+    coloring <- 'new'
+  } else {
+    dfTotal$seq<-'1'
+    dfTotal$group<-'Z'
+    dfTotal$color<-NA
+    coloring <- 'standard'
+  }
+  
+  # colorId maps the unique ids to graph colors  
+  dfTotal$colorId <- paste0(dfTotal$seq,dfTotal$sensorId,dfTotal$sensorType)
+  dfTotal$colorId <- factor(dfTotal$colorId,
+                     levels = sort(unique(dfTotal$colorId)))
+  dfTotal <- dfTotal[order(dfTotal$colorId), ]  # sort for legend
+  
+  # add name of sensor (label) to dfTotal
+  dfTotal <- dfTotal %>%
+    left_join(dfSensorIds, by = c("sensorId")) 
+
+  # map colors depending on fixed color, group A,B,Z, else C   
+  color_map <- make_color_map(dfTotal, group_palettes)
+  dfTotal$color <- color_map[dfTotal$colorId]
 
   statsPosX<-min(dfTotal$date, na.rm = TRUE) #+60*60
   statsPosXMax<-max(dfTotal$date, na.rm = TRUE) #+60*60
@@ -210,9 +262,18 @@ apriSensorPlotSingle<-function(dfTotal,dfFois,sensorTypes,foiLabel,foiText,ylim,
   }
   
   legendRows <- ceiling(length(unique(dfTotal$foiLocation))/3)
-  gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation,timezone=localTimezone)
-                  ,col = brewer.pal(n = 8, name = "RdYlBu")) +
-    guides(color = guide_legend(keywidth = 0.2, override.aes = list(size = 2))) +
+  #gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,colour=foiLocation,timezone=localTimezone)
+  
+  if (coloring== 'new') {
+    gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,color=label,timezone=localTimezone
+    )) 
+      
+  } else {
+    gTotal <-ggplot(data=dfTotal, aes(x=date,y=sensorValue,color=sensorId,timezone=localTimezone
+                                    ,col = brewer.pal(n = 8, name = "RdYlBu")
+    )) 
+  }
+  gTotal <- gTotal + guides(color = guide_legend(keywidth = 0.2, override.aes = list(size = 2))) +
   theme_bw(base_family = "DejaVu Sans", base_size = 12) +
   theme(
     
@@ -351,7 +412,7 @@ legend.justification="center", # center is default
 #          , axis.text.y.right=element_text(size = rel(1))
 #          , legend.text=element_text(size = rel(3))
 #          , legend.title=element_text(size = rel(2.0)) #,face="bold")
-    )  +
+    )  
    # guides(guide_legend(foiLocation="xxx") ) +
   
 #    rectangle_key_glyph(
@@ -374,28 +435,62 @@ legend.justification="center", # center is default
 #    color
 #  )
   
-    geom_line(
-#      key_glyph = draw_key_rect
-    #  key_glyph = draw_key_vpath
-      key_glyph = circle_key_glyph( # cowplot
-        fill = color,
-        color = NA
-        #color = "black", linetype = 3, size = 0.3,
-        #padding = margin(2, 2, 2, 2)
-      )
-      , aes(group=interaction(sensorId,sensorType,type)),linewidth=0.15)+ #group=foi))+#
-   # guides(color = guide_legend(override.aes = list(size = 1.0) ) ) +
-  #  labs(,x=paste(xAxisText,' ',aggregateTxt,'\n',periodeLabel,': ',periodetext1,' - ',periodetext2,sep=''),
-     labs(x=paste(xAxisText,' ',aggregateTxt,'\n',periodetext1,' - ',periodetext2,sep=''),
-         y=yAxisText,title=paste(foiLabel), subtitle=foiText, caption=captionText) +
-    facet_grid( sensorType ~ . , labeller=labeller(sensorType = unlist(sensorTypes[dfTotal$sensorType],use.names=T)), scales = "free") +
-    #annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
-    #annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=1,hjust=0) +
-    #annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0) +
-    theme(
-      strip.text.y = element_text(size = rel(3.0)),
-      strip.background = element_rect(colour="black", fill="grey", linewidth=0.1)
-    )
+    if (coloring== 'new') {
+      gTotal<-gTotal+
+      geom_line(
+        #      key_glyph = draw_key_rect
+        #  key_glyph = draw_key_vpath
+        key_glyph = circle_key_glyph( # cowplot
+          fill = color,
+          color = NA
+          #color = "black", linetype = 3, size = 0.3,
+          #padding = margin(2, 2, 2, 2)
+        )
+           , aes(group=interaction(colorId)),linewidth=0.15)+ #group=foi))+#
+        #, aes(group=interaction(sensorId,sensorType,type)),linewidth=0.15)+ #group=foi))+#
+        # guides(color = guide_legend(override.aes = list(size = 1.0) ) ) +
+        #  labs(,x=paste(xAxisText,' ',aggregateTxt,'\n',periodeLabel,': ',periodetext1,' - ',periodetext2,sep=''),
+        labs(x=paste(xAxisText, #'\n',
+                     periodetext1,' - ',periodetext2,sep=''),
+             y=paste0(yAxisText,' ',aggregateTxt),title=paste(foiLabel), subtitle=foiText, caption=captionText) +
+        facet_grid( sensorType ~ . , labeller=labeller(sensorType = unlist(sensorTypes[dfTotal$sensorType],use.names=T)), scales = "free") +
+        #annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
+        #annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Mean: ",statsMean),size=1,hjust=0) +
+        #annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0) +
+        theme(
+          strip.text.y = element_text(size = rel(3.0)),
+          strip.background = element_rect(colour="black", fill="grey", linewidth=0.1)
+        )
+      
+    } else {
+      gTotal<-gTotal+
+      geom_line(
+        #      key_glyph = draw_key_rect
+        #  key_glyph = draw_key_vpath
+        key_glyph = circle_key_glyph( # cowplot
+          fill = color,
+          color = NA
+          #color = "black", linetype = 3, size = 0.3,
+          #padding = margin(2, 2, 2, 2)
+        )
+        #   , aes(group=interaction(colorId)),linewidth=0.15)+ #group=foi))+#
+        , aes(group=interaction(sensorId,sensorType,type)),linewidth=0.15)+ #group=foi))+#
+        # guides(color = guide_legend(override.aes = list(size = 1.0) ) ) +
+        #  labs(,x=paste(xAxisText,' ',aggregateTxt,'\n',periodeLabel,': ',periodetext1,' - ',periodetext2,sep=''),
+        labs(x=paste(xAxisText, # '\n',
+                     periodetext1,' - ',periodetext2,sep=''),
+             y=paste0(yAxisText,' ',aggregateTxt),title=paste(foiLabel), subtitle=foiText, caption=captionText) +
+        facet_grid( sensorType ~ . , labeller=labeller(sensorType = unlist(sensorTypes[dfTotal$sensorType],use.names=T)), scales = "free") +
+        #annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=1,hjust=0) +
+        #annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Mean: ",statsMean),size=1,hjust=0) +
+        #annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=1,hjust=0) +
+        theme(
+          strip.text.y = element_text(size = rel(3.0)),
+          strip.background = element_rect(colour="black", fill="grey", linewidth=0.1)
+        )
+      
+    }
+
   #print('annotation')
 
   print('reportStats')
@@ -412,7 +507,7 @@ legend.justification="center", # center is default
   if(is.null(ylim)!=TRUE && printStats == T) {
       gTotal<-gTotal +
           annotate("text", x = statsPosX, y = statsMax-statsResolution*1, label = paste0("Max: ",statsMax),size=4,hjust=0) +
-          annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Gem: ",statsMean),size=4,hjust=0) +
+          annotate("text", x = statsPosX, y = statsMax-statsResolution*2, label = paste0("Mean: ",statsMean),size=4,hjust=0) +
           annotate("text", x = statsPosX, y = statsMax-statsResolution*3, label = paste0("Min: ",statsMin),size=4,hjust=0)
   }
 
@@ -481,8 +576,19 @@ legend.justification="center", # center is default
 #    } 
   }
   # geom_line(data=as.data.frame(bb),aes(x=b,y=a))
-  
-  return (gTotal +
+
+  if (coloring== 'new') {
+    return (gTotal +
+    #          scale_color_manual(values = color_map,  name = "",breaks= dfSensorIds$sensorId, labels= dfSensorIds$label) 
+        scale_color_manual(values = setNames(dfTotal$color, dfTotal$label),limits = dfTotal$label,name = "") 
+    )
+  } else {
+    return (gTotal +
+              scale_colour_discrete( name = "",breaks= dfSensorIds$sensorId,labels= dfSensorIds$label)
+    )
+    
+  }
+  #return (gTotal +
             #    scale_colour_manual(values = c(
             #    "red"
             #   ,"blue"
@@ -498,11 +604,9 @@ legend.justification="center", # center is default
           #   ,"grey"
           #   ,"black"
           #   ),
-          scale_colour_discrete(
-            name = "",
-            breaks= dfFois$sensorId,
-            labels= dfFois$label
-          ))
+ #           scale_color_manual(values = color_map,  name = "",breaks= dfSensorIds$sensorId, labels= dfSensorIds$label) 
+#          scale_colour_discrete(values = color_map, name = "",breaks= dfSensorIds$sensorId,labels= dfSensorIds$label)
+#  )
 }
 
 apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL,width=3.8,height=2.28,dpi=300,units='in',subFolder='') {
@@ -530,3 +634,34 @@ apriSensorImage<-function(apriSensorPlot,fileLabel,fileSuffix=NULL,fileDate=NULL
   print(paste0(plotPath,'/',subFolder,fileName))
 
 }
+
+make_color_map <- function(df, palettes) {
+  out <- c()
+
+  # vaste kleuren
+  fixed <- df %>%
+    filter(group == "fixed") %>%
+    distinct(colorId, color)
+  
+  out[fixed$colorId] <- fixed$color
+  
+  # groepen A/B
+  for (g in c("A", "B", "Z")) {
+    ids <- df %>% 
+      filter(group == g) %>% 
+      pull(colorId) %>% 
+      unique() %>%
+      sort()
+    if (length(ids) > 0) {
+      cols <- palettes[[g]][seq_along(ids)]
+      out[ids] <- cols
+    }
+  }
+  
+  # groep C
+  ids_C <- df %>% filter(group == "C") %>% pull(colorId) %>% unique()
+  out[ids_C] <- palettes$C
+  
+  out
+}
+

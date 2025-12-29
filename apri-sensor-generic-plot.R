@@ -13,17 +13,50 @@ options(width = 100)
 library('dplyr')
 library('zoo')
 library('lubridate')
+#install.packages("optparse")
+library(optparse)
 
 args = commandArgs(trailingOnly=TRUE)
-# test if there is at least one argument: if not, return an error
-defaultReport<-'AFF4-pm25-csv-locatie-2'
-if (length(args)==0 && is.null(defaultReport)) {
-  stop(" Commandline parameter voor reportID is missing, process stopped.", call.=FALSE)
+
+option_list <- list(
+  make_option(c("-r", "--report"), type="character"),
+  make_option(c("-t", "--timezone"), type="character", default="CET"),
+  make_option(c("-A", "--colorA"), type="character"), # brewer color scheme group A eg Dark2, Paired
+  make_option(c("-B", "--colorB"), type="character"), # brewer color scheme group B eg Dark2, Paired
+  make_option(c("-Z", "--colorZ"), type="character"), # brewer color scheme group Z eg Dark2, Paired, Z=old/classic style
+  make_option(c("-C", "--colorC"), type="character"), # brewer color scheme group C eg Dark2, Paired, C=other (grey?)
+  make_option(c("-n", "--n"), type="integer", default=1)
+)
+opt <- parse_args(OptionParser(option_list=option_list), positional_arguments = TRUE)
+
+print('======== arguments')
+#print(opt$options)  # opt$options$timezone, opt$options$report
+#print(opt$options$report[1])
+if (!is.null(opt$args[1]) && !is.na(opt$args[1])) {
+  print('Script arg 1 without argument name:')
+  reportId<-opt$args[1]
+} else {
+#  print('Script argument report:')
+  reportId<-opt$options$report
 }
-if (length(args)==0) {
-  print(" Commandline parameter voor reportID is missing, default taken")
-  reportId<-defaultReport
-} else reportId<-args[1]
+print(paste0('report:',reportId))
+print(paste0('tijdzone:',opt$options$timezone))
+print(paste0('Brewer color scheme group A:',opt$options$colorA)) # always use full name
+print(paste0('Brewer color scheme group B:',opt$options$colorB))
+print(paste0('Brewer color scheme group C (other):',opt$options$colorC)) 
+print(paste0('Brewer color scheme group Z (classic):',opt$options$colorZ))
+#print(opt$args) # opt$args is string with all unnamed options seperated by space
+#print(opt$args[1])
+print('========')
+# test if there is at least one argument: if not, return an error
+#defaultReport<-'AFF4-pm25-csv-locatie-2'
+#if (length(args)==0 && is.null(defaultReport)) {
+#  stop(" Commandline parameter voor reportID is missing, process stopped.", call.=FALSE)
+#}
+#if (length(args)==0) {
+#  print(" Commandline parameter voor reportID is missing, default taken")
+#  reportId<-defaultReport
+#} else reportId<-args[1]
 
 # defaults:
 #scriptPath='/data/Alfresco/opt/R/apri-sensor-report/'
@@ -50,13 +83,14 @@ library(ggpubr)
 #install.packages("ggplot2")
 library(ggplot2)
 library(magick)
-#library(RColorBrewer)
+library(RColorBrewer)
 library(jsonlite)
 
 source(paste0(subPath,"apri-sensor-fiware.R"))
 source(paste0(subPath,"apri-sensor-aprisensor.R"))
 source(paste0(subPath,"apri-luchtmeetnet.R"))
 source(paste0(subPath,"aprisensor-knmi-v1.R"))
+source(paste0(subPath,"aprisensor-cams.R"))
 source(paste0(subPath,"apri-sensor-plot.R"))
 
 sensorTypes<-json_data<-fromJSON(paste0(configPath,"apri-sensor-sensorTypes.json"))
@@ -88,6 +122,24 @@ reportStats <- reportConfig$stats
 periodType<-reportConfig$periodType
 periodSpan<-reportConfig$periodSpan
 if (!is.null(reportConfig$incident) && reportConfig$incident=='T') incident<-T else incident<-F;
+
+# "colors": [
+#   {"id": "1234","type": "pm25","color": "blue"},
+#   {"id": "1235","type": "pm25","color": "green"},
+#   {"id": "1236","type": "pm25","group": "A"},
+#   {"id": "1237","type": "pm25","group": "B"}
+# ]
+
+reportColors <- reportConfig$colors
+#print(str(reportColors))
+#if (nrow(reportColors) == 0) {
+#  color_config <- tibble::tribble(
+#    ~id,   ~type,   ~color,  ~group,
+#    "1234","pm25",  "blue",  NA,
+#    "1236","pm25",  NA,      "A"
+#  )
+#}
+
 
 #dateFrom<-'2020-11-15T11:00:00'
 #dateTo<-'2020-11-15T13:00:00'
@@ -138,7 +190,21 @@ for (i in 1:nrow(sensorIds)) {
         dbGroup<-sensorIds$dbGroup[i]
         observationTypes<-observableProperties
 
-        if (sensorIds$sensorType[i]=='knmi') {
+        if (sensorIds$sensorType[i]=='cams') {
+          
+          if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+            sensorIdAlias<- sensorIds$sensorIdAlias[i]
+          } else sensorIdAlias<-NULL
+          
+          dfTmpOne<-getCamsData(dfIn=NULL,lat=52,lon=4,dateFrom=NULL,dateTo=NULL,periodSpan=periodSpan
+                                                ,observationTypes=observationTypes
+          )
+          dfTmpOne$date <- as.POSIXct(dfTmpOne$dateObserved, format = "%Y-%m-%dT%H:%M:%S")
+          keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+          dfTmpOne <- dfTmpOne[keeps]
+          
+        } else {
+          if (sensorIds$sensorType[i]=='knmi') {
           
           if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
             sensorIdAlias<- sensorIds$sensorIdAlias[i]
@@ -202,6 +268,7 @@ for (i in 1:nrow(sensorIds)) {
             )
           }
         }
+        } # else end on cams
         #print(head(dfTmpOne))
       } #else {
       #   #t<-strsplit(observableProperties, ":")#[[1,1]]
@@ -630,7 +697,7 @@ for (i in 1:nrow(sensorIds)) {
                   #                    print('geen mlr object')
                   #                  }
                   print(sensorMlrFactorsPM)
-                  print(head(dfTmpMlr2))
+#                  print(head(dfTmpMlr2))
                   
                   dfTmpMlr2<-dfTmpMlr2 %>%
                     #mutate(sensorValue = 14.8 + (0.3834*sensorValue) + (-0.1498*rHum) + (-0.1905*temperature) ) %>%
@@ -639,7 +706,7 @@ for (i in 1:nrow(sensorIds)) {
             #                                    sensorValueTmp
             #                                    , sensorValue))
                   
-                  print(head(dfTmpMlr2))
+#                  print(head(dfTmpMlr2))
 
                                     #            dfTmpMlr2$sensorValue<-ifelse (dfTmpMlr2$sensorValue>=4,
                   #            dfTmpMlr2$sensorValue <- 14.8 + (0.3834*dfTmpMlr2$sensorValue) + (-0.1498*dfTmpMlr2$rHum) + (-0.1905*dfTmpMlr2$temperature)
@@ -1121,6 +1188,7 @@ if (!is.null(reportConfig$mean$nr) && reportConfig$mean$nr==10) {
 if (!is.null(reportLocal)&&!is.na(reportLocal)) {
   if(reportLocal=='JA') {
     if (aggregateTxt=='gemiddeld per minuut') aggregateTxt<-'1分あたりの平均'
+    if (aggregateTxt=='gemiddeld per uur') aggregateTxt<-'1時間あたりの平均'
     if (aggregateTxt=='gemiddeld per dag') aggregateTxt<-'1日あたりの平均'
     if (aggregateTxt=='gemiddeld per 10 seconden') aggregateTxt<-'10秒ごとの平均'
     if (aggregateTxt=='gemiddeld per 20 seconden') aggregateTxt<-'20秒ごとの平均'
@@ -1134,7 +1202,9 @@ gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSub
                              ,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels
                              ,aggregateTxt=aggregateTxt,yzoom=yZoom,
                              incident=incident
-                             ,reportLocal=reportLocal,reportStats=reportStats)
+                             ,reportLocal=reportLocal
+                             ,reportStats=reportStats
+                             ,reportColors=reportColors)
 
 
 print("make imagefile")
