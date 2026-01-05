@@ -78,7 +78,7 @@ getCamsData<-function(dfIn=NULL,
 #  print('=========== 2')
   
   dfResult$date<-as.POSIXct(dfResult$dateObserved, format="%Y-%m-%dT%H:%M:%S")
-  dfResult$sensorId<-"CAMS_forecast"
+  dfResult$sensorId<-paste0("CAMS_",dataType)
   dfResult$sensorType<-strsplit(observationTypeObject,split=':')[[1]][2] # observationTypeArray[[1]] #'pm25'
   dfResult$sensorValue<-dfResult$observation$pm25
 #  print(head(dfResult))
