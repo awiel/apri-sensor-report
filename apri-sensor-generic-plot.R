@@ -196,7 +196,7 @@ for (i in 1:nrow(sensorIds)) {
             sensorIdAlias<- sensorIds$sensorIdAlias[i]
           } else sensorIdAlias<-NULL
           
-          dfTmpOne<-getCamsData(dfIn=NULL,lat=52,lon=4,dateFrom=NULL,dateTo=NULL,periodSpan=periodSpan
+          dfTmpOne<-getCamsData(dfIn=NULL,lat=sensorIds$lat[i],lon=sensorIds$lon[i],dateFrom=NULL,dateTo=NULL,periodSpan=periodSpan
                                                 ,observationTypes=observationTypes
           )
           dfTmpOne$date <- as.POSIXct(dfTmpOne$dateObserved, format = "%Y-%m-%dT%H:%M:%S")
@@ -288,6 +288,21 @@ for (i in 1:nrow(sensorIds)) {
       print('hist')
       
       if (!is.null(sensorIds$serviceDB[i]) && !is.na(sensorIds$serviceDB[i])) {
+        if (sensorIds$sensorType[i]=='cams') {
+          
+          if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
+            sensorIdAlias<- sensorIds$sensorIdAlias[i]
+          } else sensorIdAlias<-NULL
+          
+          dfTmpOne<-getCamsData(dfIn=NULL,lat=sensorIds$lat[i],lon=sensorIds$lon[i],dateFrom=reportConfig$dateFrom,dateTo=reportConfig$dateTo,periodSpan=periodSpan
+                                ,observationTypes=observationTypes
+          )
+          dfTmpOne$date <- as.POSIXct(dfTmpOne$dateObserved, format = "%Y-%m-%dT%H:%M:%S")
+          keeps <- c("sensorId","sensorType","date", "sensorValue","dateObserved")
+          dfTmpOne <- dfTmpOne[keeps]
+          
+        } else {
+          
         if (sensorIds$sensorType[i]=='knmi') {
           print("hist getStationSelectRecordsKnmi")
           
@@ -297,8 +312,8 @@ for (i in 1:nrow(sensorIds)) {
           
           dfTmpOne<-getStationSelectRecordsKnmi(dfIn=NULL
                                                 ,station=sensorIds$sensorId[i]
-                                                ,dateFrom=NULL
-                                                ,dateTo=NULL
+                                                ,dateFrom=reportConfig$dateFrom
+                                                ,dateTo=reportConfig$dateTo
                                                 ,periodSpan=periodSpan
                                                 # ,sensorIdAlias=sensorIdAlias
                                                 #  ,observationTypes=observationTypes
@@ -341,6 +356,7 @@ for (i in 1:nrow(sensorIds)) {
                                       ,dateTo=reportConfig$dateTo
                                       ,minuteMod=minuteMod
           )
+        }
         }
         #     print(str(dfTmpOne))
         
