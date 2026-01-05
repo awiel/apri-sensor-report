@@ -196,7 +196,7 @@ for (i in 1:nrow(sensorIds)) {
             sensorIdAlias<- sensorIds$sensorIdAlias[i]
           } else sensorIdAlias<-NULL
           
-          dfTmpOne<-getCamsData(dfIn=NULL,lat=sensorIds$lat[i],lon=sensorIds$lon[i],dateFrom=NULL,dateTo=NULL,periodSpan=periodSpan
+          dfTmpOne<-getCamsData(dfIn=NULL,dataType=sensorIds$dataType[i],lat=sensorIds$lat[i],lon=sensorIds$lon[i],dateFrom=NULL,dateTo=NULL,periodSpan=periodSpan
                                                 ,observationTypes=observationTypes
           )
           dfTmpOne$date <- as.POSIXct(dfTmpOne$dateObserved, format = "%Y-%m-%dT%H:%M:%S")
@@ -294,7 +294,7 @@ for (i in 1:nrow(sensorIds)) {
             sensorIdAlias<- sensorIds$sensorIdAlias[i]
           } else sensorIdAlias<-NULL
           
-          dfTmpOne<-getCamsData(dfIn=NULL,lat=sensorIds$lat[i],lon=sensorIds$lon[i],dateFrom=reportConfig$dateFrom,dateTo=reportConfig$dateTo,periodSpan=periodSpan
+          dfTmpOne<-getCamsData(dfIn=NULL,dataType=sensorIds$dataType[i],lat=sensorIds$lat[i],lon=sensorIds$lon[i],dateFrom=reportConfig$dateFrom,dateTo=reportConfig$dateTo,periodSpan=periodSpan
                                 ,observationTypes=observationTypes
           )
           dfTmpOne$date <- as.POSIXct(dfTmpOne$dateObserved, format = "%Y-%m-%dT%H:%M:%S")
