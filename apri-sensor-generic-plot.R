@@ -288,11 +288,15 @@ for (i in 1:nrow(sensorIds)) {
       print('hist')
       
       if (!is.null(sensorIds$serviceDB[i]) && !is.na(sensorIds$serviceDB[i])) {
+        
+        observationTypes<-observableProperties
+        
         if (sensorIds$sensorType[i]=='cams') {
           
           if (!is.null(sensorIds$sensorIdAlias[i]) && !is.na(sensorIds$sensorIdAlias[i])){
             sensorIdAlias<- sensorIds$sensorIdAlias[i]
           } else sensorIdAlias<-NULL
+
           
           dfTmpOne<-getCamsData(dfIn=NULL,dataType=sensorIds$dataType[i],lat=sensorIds$lat[i],lon=sensorIds$lon[i],dateFrom=reportConfig$dateFrom,dateTo=reportConfig$dateTo,periodSpan=periodSpan
                                 ,observationTypes=observationTypes
