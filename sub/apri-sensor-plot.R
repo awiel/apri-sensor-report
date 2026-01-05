@@ -436,7 +436,7 @@ legend.justification="center", # center is default
 #    color
 #  )
   if (trend == T) {
-    alpha <- 0.4
+    alpha <- 0.3
   } else alpha <- 1
   
     if (coloring== 'new') {
