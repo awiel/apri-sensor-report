@@ -26,7 +26,8 @@ apriSensorPlotSingle<-function(dfTotal,dfSensorIds,sensorTypes,foiLabel,foiText,
     dateBreaks="1 hour",dateLabels="%H",aggregateTxt='gemiddeld per minuut',
     yzoom=NULL,
     incident=F,reportLocal=NULL,reportStats="TRUE"
-    ,reportColors=NULL) {
+    ,reportColors=NULL
+    ,trend=F) {
   
   #plotDateTime<- Sys.time() #+ (as.numeric(format(Sys.time(),'%z'))/100)*60*60;
   plotDateTime<- as.POSIXct(format(Sys.time(),'%Y-%m-%d %H:%M:%S'), format="%Y-%m-%d %H:%M:%S")
@@ -434,10 +435,13 @@ legend.justification="center", # center is default
 #    padding = unit(c(0, 0, 0, 0), "pt"),
 #    color
 #  )
+  if (trend == T) {
+    alpha <- 0.4
+  } else alpha <- 1
   
     if (coloring== 'new') {
       gTotal<-gTotal+
-      geom_line(
+      geom_line(alpha = alpha,
         #      key_glyph = draw_key_rect
         #  key_glyph = draw_key_vpath
         key_glyph = circle_key_glyph( # cowplot
@@ -460,8 +464,7 @@ legend.justification="center", # center is default
         theme(
           strip.text.y = element_text(size = rel(3.0)),
           strip.background = element_rect(colour="black", fill="grey", linewidth=0.1)
-        )
-      
+        ) 
     } else {
       gTotal<-gTotal+
       geom_line(
@@ -488,8 +491,15 @@ legend.justification="center", # center is default
           strip.text.y = element_text(size = rel(3.0)),
           strip.background = element_rect(colour="black", fill="grey", linewidth=0.1)
         )
-      
     }
+  
+  if (trend == T) {
+    gTotal<-gTotal+
+      geom_smooth(method = "gam",
+                  formula = y ~ s(x),
+                  se = FALSE,linewidth=0.3)
+  }
+  
 
   #print('annotation')
 

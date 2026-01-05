@@ -118,6 +118,7 @@ reportTreshold <- reportConfig$treshold
 reportTresholdLabel <- reportConfig$tresholdLabel
 reportLocal <- reportConfig$local
 reportStats <- reportConfig$stats
+if (!is.null(reportConfig$trend) && reportConfig$trend=='T') reportTrend<-T else reportTrend<-F;
 
 periodType<-reportConfig$periodType
 periodSpan<-reportConfig$periodSpan
@@ -1220,8 +1221,10 @@ print("start apriSensorPlotSingle")
 gTotal<-apriSensorPlotSingle(total,dfSensorIds,sensorTypes,reportTitle,reportSubTitle
                              ,ylim,treshold=reportTreshold
                              ,tresholdLabel=reportTresholdLabel,dateBreaks=dateBreaks,dateLabels=dateLabels
-                             ,aggregateTxt=aggregateTxt,yzoom=yZoom,
-                             incident=incident
+                             ,aggregateTxt=aggregateTxt
+                             ,yzoom=yZoom
+                             ,incident=incident
+                             ,trend=reportTrend
                              ,reportLocal=reportLocal
                              ,reportStats=reportStats
                              ,reportColors=reportColors)
